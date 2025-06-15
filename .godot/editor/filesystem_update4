@@ -4,3 +4,4 @@ res://scripts/CharacterCreation.gd
 res://scripts/main.gd
 res://scripts/PlayerAgent.gd
 res://scripts/PlayerManager.gd
+res://scenes/Main.gd

@@ -27,141 +27,7 @@ var character_creation: Control
 # =====================================
 #  INICIALIZAÇÃO
 # =====================================
-func _get_group_emoji(group: String) -> String:
-	match group:
-		"military": return "⚔️"
-		"business": return "💼"
-		"intellectuals": return "🎓"
-		"workers": return "🔨"
-		"students": return "📚"
-		"church": return "⛪"
-		"peasants": return "🌾"
-		_: return "👥"
-
-func get_current_phase() -> int:
-	return current_phase
-
-func is_player_in_power() -> bool:
-	return player_agent != null and player_agent.in_power
-
-func get_player_agent() -> PlayerAgent:
-	return player_agent
-
-# =====================================
-#  SAVE/LOAD DO AGENTE
-# =====================================
-func save_player_data() -> Dictionary:
-	if player_agent == null:
-		return {}
-	
-	return {
-		"name": player_agent.name,
-		"age": player_agent.age,
-		"country": player_agent.country,
-		"background": player_agent.background,
-		"ideology": player_agent.ideology,
-		"current_position": player_agent.current_position,
-		"in_power": player_agent.in_power,
-		"years_in_position": player_agent.years_in_position,
-		"political_experience": player_agent.political_experience,
-		"charisma": player_agent.charisma,
-		"intelligence": player_agent.intelligence,
-		"connections": player_agent.connections,
-		"wealth": player_agent.wealth,
-		"military_knowledge": player_agent.military_knowledge,
-		"support": player_agent.support,
-		"usa_influence": player_agent.usa_influence,
-		"ussr_influence": player_agent.ussr_influence,
-		"is_in_exile": player_agent.is_in_exile,
-		"is_underground": player_agent.is_underground,
-		"is_imprisoned": player_agent.is_imprisoned,
-		"condor_target_level": player_agent.condor_target_level,
-		"major_events": player_agent.major_events,
-		"allies": player_agent.allies,
-		"enemies": player_agent.enemies,
-		"current_phase": current_phase
-	}
-
-func load_player_data(data: Dictionary):
-	if data.is_empty():
-		return
-	
-	player_agent = PlayerAgent.new()
-	player_agent.name = data.get("name", "")
-	player_agent.age = data.get("age", 30)
-	player_agent.country = data.get("country", "")
-	player_agent.background = data.get("background", "Estudante")
-	player_agent.ideology = data.get("ideology", "Social-Democrata")
-	player_agent.current_position = data.get("current_position", "Cidadão")
-	player_agent.in_power = data.get("in_power", false)
-	player_agent.years_in_position = data.get("years_in_position", 0)
-	player_agent.political_experience = data.get("political_experience", 0)
-	player_agent.charisma = data.get("charisma", 50)
-	player_agent.intelligence = data.get("intelligence", 50)
-	player_agent.connections = data.get("connections", 50)
-	player_agent.wealth = data.get("wealth", 50)
-	player_agent.military_knowledge = data.get("military_knowledge", 50)
-	player_agent.support = data.get("support", {})
-	player_agent.usa_influence = data.get("usa_influence", 0)
-	player_agent.ussr_influence = data.get("ussr_influence", 0)
-	player_agent.is_in_exile = data.get("is_in_exile", false)
-	player_agent.is_underground = data.get("is_underground", false)
-	player_agent.is_imprisoned = data.get("is_imprisoned", false)
-	player_agent.condor_target_level = data.get("condor_target_level", 0)
-	player_agent.major_events = data.get("major_events", [])
-	player_agent.allies = data.get("allies", [])
-	player_agent.enemies = data.get("enemies", [])
-	current_phase = data.get("current_phase", 1)
-	
-	# Reconfigurar baseado na fase
-	if current_phase == 1:
-		_setup_phase_1_ui()
-	else:
-		_transition_to_phase_2()
-
-# =====================================
-#  DEBUG E TESTES
-# =====================================
-func debug_advance_to_president():
-	if player_agent == null:
-		return
-	
-	print("🔧 DEBUG: Avançando para presidente")
-	
-	# Forçar apoio máximo
-	for group in player_agent.support:
-		player_agent.support[group] = 85
-	
-	# Forçar posição
-	player_agent.current_position = "Presidente"
-	player_agent.in_power = true
-	
-	_transition_to_phase_2()
-
-func debug_create_test_agent(country: String = "Argentina"):
-	var test_agent = PlayerAgent.create_preset_character("intelectual_democrata", country)
-	create_player_agent(test_agent)
-	print("🔧 DEBUG: Agente de teste criado")
-
-func get_debug_info() -> String:
-	if player_agent == null:
-		return "Nenhum agente criado"
-	
-	var info = "=== DEBUG INFO ===\n"
-	info += "Fase: %d\n" % current_phase
-	info += "Agente: %s\n" % player_agent.name
-	info += "Posição: %s\n" % player_agent.current_position
-	info += "Apoio Total: %d/700\n" % player_agent.get_total_support()
-	info += "No Poder: %s\n" % ("Sim" if player_agent.in_power else "Não")
-	
-	if player_agent.is_imprisoned:
-		info += "⚠️ PRESO\n"
-	if player_agent.is_in_exile:
-		info += "⚠️ EXILADO\n"
-	if player_agent.condor_target_level > 50:
-		info += "⚠️ ALTA AMEAÇA CONDOR\n"
-	
-	return info _ready():
+func _ready():
 	# Conectar com o sistema existente
 	_setup_integration()
 
@@ -342,52 +208,57 @@ func _update_phase_1_ui():
 	if phase_1_ui == null or current_phase != 1:
 		return
 	
-	# Atualizar informações do agente
-	var name_label = phase_1_ui.get_node_or_null("PanelContainer/VBoxContainer/NameLabel")
-	if name_label:
-		name_label.text = "%s" % player_agent.name
+	# Buscar elementos da UI de forma mais robusta
+	var panels = phase_1_ui.get_children()
 	
-	var position_label = phase_1_ui.get_node_or_null("PanelContainer/VBoxContainer/PositionLabel")
-	if position_label:
-		position_label.text = "Posição: %s" % player_agent.current_position
-	
-	var attributes_label = phase_1_ui.get_node_or_null("PanelContainer/VBoxContainer/AttributesLabel")
-	if attributes_label:
-		attributes_label.text = "💬%d 🧠%d 🤝%d 💰%d" % [
-			player_agent.charisma, 
-			player_agent.intelligence, 
-			player_agent.connections, 
-			player_agent.wealth
-		]
-	
-	var support_label = phase_1_ui.get_node_or_null("PanelContainer/VBoxContainer/SupportLabel")
-	if support_label:
-		support_label.text = "Apoio Total: %d/700" % player_agent.get_total_support()
-	
-	var progress_label = phase_1_ui.get_node_or_null("PanelContainer/VBoxContainer/ProgressLabel")
-	if progress_label:
-		var required = player_agent.get_required_support_for_next_position()
-		var current = player_agent.get_total_support()
-		progress_label.text = "Próximo: %s (%d/%d)" % [
-			player_agent.get_next_position(), 
-			current, 
-			required
-		]
-	
-	# Atualizar barras de progresso dos grupos
-	for group_name in player_agent.support:
-		var progress_bar = phase_1_ui.get_node_or_null("PanelContainer2/VBoxContainer/%sProgress" % group_name.capitalize())
-		var value_label = phase_1_ui.get_node_or_null("PanelContainer2/VBoxContainer/HBoxContainer/%sValue" % group_name.capitalize())
-		
-		if progress_bar:
-			progress_bar.value = player_agent.support[group_name]
-		if value_label:
-			value_label.text = "%d" % player_agent.support[group_name]
+	for panel in panels:
+		if panel is PanelContainer:
+			var vbox = panel.get_child(0) if panel.get_child_count() > 0 else null
+			if vbox == null:
+				continue
+				
+			# Atualizar labels se existirem
+			for child in vbox.get_children():
+				if child is Label:
+					match child.name:
+						"NameLabel":
+							child.text = "%s" % player_agent.name
+						"PositionLabel":
+							child.text = "Posição: %s" % player_agent.current_position
+						"AttributesLabel":
+							child.text = "💬%d 🧠%d 🤝%d 💰%d" % [
+								player_agent.charisma, 
+								player_agent.intelligence, 
+								player_agent.connections, 
+								player_agent.wealth
+							]
+						"SupportLabel":
+							child.text = "Apoio Total: %d/700" % player_agent.get_total_support()
+						"ProgressLabel":
+							var required = player_agent.get_required_support_for_next_position()
+							var current = player_agent.get_total_support()
+							child.text = "Próximo: %s (%d/%d)" % [
+								player_agent.get_next_position(), 
+								current, 
+								required
+							]
 	
 	_update_available_actions()
 
 func _update_available_actions():
-	var actions_container = phase_1_ui.get_node_or_null("PanelContainer3/VBoxContainer/ActionsContainer")
+	# Buscar container de ações
+	var actions_container: HBoxContainer = null
+	
+	if phase_1_ui:
+		for panel in phase_1_ui.get_children():
+			if panel is PanelContainer:
+				var vbox = panel.get_child(0) if panel.get_child_count() > 0 else null
+				if vbox:
+					for child in vbox.get_children():
+						if child is HBoxContainer and child.name == "ActionsContainer":
+							actions_container = child
+							break
+	
 	if actions_container == null:
 		return
 	
@@ -572,4 +443,138 @@ func _attempt_military_coup():
 # =====================================
 #  UTILIDADES
 # =====================================
-func
+func _get_group_emoji(group: String) -> String:
+	match group:
+		"military": return "⚔️"
+		"business": return "💼"
+		"intellectuals": return "🎓"
+		"workers": return "🔨"
+		"students": return "📚"
+		"church": return "⛪"
+		"peasants": return "🌾"
+		_: return "👥"
+
+func get_current_phase() -> int:
+	return current_phase
+
+func is_player_in_power() -> bool:
+	return player_agent != null and player_agent.in_power
+
+func get_player_agent() -> PlayerAgent:
+	return player_agent
+
+# =====================================
+#  SAVE/LOAD DO AGENTE
+# =====================================
+func save_player_data() -> Dictionary:
+	if player_agent == null:
+		return {}
+	
+	return {
+		"name": player_agent.name,
+		"age": player_agent.age,
+		"country": player_agent.country,
+		"background": player_agent.background,
+		"ideology": player_agent.ideology,
+		"current_position": player_agent.current_position,
+		"in_power": player_agent.in_power,
+		"years_in_position": player_agent.years_in_position,
+		"political_experience": player_agent.political_experience,
+		"charisma": player_agent.charisma,
+		"intelligence": player_agent.intelligence,
+		"connections": player_agent.connections,
+		"wealth": player_agent.wealth,
+		"military_knowledge": player_agent.military_knowledge,
+		"support": player_agent.support,
+		"usa_influence": player_agent.usa_influence,
+		"ussr_influence": player_agent.ussr_influence,
+		"is_in_exile": player_agent.is_in_exile,
+		"is_underground": player_agent.is_underground,
+		"is_imprisoned": player_agent.is_imprisoned,
+		"condor_target_level": player_agent.condor_target_level,
+		"major_events": player_agent.major_events,
+		"allies": player_agent.allies,
+		"enemies": player_agent.enemies,
+		"current_phase": current_phase
+	}
+
+func load_player_data(data: Dictionary):
+	if data.is_empty():
+		return
+	
+	player_agent = PlayerAgent.new()
+	player_agent.name = data.get("name", "")
+	player_agent.age = data.get("age", 30)
+	player_agent.country = data.get("country", "")
+	player_agent.background = data.get("background", "Estudante")
+	player_agent.ideology = data.get("ideology", "Social-Democrata")
+	player_agent.current_position = data.get("current_position", "Cidadão")
+	player_agent.in_power = data.get("in_power", false)
+	player_agent.years_in_position = data.get("years_in_position", 0)
+	player_agent.political_experience = data.get("political_experience", 0)
+	player_agent.charisma = data.get("charisma", 50)
+	player_agent.intelligence = data.get("intelligence", 50)
+	player_agent.connections = data.get("connections", 50)
+	player_agent.wealth = data.get("wealth", 50)
+	player_agent.military_knowledge = data.get("military_knowledge", 50)
+	player_agent.support = data.get("support", {})
+	player_agent.usa_influence = data.get("usa_influence", 0)
+	player_agent.ussr_influence = data.get("ussr_influence", 0)
+	player_agent.is_in_exile = data.get("is_in_exile", false)
+	player_agent.is_underground = data.get("is_underground", false)
+	player_agent.is_imprisoned = data.get("is_imprisoned", false)
+	player_agent.condor_target_level = data.get("condor_target_level", 0)
+	player_agent.major_events = data.get("major_events", [])
+	player_agent.allies = data.get("allies", [])
+	player_agent.enemies = data.get("enemies", [])
+	current_phase = data.get("current_phase", 1)
+	
+	# Reconfigurar baseado na fase
+	if current_phase == 1:
+		_setup_phase_1_ui()
+	else:
+		_transition_to_phase_2()
+
+# =====================================
+#  DEBUG E TESTES
+# =====================================
+func debug_advance_to_president():
+	if player_agent == null:
+		return
+	
+	print("🔧 DEBUG: Avançando para presidente")
+	
+	# Forçar apoio máximo
+	for group in player_agent.support:
+		player_agent.support[group] = 85
+	
+	# Forçar posição
+	player_agent.current_position = "Presidente"
+	player_agent.in_power = true
+	
+	_transition_to_phase_2()
+
+func debug_create_test_agent(country: String = "Argentina"):
+	var test_agent = PlayerAgent.create_preset_character("intelectual_democrata", country)
+	create_player_agent(test_agent)
+	print("🔧 DEBUG: Agente de teste criado")
+
+func get_debug_info() -> String:
+	if player_agent == null:
+		return "Nenhum agente criado"
+	
+	var info = "=== DEBUG INFO ===\n"
+	info += "Fase: %d\n" % current_phase
+	info += "Agente: %s\n" % player_agent.name
+	info += "Posição: %s\n" % player_agent.current_position
+	info += "Apoio Total: %d/700\n" % player_agent.get_total_support()
+	info += "No Poder: %s\n" % ("Sim" if player_agent.in_power else "Não")
+	
+	if player_agent.is_imprisoned:
+		info += "⚠️ PRESO\n"
+	if player_agent.is_in_exile:
+		info += "⚠️ EXILADO\n"
+	if player_agent.condor_target_level > 50:
+		info += "⚠️ ALTA AMEAÇA CONDOR\n"
+	
+	return info
