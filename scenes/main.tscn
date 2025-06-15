@@ -1,0 +1,276 @@
+[gd_scene load_steps=13 format=3 uid="uid://cdp6jvquney6u"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_5o5fk"]
+[ext_resource type="Script" path="res://scripts/Market.gd" id="2_bx5ix"]
+[ext_resource type="Script" path="res://scripts/EventSystem.gd" id="3_caej0"]
+[ext_resource type="Script" path="res://scripts/Combat.gd" id="5_chejw"]
+[ext_resource type="Script" path="res://scripts/Svg.gd" id="6_5p8qb"]
+[ext_resource type="Texture2D" path="res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg" id="7_b57ln"]
+[ext_resource type="Texture2D" path="res://1.png" id="8_ioih3"]
+[ext_resource type="Texture2D" path="res://5.png" id="9_1v0qj"]
+[ext_resource type="Texture2D" path="res://3.png" id="10_tbl38"]
+[ext_resource type="Texture2D" path="res://2.png" id="11_pin2s"]
+[ext_resource type="Texture2D" path="res://4.png" id="12_uuekj"]
+[ext_resource type="Texture2D" path="res://Design sem nome (1).png" id="13_7c1wy"]
+
+[node name="Node2D" type="Node2D"]
+position = Vector2(593, 320)
+scale = Vector2(1.2557, 0.99641)
+
+[node name="Main" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.43527, 0.200359)
+script = ExtResource("1_5o5fk")
+metadata/_edit_use_anchors_ = true
+
+[node name="Market" type="Node" parent="Main"]
+script = ExtResource("2_bx5ix")
+
+[node name="Events" type="Node" parent="Main"]
+script = ExtResource("3_caej0")
+
+[node name="Politics" type="Node" parent="Main"]
+
+[node name="Combat" type="Node" parent="Main"]
+script = ExtResource("5_chejw")
+
+[node name="NodeMapaSVG2D" type="Node2D" parent="Main"]
+position = Vector2(214.063, 235.424)
+scale = Vector2(0.985834, 3.05081)
+script = ExtResource("6_5p8qb")
+
+[node name="Argentina" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+position = Vector2(-72.0785, -11.492)
+texture = ExtResource("7_b57ln")
+polygon = PackedVector2Array(-289.819, -307.03, -315.802, -87.02, -364.055, 353, -308.378, 377.628, -269.405, 310.312, -239.71, 239.711, -206.304, 91.9434, -42.9863, -193.741, -80.1041, -254.49, -150.628, -333.3)
+
+[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Argentina"]
+position = Vector2(-273.116, 49.2549)
+scale = Vector2(0.465475, 0.399952)
+texture = ExtResource("8_ioih3")
+
+[node name="Uruguay" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+position = Vector2(-72.0785, -11.492)
+texture = ExtResource("7_b57ln")
+polygon = PackedVector2Array(-74.5365, -101.797, -44.8423, -85.3781, 27.5374, -70.6013, 36.8168, -126.425, 1.55493, -157.62, -42.9863, -185.532, -46.6981, -185.532, -70.8247, -149.411)
+
+[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Uruguay"]
+position = Vector2(-9.11644, -101.797)
+scale = Vector2(0.123439, 0.103377)
+texture = ExtResource("9_1v0qj")
+
+[node name="Chile" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+position = Vector2(-72.0785, -11.492)
+texture = ExtResource("7_b57ln")
+polygon = PackedVector2Array(-326.937, -453.156, -430.867, 22.985, -430.867, 359.568, -371.478, 256.13, -338.072, -82.0944, -284.252, -344.793)
+
+[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Chile"]
+position = Vector2(-320.442, -22.9149)
+scale = Vector2(0.412992, 0.372923)
+texture = ExtResource("10_tbl38")
+
+[node name="Paraguay" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+position = Vector2(-72.0785, -11.492)
+texture = ExtResource("7_b57ln")
+polygon = PackedVector2Array(-78.2483, -415.393, -146.916, -346.435, -15.1481, -249.565, -5.86865, -274.193, -2.15686, -369.421)
+
+[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Paraguay"]
+position = Vector2(-70.8248, -337.405)
+scale = Vector2(0.177569, 0.154558)
+texture = ExtResource("11_pin2s")
+
+[node name="Bolivia" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+position = Vector2(-72.0785, -11.492)
+texture = ExtResource("7_b57ln")
+polygon = PackedVector2Array(-104.231, -487.635, -132.069, -425.245, -195.169, -394.049, -263.837, -390.765, -319.514, -451.514, -271.26, -591.073)
+
+[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Bolivia"]
+position = Vector2(-182.178, -459.724)
+scale = Vector2(0.131745, 0.117566)
+texture = ExtResource("12_uuekj")
+
+[node name="Agua" type="Node2D" parent="Main/NodeMapaSVG2D"]
+light_mask = 384
+visibility_layer = 524289
+z_index = -5
+position = Vector2(6.10352e-05, 7.62939e-06)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Main/NodeMapaSVG2D/Agua"]
+process_mode = 1
+process_priority = -6
+process_physics_priority = -1
+position = Vector2(-247.761, -64.8537)
+scale = Vector2(0.556283, 0.49484)
+texture = ExtResource("13_7c1wy")
+metadata/_edit_lock_ = true
+
+[node name="Node2D" type="Node2D" parent="Main"]
+position = Vector2(214.063, 235.424)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Main"]
+
+[node name="TopBar" type="Panel" parent="Main/CanvasLayer"]
+custom_minimum_size = Vector2(120, 200)
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.21007
+anchor_bottom = 0.5
+offset_left = -1151.0
+offset_top = -324.0
+offset_right = -1031.0
+offset_bottom = -124.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/TopBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="DateLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Spacer1" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="MoneyLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Spacer2" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="StabilityLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="Panel" parent="Main/CanvasLayer"]
+custom_minimum_size = Vector2(20, 80)
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = -75.0
+offset_right = 1.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 0
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/BottomBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Leftspacer" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="PauseButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Leftspacer2" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+
+[node name="Sidepanel" type="Panel" parent="Main/CanvasLayer"]
+anchors_preset = -1
+anchor_left = 0.846
+anchor_top = 0.302469
+anchor_right = 1.0
+anchor_bottom = 0.822
+offset_left = 0.407959
+offset_top = 12.0
+offset_right = 4.0
+offset_bottom = 20.344
+metadata/_edit_use_anchors_ = true
+
+[node name="InfoContainer" type="VBoxContainer" parent="Main/CanvasLayer/Sidepanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AutoTimer" type="Timer" parent="Main"]
+wait_time = 3.0
+autostart = true
+
+[node name="Gameover" type="CanvasLayer" parent="Main"]
+layer = 10
+
+[node name="GameOverScreen" type="Control" parent="Main/Gameover"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Main/Gameover/GameOverScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.784314)
+
+[node name="CenterContainer" type="CenterContainer" parent="Main/Gameover/GameOverScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/Gameover/GameOverScreen/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Title" type="Label" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "🔥 REVOLUÇÃO!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.890196, 0.968627, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "Seu governo foi deposto!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RestartBtn" type="Button" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+theme_override_constants/h_separation = 30
+theme_override_font_sizes/font_size = 18
+text = "🔄 Reiniciar"
+icon_alignment = 1
+
+[node name="QuitBtn" type="Button" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "⏹️ Sair"

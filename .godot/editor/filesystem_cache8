@@ -1,0 +1,134 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1750015824
+1.png::CompressedTexture2D::453906929923963489::1749877958::1749877979::1::::<><>::
+2.png::CompressedTexture2D::5380086810490017260::1749877958::1749877979::1::::<><>::
+3.png::CompressedTexture2D::2132027972991069971::1749877958::1749877979::1::::<><>::
+4.png::CompressedTexture2D::9207330113764981915::1749877958::1749877979::1::::<><>::
+5.png::CompressedTexture2D::4500588228425396450::1749877958::1749877979::1::::<><>::
+Design sem nome (1).png::CompressedTexture2D::141819766374703410::1749970912::1749970925::1::::<><>::
+h.tres::MeshLibrary::3344339003118840135::1749958567::0::1::::<><>::
+icon.svg::CompressedTexture2D::7856466622685867473::1749430480::1749430495::1::::<><>::
+Orange and White Elegant Modern Beauty Skincare Instagram Post.svg::CompressedTexture2D::3396827842640491691::1749876447::1749876484::1::::<><>::
+README.md::TextFile::-1::1749441885::0::1::::<><>::
+screenshot2.png::CompressedTexture2D::4305879825559429308::1749441888::1749441890::1::::<><>::
+screenshot.png::CompressedTexture2D::9216487480810376924::1749441888::1749441890::1::::<><>::
+::res://addons/::1749970223
+::res://addons/ai_assistant_hub/::1749970226
+ai_answer_handler.gd::GDScript::-1::1749970223::0::1::::AIAnswerHandler<>RefCounted<>::
+ai_assistant_hub.gd::GDScript::-1::1749970223::0::1::::AIAssistantHub<>Control<>::
+ai_assistant_hub.tscn::PackedScene::1598183923687734075::1749970223::0::1::::<><>::res://addons/ai_assistant_hub/ai_assistant_hub.gd
+ai_chat.gd::GDScript::-1::1749970223::0::1::::AIChat<>Control<>::
+ai_chat.tscn::PackedScene::6886326972128084726::1749970223::0::1::::<><>::res://addons/ai_assistant_hub/ai_chat.gd<>uid://beq5nk70uk8v4::::res://addons/ai_assistant_hub/graphics/icons/edit_chat_icon.png<>uid://dxr0f1xqsje6b::::res://addons/ai_assistant_hub/bot_portrait.tscn<>uid://dk1yumltykf6x::::res://addons/ai_assistant_hub/sounds/ai_replied.wav<>uid://b2lftlbs848c4::::res://addons/ai_assistant_hub/sounds/ai_error_cancel.wav
+ai_conversation.gd::GDScript::-1::1749970223::0::1::::AIConversation<>RefCounted<>::
+ai_hub_plugin.gd::GDScript::-1::1749970223::0::1::::AIHubPlugin<>EditorPlugin<>::
+bot_portrait.gd::GDScript::-1::1749970224::0::1::::BotPortrait<>Control<>::
+bot_portrait.tscn::PackedScene::8810228132250735831::1749970224::0::1::::<><>::uid://ba07lvip5fjtx::::res://addons/ai_assistant_hub/graphics/portraits/portraits_base.png<>res://addons/ai_assistant_hub/bot_portrait.gd<>uid://bqkxfvi24xl6c::::res://addons/ai_assistant_hub/graphics/portraits/portraits_mouth.png<>uid://bcfkhh3ljqe6g::::res://addons/ai_assistant_hub/graphics/portraits/portraits_eyes.png<>uid://crtbbm01emvsf::::res://addons/ai_assistant_hub/graphics/portraits/portrait_think_hand.png
+chat_history_editor.gd::GDScript::-1::1749970224::0::1::::ChatHistoryEditor<>Window<>::
+chat_history_editor.tscn::PackedScene::8139199892312393567::1749970224::0::1::::<><>::res://addons/ai_assistant_hub/chat_history_editor.gd
+chat_history_entry.gd::GDScript::-1::1749970224::0::1::::ChatHistoryEntry<>HBoxContainer<>::
+chat_history_entry.tscn::PackedScene::4237022014863903071::1749970224::0::1::::<><>::res://addons/ai_assistant_hub/chat_history_entry.gd
+new_ai_assistant_button.gd::GDScript::-1::1749970226::0::1::::NewAIAssistantButton<>Button<>::
+new_ai_assistant_button.tscn::PackedScene::7616615085180607967::1749970226::0::1::::<><>::res://addons/ai_assistant_hub/new_ai_assistant_button.gd
+plugin.cfg::TextFile::-1::1749970226::0::1::::<><>::
+::res://addons/ai_assistant_hub/assistants/::1749970224
+ai_assistant_resource.gd::GDScript::-1::1749970224::0::1::::AIAssistantResource<>Resource<>::
+::res://addons/ai_assistant_hub/graphics/::1749970224
+::res://addons/ai_assistant_hub/graphics/icons/::1749970227
+edit_chat_icon.png::CompressedTexture2D::2702051403244231579::1749970224::1749970227::1::::<><>::
+linear_32_3dmsicons.png::CompressedTexture2D::1142901758444079618::1749970224::1749970227::1::::<><>::
+linear_32_flatmsicons.png::CompressedTexture2D::1260076484917817129::1749970224::1749970227::1::::<><>::
+::res://addons/ai_assistant_hub/graphics/portraits/::1749970227
+portraits_base.png::CompressedTexture2D::2439993831116693545::1749970225::1749970227::1::::<><>::
+portraits_eyes.png::CompressedTexture2D::2537740341654889508::1749970225::1749970227::1::::<><>::
+portraits_mouth.png::CompressedTexture2D::3531492495860586420::1749970225::1749970227::1::::<><>::
+portrait_think_hand.png::CompressedTexture2D::6005338059434034781::1749970225::1749970227::1::::<><>::
+::res://addons/ai_assistant_hub/llm_apis/::1749970226
+gemini_api.gd::GDScript::-1::1749970225::0::1::::GeminiAPI<>LLMInterface<>::
+jan_api.gd::GDScript::-1::1749970225::0::1::::JanAPI<>LLMInterface<>::
+llm_interface.gd::GDScript::-1::1749970225::0::1::::LLMInterface<>RefCounted<>::
+ollama_api.gd::GDScript::-1::1749970225::0::1::::OllamaAPI<>LLMInterface<>::
+openrouter_api.gd::GDScript::-1::1749970226::0::1::::OpenRouterAPI<>LLMInterface<>::
+::res://addons/ai_assistant_hub/quick_prompts/::1749970226
+ai_quick_prompt_resource.gd::GDScript::-1::1749970226::0::1::::AIQuickPromptResource<>Resource<>::
+::res://addons/ai_assistant_hub/sounds/::1749970227
+ai_error_cancel.wav::AudioStreamWAV::4304565712427429085::1749970226::1749970227::1::::<><>::
+ai_replied.wav::AudioStreamWAV::7916317880938469561::1749970226::1749970227::1::::<><>::
+::res://addons/ai_assistant_hub/tools/::1749970226
+assistant_tool_code_writer.gd::GDScript::-1::1749970226::0::1::::AssistantToolCodeWriter<>RefCounted<>::
+assistant_tool_selection.gd::GDScript::-1::1749970226::0::1::::AssistantToolSelection<>RefCounted<>::
+::res://addons/godot-prototype-texture/::1749441885
+::res://addons/godot-prototype-texture/Vector/::1749441888
+::res://addons/godot-prototype-texture/Vector/checker_512x512/::1749441890
+checker_black_512x512.svg::CompressedTexture2D::5201435351938548625::1749441885::1749441890::1::::<><>::
+checker_blue_512x512.svg::CompressedTexture2D::6844318561674363729::1749441886::1749441890::1::::<><>::
+checker_cyan_512x512.svg::CompressedTexture2D::5704301092308699109::1749441886::1749441890::1::::<><>::
+checker_lime_512x512.svg::CompressedTexture2D::3129151427725513877::1749441886::1749441890::1::::<><>::
+checker_orange_512x512.svg::CompressedTexture2D::9072600509098014657::1749441886::1749441890::1::::<><>::
+checker_pink_512x512.svg::CompressedTexture2D::1298854418671133238::1749441886::1749441890::1::::<><>::
+checker_red_512x512.svg::CompressedTexture2D::4593458232152062794::1749441886::1749441890::1::::<><>::
+checker_white_512x512.svg::CompressedTexture2D::2125426528753030068::1749441886::1749441890::1::::<><>::
+checker_yellow_512x512.svg::CompressedTexture2D::1308494611082374515::1749441886::1749441890::1::::<><>::
+::res://addons/godot-prototype-texture/Vector/grid_512x512/::1749441890
+grid_black_512x512.svg::CompressedTexture2D::8836734470178361756::1749441887::1749441890::1::::<><>::
+grid_blue_512x512.svg::CompressedTexture2D::7970680281418005786::1749441887::1749441890::1::::<><>::
+grid_cyan_512x512.svg::CompressedTexture2D::6686772036928841585::1749441887::1749441890::1::::<><>::
+grid_lime_512x512.svg::CompressedTexture2D::6920620499296668036::1749441887::1749441890::1::::<><>::
+grid_orange_512x512.svg::CompressedTexture2D::4416750545351855525::1749441887::1749441890::1::::<><>::
+grid_pink_512x512.svg::CompressedTexture2D::4103010556723651439::1749441887::1749441890::1::::<><>::
+grid_red_512x512.svg::CompressedTexture2D::4896944829473198371::1749441887::1749441890::1::::<><>::
+grid_white_512x512.svg::CompressedTexture2D::4084666557115542925::1749441887::1749441890::1::::<><>::
+grid_yellow_512x512.svg::CompressedTexture2D::1250954441440897054::1749441888::1749441890::1::::<><>::
+::res://addons/godot-prototype-texture/Vector/grid_1024x1024/::1749441890
+grid_black_1024x1024.svg::CompressedTexture2D::6273138390381529490::1749441886::1749441890::1::::<><>::
+grid_blue_1024x1024.svg::CompressedTexture2D::9123627477159239934::1749441886::1749441889::1::::<><>::
+grid_cyan_1024x1024.svg::CompressedTexture2D::6780836694189817518::1749441886::1749441889::1::::<><>::
+grid_lime_1024x1024.svg::CompressedTexture2D::5679269320484004919::1749441886::1749441889::1::::<><>::
+grid_orange_1024x1024.svg::CompressedTexture2D::4937504425366958517::1749441886::1749441889::1::::<><>::
+grid_pink_1024x1024.svg::CompressedTexture2D::830437299207923139::1749441887::1749441889::1::::<><>::
+grid_red_1024x1024.svg::CompressedTexture2D::1871138633496301984::1749441887::1749441890::1::::<><>::
+grid_white_1024x1024.svg::CompressedTexture2D::2804555579497037725::1749441887::1749441889::1::::<><>::
+grid_yellow_1024x1024.svg::CompressedTexture2D::334629406699239693::1749441887::1749441890::1::::<><>::
+::res://addons/godot-prototype-texture/Vector/logo_512x512/::1749441890
+logo_black_512x512.svg::CompressedTexture2D::2410242666714589304::1749441888::1749441889::1::::<><>::
+logo_blue_512x512.svg::CompressedTexture2D::2538373249081507373::1749441888::1749441889::1::::<><>::
+logo_cyan_512x512.svg::CompressedTexture2D::7417290846355955256::1749441888::1749441889::1::::<><>::
+logo_lime_512x512.svg::CompressedTexture2D::1087084468586187722::1749441888::1749441889::1::::<><>::
+logo_orange_512x512.svg::CompressedTexture2D::2733293483767829073::1749441888::1749441889::1::::<><>::
+logo_pink_512x512.svg::CompressedTexture2D::1742626648406883802::1749441888::1749441890::1::::<><>::
+logo_red_512x512.svg::CompressedTexture2D::3506377109820711568::1749441888::1749441890::1::::<><>::
+logo_white_512x512.svg::CompressedTexture2D::3213685424842671577::1749441888::1749441890::1::::<><>::
+logo_yellow_512x512.svg::CompressedTexture2D::2724272930381231225::1749441888::1749441890::1::::<><>::
+::res://assets/::1749442962
+::res://assets/audio/::1749431105
+::res://assets/Documents/::1749442008
+::res://assets/Documents/Game - Projet/::1749442008
+::res://assets/Documents/Game - Projet/assets/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/Documents/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/Documents/Game - Projet/::1749442095
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/::1749442276
+cone_sul.png::CompressedTexture2D::8183892418313894258::1749442149::1749442276::1::::<><>::
+cone_sul.svg::CompressedTexture2D::7809843826967786246::1749442165::1749442276::1::::<><>::
+::res://assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/Documents/Game - Projet/assets/maps/::1749442276
+cone_sul.svg::CompressedTexture2D::9184455072481289436::1749442096::1749442276::1::::<><>::
+::res://assets/Documents/Game - Projet/assets/maps/::1749442276
+cone_sul.png::CompressedTexture2D::2557493617796562673::1749442093::1749442276::1::::<><>::
+cone_sul.svg::CompressedTexture2D::960783154205423403::1749442086::1749442037::1::::<><>::
+::res://assets/fonts/::1749431095
+::res://assets/maps/::1749446079
+cone_sul.svg::CompressedTexture2D::7972113229646869173::1749446037::1749446079::1::::<><>::
+::res://data/::1749431263
+::res://scenes/::1750015629
+Main.gd::GDScript::-1::1749975263::0::1::::<>Control<>::
+main.tscn::PackedScene::5016272992165590914::1750015629::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/EventSystem.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
+Politics.gd::GDScript::-1::1749976484::0::1::::<>Node<>::
+::res://scripts/::1750015629
+Combat.gd::GDScript::-1::1749975875::0::1::::<>Node<>::
+EventSystem.gd::GDScript::-1::1749433571::0::1::::<>Node<>::
+GameOver.gd::GDScript::-1::1750012435::0::1::::<>Control<>::
+Globals.gd::GDScript::-1::1750015340::0::1::::<>Node<>::
+main.gd::GDScript::-1::1750015629::0::1::::<>Node<>::
+Market.gd::GDScript::-1::1749433571::0::1::::<>Node<>::
+Svg.gd::GDScript::-1::1749446695::0::1::::<>Node2D<>::
