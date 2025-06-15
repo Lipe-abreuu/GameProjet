@@ -1,3 +1,6 @@
 res://scenes/main.tscn
-res://scripts/Globals.gd
+res://scenes/main2.tscn
+res://scripts/CharacterCreation.gd
 res://scripts/main.gd
+res://scripts/PlayerAgent.gd
+res://scripts/PlayerManager.gd

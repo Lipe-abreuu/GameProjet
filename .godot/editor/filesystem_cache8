@@ -1,5 +1,5 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1750015824
+::res://::1750020787
 1.png::CompressedTexture2D::453906929923963489::1749877958::1749877979::1::::<><>::
 2.png::CompressedTexture2D::5380086810490017260::1749877958::1749877979::1::::<><>::
 3.png::CompressedTexture2D::2132027972991069971::1749877958::1749877979::1::::<><>::
@@ -9,9 +9,6 @@ Design sem nome (1).png::CompressedTexture2D::141819766374703410::1749970912::17
 h.tres::MeshLibrary::3344339003118840135::1749958567::0::1::::<><>::
 icon.svg::CompressedTexture2D::7856466622685867473::1749430480::1749430495::1::::<><>::
 Orange and White Elegant Modern Beauty Skincare Instagram Post.svg::CompressedTexture2D::3396827842640491691::1749876447::1749876484::1::::<><>::
-README.md::TextFile::-1::1749441885::0::1::::<><>::
-screenshot2.png::CompressedTexture2D::4305879825559429308::1749441888::1749441890::1::::<><>::
-screenshot.png::CompressedTexture2D::9216487480810376924::1749441888::1749441890::1::::<><>::
 ::res://addons/::1749970223
 ::res://addons/ai_assistant_hub/::1749970226
 ai_answer_handler.gd::GDScript::-1::1749970223::0::1::::AIAnswerHandler<>RefCounted<>::
@@ -120,15 +117,18 @@ cone_sul.svg::CompressedTexture2D::960783154205423403::1749442086::1749442037::1
 ::res://assets/maps/::1749446079
 cone_sul.svg::CompressedTexture2D::7972113229646869173::1749446037::1749446079::1::::<><>::
 ::res://data/::1749431263
-::res://scenes/::1750015629
+::res://scenes/::1750020795
+main2.tscn::PackedScene::5568710339069655355::1750020795::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/EventSystem.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
 Main.gd::GDScript::-1::1749975263::0::1::::<>Control<>::
-main.tscn::PackedScene::5016272992165590914::1750015629::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/EventSystem.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
+main.tscn::PackedScene::5016272992165590914::1750020795::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/EventSystem.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
 Politics.gd::GDScript::-1::1749976484::0::1::::<>Node<>::
-::res://scripts/::1750015629
+::res://scripts/::1750021062
 Combat.gd::GDScript::-1::1749975875::0::1::::<>Node<>::
 EventSystem.gd::GDScript::-1::1749433571::0::1::::<>Node<>::
 GameOver.gd::GDScript::-1::1750012435::0::1::::<>Control<>::
-Globals.gd::GDScript::-1::1750015340::0::1::::<>Node<>::
-main.gd::GDScript::-1::1750015629::0::1::::<>Node<>::
+Globals.gd::GDScript::-1::1750016223::0::1::::<>Node<>::
+main.gd::GDScript::-1::1750016223::0::1::::<>Node<>::
 Market.gd::GDScript::-1::1749433571::0::1::::<>Node<>::
+PlayerAgent.gd::GDScript::-1::1750020954::0::1::::<>Node<>::
+CharacterCreator.gd::GDScript::-1::1750021062::0::1::::<>Node<>::
 Svg.gd::GDScript::-1::1749446695::0::1::::<>Node2D<>::

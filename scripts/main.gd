@@ -1,3 +1,7 @@
+# =====================================
+#  MAIN.GD - SISTEMA PRINCIPAL INTEGRADO
+#  Atualização para incluir PlayerAgent + Sistema existente
+# =====================================
 extends Node
 
 # =====================================
@@ -9,6 +13,14 @@ const MONTH_NAMES := ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out
 #  VARIÁVEIS DE ESTADO
 # =====================================
 var time_running := true
+var game_started := false
+
+# =====================================
+#  COMPONENTES DO SISTEMA
+# =====================================
+var player_manager: PlayerManager
+var character_creation: Control
+var main_ui: Control
 
 # =====================================
 #  NÓS DA UI - DETECTADOS DINAMICAMENTE
@@ -20,22 +32,22 @@ var pause_button: Button
 var next_button: Button
 var info_container: VBoxContainer
 var timer: Timer
-var game_over_screen: Control
 
 # =====================================
 #  READY
 # =====================================
 func _ready() -> void:
-	print("=== INICIANDO JOGO COM ESTRUTURA EXISTENTE ===")
+	print("=== INICIANDO JOGO INTEGRADO ===")
 	
 	# Aguardar um frame
 	await get_tree().process_frame
 	
-	# Detectar estrutura existente CORRETAMENTE
-	_detect_ui_structure()
+	# Inicializar componentes
+	_setup_player_manager()
+	_setup_character_creation()
 	
-	# Configurar/criar tela de game over
-	_setup_game_over_screen()
+	# Detectar estrutura existente
+	_detect_ui_structure()
 	
 	# Configurar timer
 	_setup_timer()
@@ -43,29 +55,66 @@ func _ready() -> void:
 	# Configurar botões se encontrados
 	_setup_buttons()
 	
-	# Atualizar UI
-	_update_ui()
+	# Mostrar criação de personagem
+	_show_character_creation()
 	
-	print("=== JOGO INICIADO ===")
+	print("=== SISTEMA INTEGRADO PRONTO ===")
 
 # =====================================
-#  DETECTAR ESTRUTURA EXISTENTE
+#  SETUP DOS COMPONENTES
+# =====================================
+func _setup_player_manager():
+	player_manager = PlayerManager.new()
+	player_manager.name = "PlayerManager"
+	add_child(player_manager)
+	
+	# Conectar sinais
+	player_manager.player_position_changed.connect(_on_player_position_changed)
+	player_manager.player_gained_power.connect(_on_player_gained_power)
+	player_manager.action_completed.connect(_on_action_completed)
+	
+	print("✅ PlayerManager configurado")
+
+func _setup_character_creation():
+	character_creation = preload("res://scenes/CharacterCreation.tscn").instantiate()
+	# Se não tiver .tscn, criar dinamicamente:
+	if character_creation == null:
+		character_creation = CharacterCreation.new()
+		character_creation.name = "CharacterCreation"
+	
+	add_child(character_creation)
+	character_creation.character_created.connect(_on_character_created)
+	character_creation.visible = false
+	
+	print("✅ CharacterCreation configurado")
+
+# =====================================
+#  DETECÇÃO DA UI EXISTENTE
 # =====================================
 func _detect_ui_structure() -> void:
 	print("🔍 Detectando estrutura de UI...")
 	
-	# Buscar nos caminhos corretos conforme a estrutura mostrada
-	date_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/DateLabel")
-	money_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/MoneyLabel")  
-	stability_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/StabilityLabel")
-	pause_button = get_node_or_null("CanvasLayer/BottomBar/HBoxContainer/PauseButton")
-	next_button = get_node_or_null("CanvasLayer/BottomBar/HBoxContainer/NextButton")
-	info_container = get_node_or_null("CanvasLayer/Sidepanel/InfoContainer")
+	# Buscar especificamente nos caminhos da sua estrutura
+	date_label = get_node_or_null("TopBar/HBoxContainer/DateLabel")
+	money_label = get_node_or_null("TopBar/HBoxContainer/MoneyLabel")  
+	stability_label = get_node_or_null("TopBar/HBoxContainer/StabilityLabel")
+	pause_button = get_node_or_null("BottomBar/HBoxContainer/PauseButton")
+	next_button = get_node_or_null("BottomBar/HBoxContainer/NextButton")
+	info_container = get_node_or_null("Sidepanel/InfoContainer")
 	
-	# Garantir que o país do jogador está correto (só uma vez)
-	if Globals.player_country == "Brasil":  # Só corrigir se ainda estiver Brasil
-		print("🔄 Corrigindo país do jogador para Argentina...")
-		Globals.set_player_country("Argentina")
+	# Se não encontrou, buscar em CanvasLayer
+	if not date_label:
+		date_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/DateLabel")
+	if not money_label:
+		money_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/MoneyLabel")
+	if not stability_label:
+		stability_label = get_node_or_null("CanvasLayer/TopBar/HBoxContainer/StabilityLabel")
+	if not pause_button:
+		pause_button = get_node_or_null("CanvasLayer/BottomBar/HBoxContainer/PauseButton")
+	if not next_button:
+		next_button = get_node_or_null("CanvasLayer/BottomBar/HBoxContainer/NextButton")
+	if not info_container:
+		info_container = get_node_or_null("CanvasLayer/Sidepanel/InfoContainer")
 	
 	# Resultados
 	print("✅ DateLabel: ", date_label != null)
@@ -74,121 +123,11 @@ func _detect_ui_structure() -> void:
 	print("✅ PauseButton: ", pause_button != null)
 	print("✅ NextButton: ", next_button != null)
 	print("✅ InfoContainer: ", info_container != null)
-	print("✅ País do jogador: ", Globals.player_country)
 
 # =====================================
-#  CONFIGURAR TELA DE GAME OVER
-# =====================================
-func _setup_game_over_screen() -> void:
-	print("🎮 Configurando GameOver screen...")
-	
-	# Buscar a tela criada no Canvas
-	game_over_screen = get_node_or_null("Gameover/GameOverScreen")
-	
-	if game_over_screen:
-		print("✅ GameOver screen encontrado no Canvas")
-		# Garantir que está oculto
-		game_over_screen.visible = false
-		
-		# Configurar para funcionar quando pausado
-		game_over_screen.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		
-		# Aguardar um frame para garantir que tudo está carregado
-		await get_tree().process_frame
-		
-		# Conectar botões - método mais robusto
-		_connect_gameover_buttons()
-	else:
-		print("⚠️ GameOver screen do Canvas não encontrado - usando popup")
-	
-	print("✅ GameOver screen configurado: ", game_over_screen != null)
-
-func _connect_gameover_buttons() -> void:
-	print("🔗 Conectando botões do GameOver...")
-	
-	# Buscar botões com diferentes possibilidades de nomes
-	var restart_btn = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer/RestartBtn")
-	var quit_btn = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer/QuitBtn")
-	
-	# Se QuitBtn não for encontrado, tentar outras variações
-	if not quit_btn:
-		quit_btn = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer/QuitBtn (")
-		if quit_btn:
-			print("🔍 QuitBtn encontrado com nome alternativo")
-	
-	# Se ainda não encontrou, listar todos os botões do container
-	if not quit_btn:
-		var button_container = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer")
-		if button_container:
-			print("🔍 Listando todos os filhos do HBoxContainer:")
-			for i in range(button_container.get_child_count()):
-				var child = button_container.get_child(i)
-				print("  [%d] %s (%s)" % [i, child.name, child.get_class()])
-				
-				# Se for um botão e não for o restart, assumir que é o quit
-				if child is Button and child != restart_btn:
-					quit_btn = child
-					print("🔍 Assumindo que este é o QuitBtn: %s" % child.name)
-					break
-	
-	print("RestartBtn encontrado: ", restart_btn != null)
-	print("QuitBtn encontrado: ", quit_btn != null)
-	
-	if restart_btn:
-		# Configurar para funcionar quando pausado
-		restart_btn.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		
-		# Verificar se já está conectado antes de conectar
-		if not restart_btn.pressed.is_connected(_restart_game):
-			restart_btn.pressed.connect(_restart_game)
-			print("✅ RestartBtn conectado à função _restart_game")
-		else:
-			print("⚠️ RestartBtn já estava conectado")
-		
-		# Definir texto para garantir
-		restart_btn.text = "🔄 Reiniciar"
-	else:
-		print("❌ RestartBtn não encontrado no caminho especificado")
-	
-	if quit_btn:
-		# Configurar para funcionar quando pausado
-		quit_btn.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		
-		# Verificar se já está conectado antes de conectar
-		if not quit_btn.pressed.is_connected(_quit_game):
-			quit_btn.pressed.connect(_quit_game)
-			print("✅ QuitBtn conectado à função _quit_game")
-		else:
-			print("⚠️ QuitBtn já estava conectado")
-		
-		# Definir texto para garantir
-		quit_btn.text = "⏹️ Sair"
-	else:
-		print("❌ QuitBtn não encontrado - criando um novo...")
-		_create_quit_button()
-
-func _create_quit_button() -> void:
-	var button_container = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer")
-	if button_container:
-		var quit_btn = Button.new()
-		quit_btn.name = "QuitBtn_Created"
-		quit_btn.text = "⏹️ Sair"
-		quit_btn.custom_minimum_size = Vector2(180, 60)
-		quit_btn.add_theme_font_size_override("font_size", 18)
-		quit_btn.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		
-		button_container.add_child(quit_btn)
-		quit_btn.pressed.connect(_quit_game)
-		
-		print("✅ QuitBtn criado e conectado dinamicamente")
-	else:
-		print("❌ Não foi possível criar QuitBtn - container não encontrado")
-
-# =====================================
-#  CONFIGURAR TIMER
+#  CONFIGURAR TIMER E BOTÕES
 # =====================================
 func _setup_timer() -> void:
-	# Buscar timer existente primeiro
 	timer = get_node_or_null("AutoTimer")
 	if timer == null:
 		timer = get_node_or_null("CanvasLayer/AutoTimer")
@@ -204,46 +143,117 @@ func _setup_timer() -> void:
 	timer.wait_time = 3.0
 	if not timer.timeout.is_connected(_on_auto_timer_timeout):
 		timer.timeout.connect(_on_auto_timer_timeout)
-	timer.start()
 
-# =====================================
-#  CONFIGURAR BOTÕES
-# =====================================
 func _setup_buttons() -> void:
 	if pause_button:
-		# Limpar conexões existentes
 		if pause_button.pressed.is_connected(_on_pause_pressed):
 			pause_button.pressed.disconnect(_on_pause_pressed)
-		
-		# Conectar novo sinal
 		pause_button.pressed.connect(_on_pause_pressed)
 		pause_button.text = "⏸ Pausar"
 		print("✅ Pause button configurado")
-	else:
-		print("❌ Pause button não encontrado")
 	
 	if next_button:
-		# Limpar conexões existentes
 		if next_button.pressed.is_connected(_on_next_month_pressed):
 			next_button.pressed.disconnect(_on_next_month_pressed)
-		
-		# Conectar novo sinal
 		next_button.pressed.connect(_on_next_month_pressed)
 		next_button.text = "▶️ Próximo Mês"
 		print("✅ Next button configurado")
-	else:
-		print("❌ Next button não encontrado")
+
+# =====================================
+#  CRIAÇÃO DE PERSONAGEM
+# =====================================
+func _show_character_creation():
+	character_creation.visible = true
+	character_creation.show_creation_screen()
+	
+	# Pausar o jogo até personagem ser criado
+	time_running = false
+	if timer:
+		timer.stop()
+
+func _on_character_created(agent: PlayerAgent):
+	print("👤 Personagem criado: %s" % agent.name)
+	
+	# Configurar PlayerManager
+	player_manager.create_player_agent(agent)
+	
+	# Esconder criação de personagem
+	character_creation.visible = false
+	
+	# Configurar país do jogador
+	Globals.player_country = agent.country
+	
+	# Iniciar o jogo
+	_start_game()
+
+func _start_game():
+	game_started = true
+	time_running = true
+	
+	# Iniciar timer
+	if timer:
+		timer.start()
+	
+	# Atualizar UI
+	_update_ui()
+	_update_map_colors()
+	
+	print("🎮 Jogo iniciado! Fase: %d" % player_manager.get_current_phase())
+
+# =====================================
+#  CALLBACKS DOS SINAIS DO PLAYER MANAGER
+# =====================================
+func _on_player_position_changed(old_position: String, new_position: String):
+	print("🎖️ %s avançou de %s para %s!" % [player_manager.get_player_agent().name, old_position, new_position])
+	
+	# Mostrar notificação
+	_show_advancement_notification(old_position, new_position)
+	
+	# Atualizar UI
+	_update_ui()
+
+func _on_player_gained_power():
+	print("🏛️ JOGADOR GANHOU O PODER!")
+	
+	# Transição visual
+	_show_power_transition()
+	
+	# Atualizar UI para Fase 2
+	_update_ui()
+
+func _on_action_completed(action_name: String, success: bool):
+	print("🎯 Ação '%s' %s" % [action_name, "bem-sucedida" if success else "falhou"])
+	
+	# Atualizar UI
+	_update_ui()
+
+func _show_advancement_notification(old_pos: String, new_pos: String):
+	var dialog = AcceptDialog.new()
+	dialog.title = "🎖️ Avanço Político!"
+	dialog.dialog_text = "Parabéns! Você avançou de %s para %s!" % [old_pos, new_pos]
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+
+func _show_power_transition():
+	var dialog = AcceptDialog.new()
+	dialog.title = "🏛️ PODER CONQUISTADO!"
+	dialog.dialog_text = "Você conquistou a presidência! Agora controle seu país na turbulenta década de 1970."
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
 
 # =====================================
 #  CICLO DE TEMPO
 # =====================================
 func _on_auto_timer_timeout() -> void:
+	if not game_started:
+		return
+	
 	print("⏰ Timer timeout! time_running = ", time_running)
 	if time_running:
 		print("⏭️ Avançando mês automaticamente...")
 		_advance_month()
-	else:
-		print("⏸️ Jogo pausado, não avançando mês")
 
 func _on_pause_pressed() -> void:
 	time_running = !time_running
@@ -251,25 +261,21 @@ func _on_pause_pressed() -> void:
 	
 	if pause_button:
 		pause_button.text = "⏸ Pausar" if time_running else "▶️ Retomar"
-		print("📝 Texto do botão alterado para: ", pause_button.text)
 	
 	if timer:
 		if time_running:
 			timer.start()
-			print("⏰ Timer iniciado")
 		else:
 			timer.stop()
-			print("⏰ Timer parado")
-	else:
-		print("❌ Timer não encontrado!")
 
 func _on_next_month_pressed() -> void:
+	if not game_started:
+		return
+	
 	print("🎮 Próximo mês pressionado! time_running é: ", time_running)
 	if not time_running:
 		print("⏭️ Avançando mês manualmente...")
 		_advance_month()
-	else:
-		print("⚠️ Jogo não está pausado, botão ignorado")
 
 func _advance_month() -> void:
 	# Avançar tempo global
@@ -278,18 +284,16 @@ func _advance_month() -> void:
 		Globals.current_month = 1
 		Globals.current_year += 1
 
+	# Avançar PlayerAgent se existir
+	if player_manager and player_manager.get_player_agent():
+		player_manager.advance_month()
+
 	# Simulação passiva de todos os países
 	Globals.simulate_monthly_changes()
 	
-	# VERIFICAR REVOLUÇÃO NO PAÍS DO JOGADOR
-	_check_revolution()
-	
 	# Chance de evento aleatório (15%)
 	if randi() % 100 < 15:
-		var countries = Globals.country_data.keys()
-		var random_country = countries[randi() % countries.size()]
-		var event = Globals.apply_random_event(random_country)
-		print("📰 EVENTO: %s em %s" % [event.get("name", "Evento"), random_country])
+		_trigger_random_event()
 
 	# Atualizar UI
 	_update_ui()
@@ -297,222 +301,119 @@ func _advance_month() -> void:
 	
 	print("📅 %s %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year])
 
-# =====================================
-#  VERIFICAR REVOLUÇÃO
-# =====================================
-func _check_revolution() -> void:
-	var player_data = Globals.get_country(Globals.player_country)
-	if player_data.is_empty():
+func _trigger_random_event():
+	var countries = Globals.country_data.keys()
+	if countries.size() == 0:
 		return
-	
-	var rebel_power = player_data.get("rebel_power", 0)
-	print("🔥 Poder rebelde em %s: %d%%" % [Globals.player_country, rebel_power])
-	
-	if rebel_power >= 100:
-		print("💀 REVOLUÇÃO! Poder rebelde atingiu 100%!")
-		_trigger_game_over()
-
-func _trigger_game_over() -> void:
-	print("🎮 Acionando Game Over...")
-	
-	# Parar timer imediatamente
-	if timer:
-		timer.stop()
-	time_running = false
-	
-	# Tentar usar a tela do Canvas primeiro
-	if game_over_screen:
-		_show_canvas_game_over()
-	else:
-		# Fallback para popup
-		_show_reliable_game_over()
-
-func _show_canvas_game_over() -> void:
-	print("🎮 Usando GameOver do Canvas...")
-	
-	var current_date = "%s %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year]
-	
-	# Atualizar textos
-	var title_label = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/Title")
-	var subtitle_label = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/Subtitle")
-	
-	if title_label:
-		title_label.text = "🔥 REVOLUÇÃO!"
-	
-	if subtitle_label:
-		subtitle_label.text = "Seu governo foi deposto em %s!\nO país %s está em revolução!" % [current_date, Globals.player_country.to_upper()]
-	
-	# Configurar botões para funcionar quando pausado
-	var restart_btn = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer/RestartBtn")
-	var quit_btn = get_node_or_null("Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer/QuitBtn")
-	
-	if restart_btn:
-		restart_btn.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		print("✅ RestartBtn configurado para funcionar quando pausado")
-	
-	if quit_btn:
-		quit_btn.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		print("✅ QuitBtn configurado para funcionar quando pausado")
-	
-	# Configurar o GameOver screen também
-	if game_over_screen:
-		game_over_screen.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-		print("✅ GameOver screen configurado para funcionar quando pausado")
-	
-	# Mostrar a tela
-	game_over_screen.visible = true
-	
-	# Pausar o jogo
-	get_tree().paused = true
-	
-	print("✅ GameOver do Canvas exibido")
-
-func _show_reliable_game_over() -> void:
-	print("💀 === GAME OVER ===")
-	print("🔥 Revolução em %s!" % Globals.player_country)
-	
-	var current_date = "%s %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year]
-	print("📅 Data: %s" % current_date)
-	print("================")
-	
-	# Usar ConfirmationDialog que é mais confiável
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "🔥 REVOLUÇÃO!"
-	
-	dialog.dialog_text = """REVOLUÇÃO EM %s!
-
-Seu governo foi deposto em %s!
-O país está em caos total.
-
-A partida terminou.
-
-Deseja reiniciar?""" % [Globals.player_country.to_upper(), current_date]
-	
-	# Configurar botões
-	dialog.get_ok_button().text = "🔄 Reiniciar"
-	dialog.get_cancel_button().text = "⏹️ Sair"
-	
-	# Conectar sinais corretos
-	dialog.confirmed.connect(_restart_game)
-	dialog.canceled.connect(_quit_game)
-	
-	add_child(dialog)
-	dialog.popup_centered()
-	
-	# Pausar árvore
-	get_tree().paused = true
-
-func _quit_game() -> void:
-	print("⏹️ Saindo do jogo...")
-	get_tree().paused = false
-	get_tree().quit()
-
-func _restart_game() -> void:
-	print("🔄 Reiniciando jogo...")
-	get_tree().paused = false
-	Globals.reset_game()
-	get_tree().reload_current_scene()
+		
+	var random_country = countries[randi() % countries.size()]
+	var event = Globals.apply_random_event(random_country)
+	print("📰 EVENTO: %s em %s" % [event.get("name", "Evento"), random_country])
 
 # =====================================
-#  ATUALIZAR UI EXISTENTE
+#  ATUALIZAÇÃO DA UI
 # =====================================
 func _update_ui() -> void:
-	# Dados do jogador atual (não forçar Argentina aqui)
-	var player_data = Globals.get_player_data()
+	if not game_started:
+		return
 	
-	print("🔄 Atualizando UI - País: %s, Dados: %s" % [Globals.player_country, player_data])
+	# Determinar se mostrar dados do jogador ou do país
+	var display_data: Dictionary
+	
+	if player_manager.get_current_phase() == 1:
+		# Fase 1: Mostrar dados pessoais do agente
+		var agent = player_manager.get_player_agent()
+		if agent:
+			display_data = {
+				"money": agent.wealth * 100,  # Converter para escala apropriada
+				"stability": agent.get_total_support() / 7,  # Converter para 0-100
+				"is_agent": true,
+				"agent_name": agent.name,
+				"position": agent.current_position
+			}
+	else:
+		# Fase 2: Mostrar dados do país
+		display_data = Globals.get_player_data()
+		display_data["is_agent"] = false
 	
 	# Atualizar data
 	if date_label and date_label is Label:
 		date_label.text = "%s %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year]
 		date_label.add_theme_color_override("font_color", Color.WHITE)
-		print("📅 Data atualizada: %s" % date_label.text)
-	else:
-		print("❌ DateLabel não encontrado ou inválido")
 	
 	# Atualizar dinheiro
 	if money_label and money_label is Label:
-		var money = player_data.get("money", 0)
-		money_label.text = "$ %s" % _format_number(money)
+		var money = display_data.get("money", 0)
+		if display_data.get("is_agent", false):
+			money_label.text = "💰 Recursos: %d" % money
+		else:
+			money_label.text = "$ %s" % _format_number(money)
 		money_label.add_theme_color_override("font_color", Color.GREEN)
-		print("💰 Dinheiro atualizado: %s" % money_label.text)
-	else:
-		print("❌ MoneyLabel não encontrado ou inválido")
 
 	# Atualizar estabilidade
 	if stability_label and stability_label is Label:
-		var stability = player_data.get("stability", 50)
-		stability_label.text = "Estabilidade: %d%%" % stability
+		var stability = display_data.get("stability", 50)
+		if display_data.get("is_agent", false):
+			stability_label.text = "📊 Apoio: %d%%" % int(stability)
+		else:
+			stability_label.text = "Estabilidade: %d%%" % stability
+		
 		var color = Color.GREEN if stability > 70 else (Color.YELLOW if stability > 40 else Color.RED)
 		stability_label.add_theme_color_override("font_color", color)
-		print("⚖️ Estabilidade atualizada: %s" % stability_label.text)
-	else:
-		print("❌ StabilityLabel não encontrado ou inválido")
 
 # =====================================
-#  ATUALIZAR CORES DO MAPA
+#  MAPA E VISUALIZAÇÃO
 # =====================================
 func _update_map_colors() -> void:
 	var map := get_node_or_null("NodeMapaSVG2D")
 	if map == null:
 		return
 	
-	for country_node in map.get_children():
-		if country_node is Polygon2D:
-			# Buscar Sprite2D dentro do Polygon2D
-			for child in country_node.get_children():
-				if child is Sprite2D:
-					var country_name = country_node.name  # Nome do país vem do Polygon2D pai
-					var country_data = Globals.get_country(country_name)
+	for child in map.get_children():
+		if child is Polygon2D:
+			var country_name = child.name
+			var country_data = Globals.get_country(country_name)
+			
+			if not country_data.is_empty():
+				var stability = country_data.get("stability", 50)
+				var gov_power = country_data.get("gov_power", 50)
+				
+				# Colorir baseado na estabilidade
+				var color: Color
+				if stability < 25:
+					color = Color.RED.darkened(0.2)
+				elif stability < 50:
+					color = Color.ORANGE.darkened(0.1)
+				elif stability < 75:
+					color = Color.YELLOW.darkened(0.1)
+				else:
+					color = Color.GREEN.darkened(0.1)
+				
+				# Opacidade baseada no poder governamental
+				color.a = 0.5 + (gov_power / 200.0)
+				
+				# Destacar país do jogador
+				if country_name == Globals.player_country:
+					color = color.lightened(0.4)
 					
-					if not country_data.is_empty():
-						# Verificar se está em revolução (prioridade máxima)
-						if country_data.get("in_revolution", false):
-							child.modulate = Color(0.8, 0.1, 0.1, 0.8)  # Vermelho revolução
-							print("🔴 %s em revolução - cor vermelha aplicada" % country_name)
-							break
-						
-						var stability = country_data.get("stability", 50)
-						var gov_power = country_data.get("gov_power", 50)
-						
-						# Colorir baseado na estabilidade
-						var color: Color
-						if stability < 25:
-							color = Color.RED
-						elif stability < 50:
-							color = Color.ORANGE
-						elif stability < 75:
-							color = Color.YELLOW
-						else:
-							color = Color.GREEN
-						
-						# Opacidade baseada no poder governamental
-						color.a = 0.5 + (gov_power / 200.0)
-						
-						# Destacar país do jogador
-						if country_name == Globals.player_country:
-							color = color.lightened(0.4)
-						
-						# Aplicar cor ao Sprite2D
-						child.modulate = color
-					break  # Só precisamos do primeiro Sprite2D
+					# Na Fase 1, adicionar borda especial
+					if player_manager.get_current_phase() == 1:
+						color = Color.CYAN.lightened(0.3)
+				
+				child.color = color
 
 # =====================================
 #  INFORMAÇÕES DO PAÍS
 # =====================================
 func _show_country_info(country_name: String) -> void:
-	print("🔍 Mostrando informações de: %s" % country_name)
-	
 	var country_data = Globals.get_country(country_name)
 	if country_data.is_empty():
 		print("❌ País não encontrado: ", country_name)
 		return
 	
-	# Se temos um container de informações, usar ele
 	if info_container:
 		_update_info_container(country_name, country_data)
 	else:
-		# Senão, só imprimir no console
 		_print_country_info(country_name, country_data)
 
 func _update_info_container(country_name: String, country_data: Dictionary) -> void:
@@ -528,10 +429,14 @@ func _update_info_container(country_name: String, country_data: Dictionary) -> v
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_container.add_child(title)
 	
-	# Indicador de país do jogador
+	# Indicador especial se for país do jogador
 	if country_name == Globals.player_country:
 		var player_indicator = Label.new()
-		player_indicator.text = "👑 SEU PAÍS"
+		if player_manager.get_current_phase() == 1:
+			var agent = player_manager.get_player_agent()
+			player_indicator.text = "👤 %s (%s)" % [agent.name if agent else "SEU AGENTE", agent.current_position if agent else ""]
+		else:
+			player_indicator.text = "👑 SEU PAÍS"
 		player_indicator.add_theme_color_override("font_color", Color.CYAN)
 		player_indicator.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		info_container.add_child(player_indicator)
@@ -554,17 +459,18 @@ func _update_info_container(country_name: String, country_data: Dictionary) -> v
 		label.add_theme_color_override("font_color", Color.WHITE)
 		info_container.add_child(label)
 	
-	# Botão de ação
-	var action_button = Button.new()
-	if country_name == Globals.player_country:
-		action_button.text = "👑 Governar"
-		action_button.pressed.connect(_on_govern_country.bind(country_name))
-	else:
-		action_button.text = "🤝 Negociar"
-		action_button.pressed.connect(_on_trade_with_country.bind(country_name))
-	
-	action_button.custom_minimum_size = Vector2(200, 40)
-	info_container.add_child(action_button)
+	# Botão de ação (apenas na Fase 2)
+	if player_manager.get_current_phase() == 2:
+		var action_button = Button.new()
+		if country_name == Globals.player_country:
+			action_button.text = "👑 Governar"
+			action_button.pressed.connect(_on_govern_country.bind(country_name))
+		else:
+			action_button.text = "🤝 Negociar"
+			action_button.pressed.connect(_on_trade_with_country.bind(country_name))
+		
+		action_button.custom_minimum_size = Vector2(200, 40)
+		info_container.add_child(action_button)
 
 func _print_country_info(country_name: String, country_data: Dictionary) -> void:
 	print("\n🏛️ === %s ===" % country_name.to_upper())
@@ -575,288 +481,62 @@ func _print_country_info(country_name: String, country_data: Dictionary) -> void
 	print("================\n")
 
 # =====================================
-#  AÇÕES DO JOGADOR
+#  AÇÕES DO JOGADOR (FASE 2)
 # =====================================
 func _on_govern_country(country_name: String) -> void:
 	print("👑 Governando: ", country_name)
-	
-	var current_money = Globals.get_country_value(country_name, "money", 0)
-	
-	if current_money >= 500:
-		# Custo da ação
-		Globals.adjust_country_value(country_name, "money", -500)
-		
-		# Benefícios (balanceados)
-		Globals.adjust_country_value(country_name, "gov_power", randi_range(3, 6))
-		Globals.adjust_country_value(country_name, "rebel_power", randi_range(-2, -4))
-		Globals.adjust_country_value(country_name, "stability", randi_range(1, 3))
-		
-		print("✅ Ação 'Governar' executada com sucesso (-$500)")
-	else:
-		print("❌ Dinheiro insuficiente para governar (precisa $500)")
-	
+	Globals.adjust_country_value(country_name, "gov_power", randi_range(3, 8))
+	Globals.adjust_country_value(country_name, "money", -500)
 	_update_ui()
 	_show_country_info(country_name)
 
 func _on_trade_with_country(country_name: String) -> void:
 	print("🤝 Negociando com: ", country_name)
-	
-	var trade_bonus = randi_range(200, 500)  # Mais conservador
-	var relation_bonus = randi_range(2, 5)   # Mais conservador
-	
+	var trade_bonus = randi_range(200, 800)
 	Globals.adjust_country_value(Globals.player_country, "money", trade_bonus)
-	Globals.adjust_relation(Globals.player_country, country_name, relation_bonus)
-	
-	print("✅ Comércio realizado: +$%d, relação +%d" % [trade_bonus, relation_bonus])
-	
+	Globals.adjust_relation(Globals.player_country, country_name, randi_range(2, 8))
 	_update_ui()
 	_show_country_info(country_name)
-
-# =====================================
-#  FUNÇÕES DE TESTE (temporárias)
-# =====================================
-func _test_revolution() -> void:
-	print("🧪 === TESTE DE REVOLUÇÃO ===")
-	Globals.set_country_value(Globals.player_country, "rebel_power", 100)
-	_check_revolution()
-	print("🧪 === FIM DO TESTE ===")
-
-func _debug_ui_structure() -> void:
-	print("🔍 === DEBUG DA ESTRUTURA DA UI ===")
-	_print_children_recursive(self, 0)
-	print("🔍 === FIM DO DEBUG ===")
-
-func _print_children_recursive(node: Node, indent: int) -> void:
-	var prefix = ""
-	for i in range(indent):
-		prefix += "  "
-	
-	print("%s%s (%s)" % [prefix, node.name, node.get_class()])
-	
-	for child in node.get_children():
-		_print_children_recursive(child, indent + 1)
 
 # =====================================
 #  INPUT GLOBAL
 # =====================================
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):  # Espaço
-		print("⌨️ Espaço pressionado!")
-		_on_pause_pressed()
-	elif event.is_action_pressed("ui_right"):  # Seta direita
-		print("⌨️ Seta direita pressionada!")
-		_on_next_month_pressed()
-	elif event.is_action_pressed("ui_home"):  # Home (para teste)
-		print("🧪 Testando revolução...")
-		_test_revolution()
-	elif event.is_action_pressed("ui_end"):  # End (para debug)
-		print("🔍 Debug da estrutura da UI...")
-		_debug_ui_structure()
-	elif event is InputEventKey and event.pressed:
-		# Atalhos específicos para teste
-		if event.keycode == KEY_T:  # T = Test buttons
-			print("🧪 Testando botões do GameOver...")
-			_test_gameover_buttons()
-		elif event.keycode == KEY_B:  # B = Balance test
-			print("⚖️ Testando balanceamento...")
-			_test_balance()
-		elif event.keycode == KEY_C:  # C = Click test
-			print("🖱️ Testando detecção de países...")
-			_test_country_detection()
-		elif event.keycode == KEY_I:  # I = IA test
-			print("🤖 Testando IA dos países...")
-			_test_ai_behavior()
-		elif event.keycode == KEY_R and game_over_screen and game_over_screen.visible:
-			# R quando GameOver está visível
-			print("🔄 Atalho R pressionado!")
-			_restart_game()
-		elif event.keycode == KEY_Q and game_over_screen and game_over_screen.visible:
-			# Q quando GameOver está visível  
-			print("⏹️ Atalho Q pressionado!")
-			_quit_game()
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		# Debug detalhado do clique
-		print("🖱️ Clique detectado em posição: %s" % event.global_position)
-		
-		# Detecta cliques em polígonos do mapa
-		var country_name = _detect_polygon_click(event.global_position)
-		print("🔍 País detectado: '%s'" % country_name)
-		
-		if country_name != "":
-			print("✅ Mostrando informações de: %s" % country_name)
-			_show_country_info(country_name)
-		else:
-			print("❌ Nenhum país detectado no clique")
-
-func _test_country_detection() -> void:
-	print("🧪 === TESTE DE DETECÇÃO DE PAÍSES ===")
-	
-	var map := get_node_or_null("NodeMapaSVG2D")
-	if map == null:
-		print("❌ NodeMapaSVG2D não encontrado!")
+	if not game_started:
 		return
 	
-	print("✅ NodeMapaSVG2D encontrado")
-	print("📋 Países disponíveis no mapa:")
+	if event.is_action_pressed("ui_accept"):  # Espaço
+		_on_pause_pressed()
+	elif event.is_action_pressed("ui_right"):  # Seta direita
+		_on_next_month_pressed()
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var country_name = _detect_polygon_click(event.global_position)
+		if country_name != "":
+			print("🖱️ Clique detectado em: ", country_name)
+			_show_country_info(country_name)
 	
-	for country_node in map.get_children():
-		if country_node is Polygon2D:
-			print("  - %s (Polygon2D)" % country_node.name)
-			
-			# Verificar se tem Sprite2D
-			for child in country_node.get_children():
-				if child is Sprite2D:
-					print("    └─ %s (Sprite2D) - pos: %s" % [child.name, child.global_position])
-					break
-	
-	print("📋 Países disponíveis nos dados:")
-	for country in Globals.country_data.keys():
-		print("  - %s" % country)
-	
-	print("🧪 === FIM DO TESTE ===")
-
-func _test_balance() -> void:
-	print("⚖️ === TESTE DE BALANCEAMENTO ===")
-	
-	var player_data = Globals.get_player_data()
-	print("💰 Estado inicial:")
-	print("  Dinheiro: $%d" % player_data.get("money", 0))
-	print("  Receita: $%d/mês" % player_data.get("income", 0))
-	print("  Despesa: $%d/mês" % player_data.get("expenses", 0))
-	print("  Estabilidade: %d%%" % player_data.get("stability", 0))
-	print("  Gov Power: %d%%" % player_data.get("gov_power", 0))
-	print("  Rebel Power: %d%%" % player_data.get("rebel_power", 0))
-	
-	print("\n🚀 Simulando 5 meses...")
-	for i in range(5):
-		_advance_month()
-		await get_tree().process_frame
-	
-	player_data = Globals.get_player_data()
-	print("\n💰 Estado após 5 meses:")
-	print("  Dinheiro: $%d" % player_data.get("money", 0))
-	print("  Estabilidade: %d%%" % player_data.get("stability", 0))
-	print("  Gov Power: %d%%" % player_data.get("gov_power", 0))
-	print("  Rebel Power: %d%%" % player_data.get("rebel_power", 0))
-	
-	print("⚖️ === FIM TESTE BALANCEAMENTO ===")
-
-func _force_show_country(country_name: String) -> void:
-	print("🔧 FORÇANDO exibição de: %s" % country_name)
-	_show_country_info(country_name)
-
-func _test_ai_behavior() -> void:
-	print("🤖 === TESTE DE IA ===")
-	
-	print("📊 Estado antes da IA:")
-	for country in ["Chile", "Uruguay", "Paraguay"]:
-		var data = Globals.get_country(country)
-		print("  %s: Money=%d, Stab=%d%%, Gov=%d%%, Rebel=%d%%" % [
-			country, data.get("money", 0), data.get("stability", 0), 
-			data.get("gov_power", 0), data.get("rebel_power", 0)
-		])
-	
-	print("\n🚀 Simulando 3 meses de IA...")
-	for i in range(3):
-		print("\n--- Mês %d ---" % (i + 1))
-		for country in ["Chile", "Uruguay", "Paraguay"]:
-			if country != Globals.player_country:
-				Globals.simulate_ai_country(country)
-		await get_tree().process_frame
-	
-	print("\n📊 Estado após IA:")
-	for country in ["Chile", "Uruguay", "Paraguay"]:
-		var data = Globals.get_country(country)
-		print("  %s: Money=%d, Stab=%d%%, Gov=%d%%, Rebel=%d%%" % [
-			country, data.get("money", 0), data.get("stability", 0), 
-			data.get("gov_power", 0), data.get("rebel_power", 0)
-		])
-		
-		if data.get("in_revolution", false):
-			print("    🔴 EM REVOLUÇÃO!")
-	
-	print("🤖 === FIM TESTE IA ===")
-	
-	# Atualizar cores do mapa
-	_update_map_colors()
-
-func _test_gameover_buttons() -> void:
-	print("🧪 === TESTE DOS BOTÕES GAMEOVER ===")
-	
-	# Reconectar botões
-	_connect_gameover_buttons()
-	
-	# Mostrar GameOver para teste
-	if game_over_screen:
-		game_over_screen.visible = true
-		get_tree().paused = true
-		print("GameOver exibido para teste")
-		print("Pressione R para Reiniciar ou Q para Sair")
-		print("Ou clique nos botões")
-	else:
-		print("❌ GameOver screen não encontrado")
-	
-	print("🧪 === FIM DO TESTE ===")
+	# Teclas de debug
+	if OS.is_debug_build():
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_F1:
+					player_manager.debug_advance_to_president()
+				KEY_F2:
+					print(player_manager.get_debug_info())
+				KEY_F3:
+					_show_character_creation()
 
 func _detect_polygon_click(global_pos: Vector2) -> String:
-	print("🔍 Detectando clique em: %s" % global_pos)
-	
 	var map := get_node_or_null("NodeMapaSVG2D")
 	if map == null:
-		print("❌ NodeMapaSVG2D não encontrado!")
 		return ""
 	
-	print("✅ NodeMapaSVG2D encontrado, verificando %d países..." % map.get_child_count())
+	for child in map.get_children():
+		if child is Polygon2D:
+			var local_pos = child.to_local(global_pos)
+			if Geometry2D.is_point_in_polygon(local_pos, child.polygon):
+				return child.name
 	
-	var detected_countries = []
-	
-	# Verificar TODOS os países e coletar os que foram clicados
-	for country_node in map.get_children():
-		if country_node is Polygon2D:
-			print("🔍 Verificando país: %s" % country_node.name)
-			
-			# Método 1: Verificar polígono primeiro (mais preciso)
-			var local_pos = country_node.to_local(global_pos)
-			if Geometry2D.is_point_in_polygon(local_pos, country_node.polygon):
-				print("✅ CLIQUE DETECTADO no polígono de %s!" % country_node.name)
-				detected_countries.append({
-					"name": country_node.name,
-					"method": "polygon",
-					"priority": 1  # Polígono tem prioridade maior
-				})
-				continue
-			
-			# Método 2: Verificar Sprite2D como fallback
-			for child in country_node.get_children():
-				if child is Sprite2D:
-					var texture = child.texture
-					if texture:
-						var tex_size = texture.get_size() * child.scale
-						var sprite_rect = Rect2(child.global_position - tex_size * 0.5, tex_size)
-						
-						if sprite_rect.has_point(global_pos):
-							print("✅ CLIQUE DETECTADO no Sprite2D de %s!" % country_node.name)
-							detected_countries.append({
-								"name": country_node.name,
-								"method": "sprite",
-								"priority": 2  # Sprite tem prioridade menor
-							})
-					break
-	
-	# Se encontrou países, escolher o de maior prioridade
-	if detected_countries.size() > 0:
-		# Ordenar por prioridade (menor número = maior prioridade)
-		detected_countries.sort_custom(func(a, b): return a.priority < b.priority)
-		
-		var selected_country = detected_countries[0]
-		print("🎯 País selecionado: %s (método: %s)" % [selected_country.name, selected_country.method])
-		
-		if detected_countries.size() > 1:
-			print("📋 Outros países detectados: %s" % [detected_countries.slice(1)])
-		
-		return selected_country.name
-	
-	print("❌ Nenhum país detectado no clique")
 	return ""
 
 # =====================================
@@ -877,7 +557,11 @@ func get_current_date() -> String:
 	return "%s/%d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year]
 
 func get_current_money() -> int:
-	return Globals.get_country_value(Globals.player_country, "money", 0)
+	if player_manager.get_current_phase() == 1:
+		var agent = player_manager.get_player_agent()
+		return agent.wealth * 100 if agent else 0
+	else:
+		return Globals.get_country_value(Globals.player_country, "money", 0)
 
 func get_current_month() -> int:
 	return Globals.current_month
@@ -887,3 +571,309 @@ func get_current_year() -> int:
 
 func is_time_running() -> bool:
 	return time_running
+
+func get_player_manager() -> PlayerManager:
+	return player_manager
+
+func get_game_phase() -> int:
+	return player_manager.get_current_phase() if player_manager else 1
+
+# =====================================
+#  SAVE/LOAD DO JOGO COMPLETO
+# =====================================
+func save_game() -> Dictionary:
+	var save_data = {
+		"version": "1.0",
+		"timestamp": Time.get_unix_time_from_system(),
+		"global_data": {
+			"current_month": Globals.current_month,
+			"current_year": Globals.current_year,
+			"player_country": Globals.player_country,
+			"country_data": Globals.country_data,
+			"relations": Globals.relations if Globals.has_method("get_relations") else {}
+		},
+		"game_state": {
+			"time_running": time_running,
+			"game_started": game_started
+		},
+		"player_data": player_manager.save_player_data() if player_manager else {}
+	}
+	
+	print("💾 Jogo salvo")
+	return save_data
+
+func load_game(save_data: Dictionary) -> bool:
+	if not save_data.has("version"):
+		print("❌ Arquivo de save inválido")
+		return false
+	
+	try:
+		# Restaurar dados globais
+		var global_data = save_data.get("global_data", {})
+		Globals.current_month = global_data.get("current_month", 1)
+		Globals.current_year = global_data.get("current_year", 1973)
+		Globals.player_country = global_data.get("player_country", "")
+		Globals.country_data = global_data.get("country_data", {})
+		
+		# Restaurar estado do jogo
+		var game_state = save_data.get("game_state", {})
+		time_running = game_state.get("time_running", true)
+		game_started = game_state.get("game_started", false)
+		
+		# Restaurar dados do jogador
+		var player_data = save_data.get("player_data", {})
+		if not player_data.is_empty() and player_manager:
+			player_manager.load_player_data(player_data)
+		
+		# Atualizar UI
+		_update_ui()
+		_update_map_colors()
+		
+		print("📁 Jogo carregado com sucesso")
+		return true
+		
+	except error:
+		print("❌ Erro ao carregar save: ", error)
+		return false
+
+# =====================================
+#  SISTEMA DE CONQUISTAS/ACHIEVEMENTS
+# =====================================
+func check_achievements():
+	if not player_manager or not player_manager.get_player_agent():
+		return
+	
+	var agent = player_manager.get_player_agent()
+	
+	# Conquista: Primeiro cargo político
+	if agent.current_position == "Ativista" and not _has_achievement("first_position"):
+		_unlock_achievement("first_position", "🎖️ Primeiro Passo", "Tornou-se um ativista político")
+	
+	# Conquista: Presidente jovem
+	if agent.current_position == "Presidente" and agent.age < 35 and not _has_achievement("young_president"):
+		_unlock_achievement("young_president", "👑 Jovem Líder", "Tornou-se presidente antes dos 35 anos")
+	
+	# Conquista: Sobrevivente da Operação Condor
+	if agent.condor_target_level > 80 and not agent.is_imprisoned and not _has_achievement("condor_survivor"):
+		_unlock_achievement("condor_survivor", "⚡ Sobrevivente", "Escapou da Operação Condor")
+	
+	# Conquista: Apoio total máximo
+	if agent.get_total_support() >= 600 and not _has_achievement("mass_support"):
+		_unlock_achievement("mass_support", "🌟 Carismático", "Conquistou apoio massivo de todos os grupos")
+
+var unlocked_achievements: Array[String] = []
+
+func _has_achievement(achievement_id: String) -> bool:
+	return achievement_id in unlocked_achievements
+
+func _unlock_achievement(achievement_id: String, title: String, description: String):
+	unlocked_achievements.append(achievement_id)
+	_show_achievement_notification(title, description)
+
+func _show_achievement_notification(title: String, description: String):
+	var dialog = AcceptDialog.new()
+	dialog.title = "🏆 CONQUISTA DESBLOQUEADA!"
+	dialog.dialog_text = "%s\n\n%s" % [title, description]
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+
+# =====================================
+#  SISTEMA DE TUTORIAL CONTEXTUAL
+# =====================================
+var tutorial_shown: Array[String] = []
+
+func show_tutorial_hint(hint_id: String, title: String, message: String):
+	if hint_id in tutorial_shown:
+		return
+	
+	tutorial_shown.append(hint_id)
+	
+	var dialog = AcceptDialog.new()
+	dialog.title = "💡 " + title
+	dialog.dialog_text = message
+	dialog.custom_minimum_size = Vector2(400, 200)
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+
+func check_tutorial_triggers():
+	if not player_manager or not player_manager.get_player_agent():
+		return
+	
+	var agent = player_manager.get_player_agent()
+	
+	# Tutorial: Primeiro mês
+	if Globals.current_year == 1973 and Globals.current_month == 1:
+		show_tutorial_hint("first_month", "Bem-vindo ao Cone Sul", 
+			"Você está em 1973, no auge da Guerra Fria. Sua jornada política começa agora!\n\n" +
+			"• Execute ações para ganhar apoio\n" +
+			"• Cuidado com os riscos políticos\n" +
+			"• Avance de posição até chegar à presidência")
+	
+	# Tutorial: Primeira ação
+	if agent.political_experience >= 5 and not "first_action" in tutorial_shown:
+		show_tutorial_hint("first_action", "Ganhando Experiência", 
+			"Ótimo! Você está ganhando experiência política.\n\n" +
+			"Continue executando ações para:\n" +
+			"• Aumentar seus atributos\n" +
+			"• Ganhar apoio dos grupos\n" +
+			"• Construir sua rede de contatos")
+	
+	# Tutorial: Alto risco Condor
+	if agent.condor_target_level > 30 and not "condor_warning" in tutorial_shown:
+		show_tutorial_hint("condor_warning", "⚠️ Ameaça da Operação Condor", 
+			"Cuidado! Você está chamando atenção das forças de segurança.\n\n" +
+			"A Operação Condor pode:\n" +
+			"• Te prender ou exilar\n" +
+			"• Eliminar fisicamente\n" +
+			"• Reduza atividades de alto risco por um tempo")
+
+# =====================================
+#  EVENTOS HISTÓRICOS ESPECÍFICOS
+# =====================================
+func trigger_historical_events():
+	var current_date = "%d-%02d" % [Globals.current_year, Globals.current_month]
+	
+	match current_date:
+		"1973-09":  # Golpe no Chile
+			if Globals.player_country == "Chile":
+				_handle_chile_coup_1973()
+			else:
+				_show_news_event("Golpe no Chile", "Augusto Pinochet toma o poder no Chile. Salvador Allende foi morto.")
+		
+		"1976-03":  # Golpe na Argentina
+			if Globals.player_country == "Argentina":
+				_handle_argentina_coup_1976()
+			else:
+				_show_news_event("Golpe na Argentina", "Junta militar toma o poder na Argentina. Início do 'Processo de Reorganização Nacional'.")
+		
+		"1982-04":  # Guerra das Malvinas
+			if Globals.player_country == "Argentina":
+				_handle_malvinas_war()
+			else:
+				_show_news_event("Guerra das Malvinas", "Argentina invade as Ilhas Malvinas. Conflito com o Reino Unido.")
+
+func _handle_chile_coup_1973():
+	var dialog = ConfirmationDialog.new()
+	dialog.title = "🎖️ Golpe Militar no Chile - 11 de Setembro de 1973"
+	dialog.dialog_text = "As Forças Armadas estão se movendo para derrubar o governo Allende. Como você reage?\n\n" +
+		"• APOIAR: Ganhe influência militar, mas perca apoio popular\n" +
+		"• RESISTIR: Mantenha princípios, mas corra risco de prisão"
+	
+	dialog.get_ok_button().text = "Apoiar Golpe"
+	dialog.get_cancel_button().text = "Resistir"
+	
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(_support_chile_coup)
+	dialog.canceled.connect(_resist_chile_coup)
+
+func _support_chile_coup():
+	var agent = player_manager.get_player_agent()
+	if agent:
+		agent.support["military"] += 20
+		agent.support["workers"] -= 15
+		agent.support["students"] -= 10
+		agent.usa_influence += 15
+		agent.major_events.append("Apoiou o golpe de Pinochet (1973)")
+	print("📰 Você apoiou o golpe militar no Chile")
+
+func _resist_chile_coup():
+	var agent = player_manager.get_player_agent()
+	if agent:
+		agent.support["workers"] += 10
+		agent.support["students"] += 15
+		agent.condor_target_level += 20
+		agent.ussr_influence += 10
+		agent.major_events.append("Resistiu ao golpe de Pinochet (1973)")
+	print("📰 Você resistiu ao golpe militar no Chile")
+
+func _handle_argentina_coup_1976():
+	# Implementar evento específico da Argentina
+	pass
+
+func _handle_malvinas_war():
+	# Implementar Guerra das Malvinas
+	pass
+
+func _show_news_event(title: String, description: String):
+	var dialog = AcceptDialog.new()
+	dialog.title = "📰 " + title
+	dialog.dialog_text = description
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+
+# =====================================
+#  SISTEMA DE ESTATÍSTICAS
+# =====================================
+func get_game_statistics() -> Dictionary:
+	var agent = player_manager.get_player_agent() if player_manager else null
+	
+	return {
+		"months_played": (Globals.current_year - 1973) * 12 + Globals.current_month,
+		"current_position": agent.current_position if agent else "N/A",
+		"total_support": agent.get_total_support() if agent else 0,
+		"major_events": agent.major_events.size() if agent else 0,
+		"countries_affected": Globals.country_data.size(),
+		"phase": player_manager.get_current_phase() if player_manager else 1,
+		"achievements": unlocked_achievements.size()
+	}
+
+func show_statistics():
+	var stats = get_game_statistics()
+	var dialog = AcceptDialog.new()
+	dialog.title = "📊 Estatísticas do Jogo"
+	
+	var text = "=== ESTATÍSTICAS ===\n\n"
+	text += "🗓️ Meses Jogados: %d\n" % stats["months_played"]
+	text += "🎖️ Posição Atual: %s\n" % stats["current_position"]
+	text += "👥 Apoio Total: %d/700\n" % stats["total_support"]
+	text += "📰 Eventos Importantes: %d\n" % stats["major_events"]
+	text += "🌍 Países no Jogo: %d\n" % stats["countries_affected"]
+	text += "🎮 Fase Atual: %d\n" % stats["phase"]
+	text += "🏆 Conquistas: %d\n" % stats["achievements"]
+	
+	dialog.dialog_text = text
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+
+# =====================================
+#  MAIN GAME LOOP UPDATE
+# =====================================
+func _process(_delta):
+	if game_started:
+		# Verificar conquistas periodicamente
+		if Engine.get_process_frames() % 300 == 0:  # A cada 5 segundos
+			check_achievements()
+		
+		# Verificar tutoriais
+		if Engine.get_process_frames() % 180 == 0:  # A cada 3 segundos
+			check_tutorial_triggers()
+		
+		# Verificar eventos históricos
+		if Engine.get_process_frames() % 900 == 0:  # A cada 15 segundos
+			trigger_historical_events()
+
+# =====================================
+#  DEBUGGING E DESENVOLVIMENTO
+# =====================================
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings = PackedStringArray()
+	
+	if not player_manager:
+		warnings.append("PlayerManager não encontrado")
+	
+	if not character_creation:
+		warnings.append("CharacterCreation não configurado")
+	
+	return warnings
+
+# Para facilitar o desenvolvimento
+func quick_start_game(country: String = "Argentina", preset: String = "intelectual_democrata"):
+	if OS.is_debug_build():
+		var agent = PlayerAgent.create_preset_character(preset, country)
+		_on_character_created(agent)
+		print("🔧 DEBUG: Jogo iniciado rapidamente com %s" % agent.name)
