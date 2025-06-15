@@ -603,38 +603,33 @@ func save_game() -> Dictionary:
 	return save_data
 
 func load_game(save_data: Dictionary) -> bool:
-	if not save_data.has("version"):
-		print("❌ Arquivo de save inválido")
-		return false
-	
-	try:
-		# Restaurar dados globais
-		var global_data = save_data.get("global_data", {})
-		Globals.current_month = global_data.get("current_month", 1)
-		Globals.current_year = global_data.get("current_year", 1973)
-		Globals.player_country = global_data.get("player_country", "")
-		Globals.country_data = global_data.get("country_data", {})
-		
-		# Restaurar estado do jogo
-		var game_state = save_data.get("game_state", {})
-		time_running = game_state.get("time_running", true)
-		game_started = game_state.get("game_started", false)
-		
-		# Restaurar dados do jogador
-		var player_data = save_data.get("player_data", {})
-		if not player_data.is_empty() and player_manager:
-			player_manager.load_player_data(player_data)
-		
-		# Atualizar UI
-		_update_ui()
-		_update_map_colors()
-		
-		print("📁 Jogo carregado com sucesso")
-		return true
-		
-	except error:
-		print("❌ Erro ao carregar save: ", error)
-		return false
+        if not save_data.has("version"):
+                print("❌ Arquivo de save inválido")
+                return false
+
+        # Restaurar dados globais
+        var global_data = save_data.get("global_data", {})
+        Globals.current_month = global_data.get("current_month", 1)
+        Globals.current_year = global_data.get("current_year", 1973)
+        Globals.player_country = global_data.get("player_country", "")
+        Globals.country_data = global_data.get("country_data", {})
+
+        # Restaurar estado do jogo
+        var game_state = save_data.get("game_state", {})
+        time_running = game_state.get("time_running", true)
+        game_started = game_state.get("game_started", false)
+
+        # Restaurar dados do jogador
+        var player_data = save_data.get("player_data", {})
+        if not player_data.is_empty() and player_manager:
+                player_manager.load_player_data(player_data)
+
+        # Atualizar UI
+        _update_ui()
+        _update_map_colors()
+
+        print("📁 Jogo carregado com sucesso")
+        return true
 
 # =====================================
 #  SISTEMA DE CONQUISTAS/ACHIEVEMENTS
