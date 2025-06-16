@@ -8,3 +8,5 @@ res://scenes/Main.gd
 res://scripts/NotificationSystem.gd
 res://scripts/UIManager.gd
 res://scripts/Svg.gd
+res://scripts/PoliticalActionUI.gd
+res://scripts/Globals.gd

@@ -70,6 +70,8 @@ var info_container: VBoxContainer
 #  INICIALIZAÇÃO
 # =====================================
 func _ready() -> void:
+	# Inicializar o agente político
+	Globals.init_player_agent()
 	_initialize_systems()
 	_setup_ui_references()
 	_setup_timer()

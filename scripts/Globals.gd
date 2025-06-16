@@ -2,7 +2,8 @@
 # Adicionar como Autoload: Project → Autoload → Name: Globals, Path: res://scripts/Globals.gd
 
 extends Node
-
+# Referência à classe PlayerAgent
+var current_player_agent: PlayerAgent
 # =====================================
 #  DADOS CENTRALIZADOS DOS PAÍSES
 # =====================================
@@ -697,3 +698,18 @@ func _ready() -> void:
 	
 	print("Sistema de relações diplomáticas inicializado")
 	print("==============================")
+	# =====================================
+#  SISTEMA DE AGENTE POLÍTICO
+# =====================================
+# =====================================
+#  SISTEMA DE AGENTE POLÍTICO
+# =====================================
+func init_player_agent() -> void:
+	if current_player_agent == null:
+		current_player_agent = PlayerAgent.create_preset("sindicalista_marxista", "Argentina")
+		print("✅ Agente político inicializado: " + current_player_agent.agent_name)
+
+func get_player_agent() -> PlayerAgent:
+	if current_player_agent == null:
+		init_player_agent()
+	return current_player_agent
