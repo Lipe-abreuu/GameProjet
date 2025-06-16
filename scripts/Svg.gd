@@ -319,6 +319,7 @@ func _update_info_container(country_name: String, country_data: Dictionary) -> v
 	action_button.custom_minimum_size = Vector2(200, 40)
 	info_container.add_child(action_button)
 
+<<<<<<< HEAD
 func _print_country_info(country_name: String, country_data: Dictionary) -> void:
 	print("\n🏛️ === %s ===" % country_name.to_upper())
 	print("💰 Dinheiro: $%s" % _format_number(country_data.get("money", 0)))
@@ -326,6 +327,222 @@ func _print_country_info(country_name: String, country_data: Dictionary) -> void
 	print("🏛️ Gov. Power: %d%%" % country_data.get("gov_power", 50))
 	print("🔥 Rebelião: %d%%" % country_data.get("rebel_power", 50))
 	print("================\n")
+=======
+func parse_svg_path(d: String) -> PackedVector2Array:
+	var points: PackedVector2Array = PackedVector2Array()
+	var current_pos: Vector2 = Vector2.ZERO
+	var start_pos: Vector2 = Vector2.ZERO
+	
+	# Remove espaços extras e normaliza
+	d = d.strip_edges().replace("\n", " ").replace("\t", " ")
+	
+	var i: int = 0
+	while i < d.length():
+		# Pula espaços
+		while i < d.length() and d[i] in " ,\t\n":
+			i += 1
+		
+		if i >= d.length():
+			break
+		
+		# Pega o comando
+		var command: String = d[i]
+		i += 1
+		
+		# Pula espaços após comando
+		while i < d.length() and d[i] in " ,\t\n":
+			i += 1
+		
+		var is_absolute: bool = command == command.to_upper()
+		
+		match command.to_upper():
+			"M": # MoveTo
+				var coords = parse_coordinates(d, i, 2)
+				if coords.size() >= 2:
+					if is_absolute:
+						current_pos = Vector2(coords[0], coords[1])
+					else:
+						current_pos += Vector2(coords[0], coords[1])
+					start_pos = current_pos
+					points.append(current_pos)
+					i = coords[2]
+					
+					# MoveTo com múltiplos pontos vira LineTo
+                                        while true:
+                                                var more_coords = parse_coordinates(d, i, 2)
+                                                if more_coords.size() < 2:
+                                                        i = more_coords[more_coords.size() - 1]
+                                                        break
+						if is_absolute:
+							current_pos = Vector2(more_coords[0], more_coords[1])
+						else:
+							current_pos += Vector2(more_coords[0], more_coords[1])
+						points.append(current_pos)
+						i = more_coords[2]
+			
+			"L": # LineTo
+                                while true:
+                                        var coords = parse_coordinates(d, i, 2)
+                                        if coords.size() < 2:
+                                                i = coords[coords.size() - 1]
+                                                break
+					if is_absolute:
+						current_pos = Vector2(coords[0], coords[1])
+					else:
+						current_pos += Vector2(coords[0], coords[1])
+					points.append(current_pos)
+					i = coords[2]
+			
+			"H": # Horizontal LineTo
+                                while true:
+                                        var coords = parse_coordinates(d, i, 1)
+                                        if coords.size() < 1:
+                                                i = coords[coords.size() - 1]
+                                                break
+					if is_absolute:
+						current_pos.x = coords[0]
+					else:
+						current_pos.x += coords[0]
+					points.append(current_pos)
+					i = coords[1]
+			
+			"V": # Vertical LineTo
+                                while true:
+                                        var coords = parse_coordinates(d, i, 1)
+                                        if coords.size() < 1:
+                                                i = coords[coords.size() - 1]
+                                                break
+					if is_absolute:
+						current_pos.y = coords[0]
+					else:
+						current_pos.y += coords[0]
+					points.append(current_pos)
+					i = coords[1]
+			
+			"C": # Cubic Bezier
+                                while true:
+                                        var coords = parse_coordinates(d, i, 6)
+                                        if coords.size() < 6:
+                                                i = coords[coords.size() - 1]
+                                                break
+					
+					# Adiciona alguns pontos intermediários para melhor aproximação
+					var p0 = current_pos
+					var p1 = Vector2(coords[0], coords[1])
+					var p2 = Vector2(coords[2], coords[3])
+					var p3 = Vector2(coords[4], coords[5])
+					
+					if not is_absolute:
+						p1 = p0 + p1
+						p2 = p0 + p2
+						p3 = p0 + p3
+					
+					# Aproxima a curva com vários pontos
+					for t in range(1, 11):
+						var t_norm = float(t) / 10.0
+						var one_minus_t = 1.0 - t_norm
+						
+						var point = p0 * pow(one_minus_t, 3) + \
+								   p1 * 3 * pow(one_minus_t, 2) * t_norm + \
+								   p2 * 3 * one_minus_t * pow(t_norm, 2) + \
+								   p3 * pow(t_norm, 3)
+						
+						points.append(point)
+					
+					current_pos = p3
+					i = coords[6]
+			
+			"S": # Smooth Cubic Bezier
+                                while true:
+                                        var coords = parse_coordinates(d, i, 4)
+                                        if coords.size() < 4:
+                                                i = coords[coords.size() - 1]
+                                                break
+					
+					# Aproxima com pontos intermediários
+					var p0 = current_pos
+					var p2 = Vector2(coords[0], coords[1])
+					var p3 = Vector2(coords[2], coords[3])
+					
+					if not is_absolute:
+						p2 = p0 + p2
+						p3 = p0 + p3
+					
+					# Adiciona pontos intermediários
+					for j in range(1, 6):
+						var t = float(j) / 5.0
+						var point = p0.lerp(p3, t)
+						points.append(point)
+					
+					current_pos = p3
+					i = coords[4]
+			
+			"Q": # Quadratic Bezier
+                                while true:
+                                        var coords = parse_coordinates(d, i, 4)
+                                        if coords.size() < 4:
+                                                i = coords[coords.size() - 1]
+                                                break
+					
+					# Aproxima a curva quadrática
+					var p0 = current_pos
+					var p1 = Vector2(coords[0], coords[1])
+					var p2 = Vector2(coords[2], coords[3])
+					
+					if not is_absolute:
+						p1 = p0 + p1
+						p2 = p0 + p2
+					
+					# Adiciona pontos intermediários
+					for j in range(1, 6):
+						var t = float(j) / 5.0
+						var one_minus_t = 1.0 - t
+						
+						var point = p0 * pow(one_minus_t, 2) + \
+								   p1 * 2 * one_minus_t * t + \
+								   p2 * pow(t, 2)
+						
+						points.append(point)
+					
+					current_pos = p2
+					i = coords[4]
+			
+			"T": # Smooth Quadratic Bezier
+                                while true:
+                                        var coords = parse_coordinates(d, i, 2)
+                                        if coords.size() < 2:
+                                                i = coords[coords.size() - 1]
+                                                break
+					if is_absolute:
+						current_pos = Vector2(coords[0], coords[1])
+					else:
+						current_pos += Vector2(coords[0], coords[1])
+					points.append(current_pos)
+					i = coords[2]
+			
+			"A": # Arc (simplificado - apenas pega o ponto final)
+                                while true:
+                                        var coords = parse_coordinates(d, i, 7)
+                                        if coords.size() < 7:
+                                                i = coords[coords.size() - 1]
+                                                break
+					if is_absolute:
+						current_pos = Vector2(coords[5], coords[6])
+					else:
+						current_pos += Vector2(coords[5], coords[6])
+					points.append(current_pos)
+					i = coords[7]
+			
+			"Z", "z": # ClosePath
+				if points.size() > 0 and current_pos.distance_to(start_pos) > 0.1:
+					points.append(start_pos)
+				current_pos = start_pos
+			
+			_:
+				push_warning("Comando SVG não reconhecido: " + command)
+	
+	return points
+>>>>>>> b7036897f6f09c269ae71b231fed92a9a47a0556
 
 # =====================================
 #  AÇÕES DO JOGADOR
