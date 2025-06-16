@@ -1,24 +1,37 @@
 # =====================================
-#  PLAYERAGENT.GD - VERSÃO SIMPLES FUNCIONAL
-#  Sistema de agente político sem erros
+#  PLAYERAGENT.GD - VERSÃO SIMPLES FUNCIONAL
+#  Sistema de agente político sem erros
 # =====================================
 class_name PlayerAgent
 extends Resource
 
 # =====================================
-#  SINAIS
+#  SINAIS
 # =====================================
 signal support_changed(group: String, old_value: int, new_value: int)
 signal position_advanced(old_position: String, new_position: String)
 
 # =====================================
-#  CONSTANTES
+#  ENUM (NOVA ADIÇÃO!)
+# =====================================
+enum Position {
+	CITIZEN = 0,
+	ACTIVIST = 1,
+	LOCAL_LEADER = 2,
+	DEPUTY = 3,
+	SENATOR = 4,
+	MINISTER = 5,
+	PRESIDENT = 6
+}
+
+# =====================================
+#  CONSTANTES
 # =====================================
 const POSITION_NAMES = ["Cidadão", "Ativista", "Líder Local", "Deputado", "Senador", "Ministro", "Presidente"]
 const SUPPORT_REQUIREMENTS = [0, 50, 100, 150, 200, 250, 300]
 
 # =====================================
-#  DADOS BÁSICOS
+#  DADOS BÁSICOS
 # =====================================
 @export var agent_name: String = ""
 @export var age: int = 30
@@ -26,8 +39,8 @@ const SUPPORT_REQUIREMENTS = [0, 50, 100, 150, 200, 250, 300]
 @export var background: String = ""
 @export var ideology: String = ""
 
-# Status político (usando int em vez de enum)
-@export var current_position: int = 0  # 0=Cidadão, 1=Ativista, ..., 6=Presidente
+# Status político (agora usando o ENUM Position)
+@export var current_position: Position = Position.CITIZEN # Usando o enum agora
 @export var months_in_position: float = 0.0
 @export var political_experience: int = 0
 @export var in_power: bool = false
@@ -62,28 +75,29 @@ const SUPPORT_REQUIREMENTS = [0, 50, 100, 150, 200, 250, 300]
 @export var major_events: Array[String] = []
 
 # =====================================
-#  PROPRIEDADES COMPUTADAS
+#  PROPRIEDADES COMPUTADAS
 # =====================================
 var total_support: int:
 	get:
-		return (military_support + business_support + intellectual_support + 
+		return (military_support + business_support + intellectual_support +
 				worker_support + student_support + church_support + peasant_support)
 
 var position_name: String:
 	get:
+		# Garante que o índice é válido para POSITION_NAMES
 		if current_position >= 0 and current_position < POSITION_NAMES.size():
 			return POSITION_NAMES[current_position]
 		return "Desconhecido"
 
 var can_advance: bool:
 	get:
-		var next_pos = current_position + 1
-		if next_pos >= SUPPORT_REQUIREMENTS.size():
-			return false
-		return total_support >= SUPPORT_REQUIREMENTS[next_pos]
+		var next_pos_index = current_position + 1
+		if next_pos_index >= SUPPORT_REQUIREMENTS.size():
+			return false # Já está na última posição ou índice inválido
+		return total_support >= SUPPORT_REQUIREMENTS[next_pos_index]
 
 # =====================================
-#  INICIALIZAÇÃO
+#  INICIALIZAÇÃO
 # =====================================
 func _init(p_name: String = "", p_country: String = "", p_background: String = "", p_ideology: String = ""):
 	if not p_name.is_empty():
@@ -98,7 +112,7 @@ func _init(p_name: String = "", p_country: String = "", p_background: String = "
 		apply_ideology_modifiers()
 
 # =====================================
-#  MODIFICADORES
+#  MODIFICADORES
 # =====================================
 func apply_background_modifiers() -> void:
 	match background:
@@ -146,7 +160,7 @@ func apply_background_modifiers() -> void:
 
 func apply_ideology_modifiers() -> void:
 	match ideology:
-		"DSN":  # Doutrina de Segurança Nacional
+		"DSN": # Doutrina de Segurança Nacional
 			military_knowledge += 20
 			usa_influence += 15
 			military_support += 20
@@ -212,7 +226,7 @@ func _clamp_all_values() -> void:
 	condor_threat_level = clamp(condor_threat_level, 0, 100)
 
 # =====================================
-#  PROGRESSÃO POLÍTICA
+#  PROGRESSÃO POLÍTICA
 # =====================================
 func attempt_advancement() -> bool:
 	if not can_advance:
@@ -222,11 +236,11 @@ func attempt_advancement() -> bool:
 		return false
 		
 	var old_position_name = position_name
-	current_position += 1
+	current_position = Position.PRESIDENT
 	months_in_position = 0.0
 	political_experience += 10
 	
-	if current_position == 6:  # Presidente
+	if current_position == Position.PRESIDENT: # Usando o enum agora
 		in_power = true
 		
 	var event_text = "Avançou de %s para %s" % [old_position_name, position_name]
@@ -236,7 +250,7 @@ func attempt_advancement() -> bool:
 	return true
 
 # =====================================
-#  AÇÕES POLÍTICAS
+#  AÇÕES POLÍTICAS
 # =====================================
 func get_available_actions() -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
@@ -266,7 +280,7 @@ func get_available_actions() -> Array[Dictionary]:
 	})
 	
 	# Ações por posição
-	if current_position <= 1:  # Cidadão ou Ativista
+	if current_position <= Position.ACTIVIST: # Cidadão ou Ativista
 		actions.append({
 			"id": "organize_rally",
 			"name": "Organizar Manifestação",
@@ -277,7 +291,7 @@ func get_available_actions() -> Array[Dictionary]:
 			"available": connections >= 10 and wealth >= 5
 		})
 	
-	if current_position >= 2:  # Líder Local ou superior
+	if current_position >= Position.LOCAL_LEADER: # Líder Local ou superior
 		actions.append({
 			"id": "propose_bill",
 			"name": "Propor Legislação",
@@ -288,7 +302,7 @@ func get_available_actions() -> Array[Dictionary]:
 			"available": intelligence >= 10
 		})
 	
-	if current_position >= 4:  # Senador ou Ministro
+	if current_position >= Position.SENATOR: # Senador ou Ministro
 		actions.append({
 			"id": "negotiate_coalition",
 			"name": "Negociar Coalizão",
@@ -378,7 +392,7 @@ func execute_action(action: Dictionary) -> Dictionary:
 					
 				"instant_presidency":
 					if effect_value:
-						current_position = 6  # Presidente
+						current_position = Position.PRESIDENT # Usando o enum agora
 						in_power = true
 						result["events"].append("Golpe militar bem-sucedido!")
 				
@@ -407,7 +421,7 @@ func execute_action(action: Dictionary) -> Dictionary:
 	return result
 
 # =====================================
-#  PASSAGEM DE TEMPO
+#  PASSAGEM DE TEMPO
 # =====================================
 func advance_month() -> void:
 	months_in_position += 1.0
@@ -417,7 +431,7 @@ func advance_month() -> void:
 		political_experience += 1
 		
 	# Eventos baseados em tempo
-	if months_in_position >= 24.0 and current_position < 6:
+	if months_in_position >= 24.0 and current_position < Position.PRESIDENT: # Usando o enum
 		_handle_stagnation()
 		
 	# Envelhecimento
@@ -442,7 +456,7 @@ func _handle_stagnation() -> void:
 		set(support_attr, new_value)
 
 func _handle_condor_risk() -> void:
-	if randf() < 0.05:  # 5% chance
+	if randf() < 0.05: # 5% chance
 		var risk_roll = randf()
 		
 		if risk_roll < 0.3:
@@ -456,7 +470,7 @@ func _handle_condor_risk() -> void:
 			major_events.append("Escapou de operação de segurança")
 
 # =====================================
-#  MÉTODOS DE CONVENIÊNCIA
+#  MÉTODOS DE CONVENIÊNCIA
 # =====================================
 func get_status_summary() -> String:
 	var summary = "=== %s ===\n" % agent_name.to_upper()
@@ -467,14 +481,14 @@ func get_status_summary() -> String:
 	summary += "Experiência: %d pontos\n" % political_experience
 	
 	if can_advance:
-		var next_pos = current_position + 1
-		var required = SUPPORT_REQUIREMENTS[next_pos] if next_pos < SUPPORT_REQUIREMENTS.size() else 999
+		var next_pos_index = current_position + 1
+		var required = SUPPORT_REQUIREMENTS[next_pos_index] if next_pos_index < SUPPORT_REQUIREMENTS.size() else 999
 		summary += "Precisa de +%d apoio para avançar\n" % (required - total_support)
 		
 	return summary
 
 # =====================================
-#  SERIALIZAÇÃO
+#  SERIALIZAÇÃO
 # =====================================
 func serialize() -> Dictionary:
 	return {
@@ -514,7 +528,7 @@ func deserialize(data: Dictionary) -> void:
 	country = data.get("country", "")
 	background = data.get("background", "")
 	ideology = data.get("ideology", "")
-	current_position = data.get("current_position", 0)
+	current_position = data.get("current_position", Position.CITIZEN) # Usando o enum no deserialize
 	months_in_position = data.get("months_in_position", 0.0)
 	political_experience = data.get("political_experience", 0)
 	in_power = data.get("in_power", false)
@@ -539,7 +553,7 @@ func deserialize(data: Dictionary) -> void:
 	major_events = data.get("major_events", [])
 
 # =====================================
-#  FACTORY METHODS
+#  FACTORY METHODS
 # =====================================
 static func create_preset(preset_name: String, country_name: String) -> PlayerAgent:
 	var agent = PlayerAgent.new()

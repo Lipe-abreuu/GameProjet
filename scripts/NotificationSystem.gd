@@ -2,7 +2,7 @@
 #  NotificationSystem.gd - COMPONENTE DE NOTIFICAÇÕES
 #  Gerencia a criação, exibição e ciclo de vida das notificações.
 # =====================================
-extends Node
+extends Control
 
 # =====================================
 #  ENUM E CONFIGURAÇÕES
@@ -90,7 +90,7 @@ func _apply_positioning_and_style() -> void:
 # =====================================
 #  API PÚBLICA
 # =====================================
-func show_notification(title: String, message: String, type: NotificationType = NotificationType.INFO, duration: float = 0.0) -> void:
+func show_notification(title: String, message: String, type: int, _duration: float = 3.0): # Adicionado '_' ao 'duration'
 	if not notification_box:
 		print("❌ Erro: NotificationBox não está disponível!")
 		return
