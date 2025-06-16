@@ -5,3 +5,5 @@ res://scripts/main.gd
 res://scripts/PlayerAgent.gd
 res://scripts/PlayerManager.gd
 res://scenes/Main.gd
+res://scripts/NotificationSystem.gd
+res://scripts/UIManager.gd
