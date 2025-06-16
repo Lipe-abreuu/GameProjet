@@ -116,82 +116,100 @@ position = Vector2(214.063, 235.424)
 
 [node name="TopBar" type="Panel" parent="Main/CanvasLayer"]
 custom_minimum_size = Vector2(120, 200)
-anchors_preset = -1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.21007
-anchor_bottom = 0.5
-offset_left = -1151.0
-offset_top = -324.0
-offset_right = -1031.0
-offset_bottom = -124.0
-grow_horizontal = 0
-grow_vertical = 2
+offset_right = 120.0
+offset_bottom = 200.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 metadata/_edit_use_anchors_ = true
 
+[node name="NotificationBox" type="VBoxContainer" parent="Main/CanvasLayer/TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 8.258
+anchor_top = 0.6
+anchor_right = 9.042
+anchor_bottom = 0.6
+offset_left = 0.039978
+offset_top = -13.0
+offset_right = -0.0400391
+offset_bottom = 8.99999
+
 [node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/TopBar"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.42
+anchor_right = 0.981
+anchor_bottom = 0.645
+offset_left = -12.0
+offset_top = 495.0
+offset_right = -77.72
+offset_bottom = 490.0
 
-[node name="DateLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Leftspacer" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="Spacer1" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="PauseButton" type="Button" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="MoneyLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Leftspacer2" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="Spacer2" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
-layout_mode = 2
-
-[node name="StabilityLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="NextButton" type="Button" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
 [node name="BottomBar" type="Panel" parent="Main/CanvasLayer"]
 custom_minimum_size = Vector2(20, 80)
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
+anchors_preset = -1
+anchor_left = 0.004
+anchor_top = 0.894
+anchor_right = 0.74566
 anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = -75.0
-offset_right = 1.0
-offset_bottom = 5.0
+offset_left = -4.608
+offset_top = -0.312012
+offset_bottom = 11.0
 grow_horizontal = 2
 grow_vertical = 0
 metadata/_edit_use_anchors_ = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/BottomBar"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="Main/CanvasLayer/BottomBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.837
+anchor_top = 0.1
+anchor_right = 0.837
+anchor_bottom = 0.1
+offset_left = -638.537
+offset_top = -587.0
+offset_right = -598.537
+offset_bottom = -547.0
 
-[node name="Leftspacer" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="DateLabel" type="Label" parent="Main/CanvasLayer/BottomBar/HBoxContainer2"]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="Spacer1" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer2"]
 layout_mode = 2
 
-[node name="PauseButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="MoneyLabel" type="Label" parent="Main/CanvasLayer/BottomBar/HBoxContainer2"]
 layout_mode = 2
 
-[node name="Leftspacer2" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="Spacer2" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer2"]
 layout_mode = 2
 
-[node name="NextButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="StabilityLabel" type="Label" parent="Main/CanvasLayer/BottomBar/HBoxContainer2"]
 layout_mode = 2
 
 [node name="Sidepanel" type="Panel" parent="Main/CanvasLayer"]
 anchors_preset = -1
 anchor_left = 0.846
-anchor_top = 0.302469
-anchor_right = 1.0
+anchor_top = 0.443
+anchor_right = 0.967
 anchor_bottom = 0.822
-offset_left = 0.407959
-offset_top = 12.0
-offset_right = 4.0
-offset_bottom = 20.344
+offset_left = -23.592
+offset_top = -39.064
+offset_right = 18.0159
+offset_bottom = 60.3441
 metadata/_edit_use_anchors_ = true
 
 [node name="InfoContainer" type="VBoxContainer" parent="Main/CanvasLayer/Sidepanel"]
@@ -205,9 +223,9 @@ autostart = true
 
 [node name="Gameover" type="CanvasLayer" parent="Main"]
 layer = 10
+visible = false
 
 [node name="GameOverScreen" type="Control" parent="Main/Gameover"]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
