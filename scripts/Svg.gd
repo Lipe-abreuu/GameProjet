@@ -131,10 +131,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[2]
 					
 					# MoveTo com múltiplos pontos vira LineTo
-					while true:
-						var more_coords = parse_coordinates(d, i, 2)
-						if more_coords.size() < 2:
-							break
+                                        while true:
+                                                var more_coords = parse_coordinates(d, i, 2)
+                                                if more_coords.size() < 2:
+                                                        i = more_coords[more_coords.size() - 1]
+                                                        break
 						if is_absolute:
 							current_pos = Vector2(more_coords[0], more_coords[1])
 						else:
@@ -143,10 +144,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 						i = more_coords[2]
 			
 			"L": # LineTo
-				while true:
-					var coords = parse_coordinates(d, i, 2)
-					if coords.size() < 2:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 2)
+                                        if coords.size() < 2:
+                                                i = coords[coords.size() - 1]
+                                                break
 					if is_absolute:
 						current_pos = Vector2(coords[0], coords[1])
 					else:
@@ -155,10 +157,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[2]
 			
 			"H": # Horizontal LineTo
-				while true:
-					var coords = parse_coordinates(d, i, 1)
-					if coords.size() < 1:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 1)
+                                        if coords.size() < 1:
+                                                i = coords[coords.size() - 1]
+                                                break
 					if is_absolute:
 						current_pos.x = coords[0]
 					else:
@@ -167,10 +170,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[1]
 			
 			"V": # Vertical LineTo
-				while true:
-					var coords = parse_coordinates(d, i, 1)
-					if coords.size() < 1:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 1)
+                                        if coords.size() < 1:
+                                                i = coords[coords.size() - 1]
+                                                break
 					if is_absolute:
 						current_pos.y = coords[0]
 					else:
@@ -179,10 +183,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[1]
 			
 			"C": # Cubic Bezier
-				while true:
-					var coords = parse_coordinates(d, i, 6)
-					if coords.size() < 6:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 6)
+                                        if coords.size() < 6:
+                                                i = coords[coords.size() - 1]
+                                                break
 					
 					# Adiciona alguns pontos intermediários para melhor aproximação
 					var p0 = current_pos
@@ -211,10 +216,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[6]
 			
 			"S": # Smooth Cubic Bezier
-				while true:
-					var coords = parse_coordinates(d, i, 4)
-					if coords.size() < 4:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 4)
+                                        if coords.size() < 4:
+                                                i = coords[coords.size() - 1]
+                                                break
 					
 					# Aproxima com pontos intermediários
 					var p0 = current_pos
@@ -235,10 +241,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[4]
 			
 			"Q": # Quadratic Bezier
-				while true:
-					var coords = parse_coordinates(d, i, 4)
-					if coords.size() < 4:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 4)
+                                        if coords.size() < 4:
+                                                i = coords[coords.size() - 1]
+                                                break
 					
 					# Aproxima a curva quadrática
 					var p0 = current_pos
@@ -264,10 +271,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[4]
 			
 			"T": # Smooth Quadratic Bezier
-				while true:
-					var coords = parse_coordinates(d, i, 2)
-					if coords.size() < 2:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 2)
+                                        if coords.size() < 2:
+                                                i = coords[coords.size() - 1]
+                                                break
 					if is_absolute:
 						current_pos = Vector2(coords[0], coords[1])
 					else:
@@ -276,10 +284,11 @@ func parse_svg_path(d: String) -> PackedVector2Array:
 					i = coords[2]
 			
 			"A": # Arc (simplificado - apenas pega o ponto final)
-				while true:
-					var coords = parse_coordinates(d, i, 7)
-					if coords.size() < 7:
-						break
+                                while true:
+                                        var coords = parse_coordinates(d, i, 7)
+                                        if coords.size() < 7:
+                                                i = coords[coords.size() - 1]
+                                                break
 					if is_absolute:
 						current_pos = Vector2(coords[5], coords[6])
 					else:
