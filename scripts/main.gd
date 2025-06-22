@@ -70,6 +70,10 @@ var last_cache_update: int = 0
 #  INICIALIZAÇÃO
 # =====================================
 func _ready() -> void:
+	# Adicione esta linha para depuração:
+	print("DEBUG: Valor inicial de current_phase vindo do Inspetor: ", GamePhase.find_key(current_phase))
+
+	# O resto da sua função _ready continua abaixo...
 	print("🎮 Iniciando sistema principal...")
 	_initialize_globals()
 	_initialize_systems()
@@ -233,7 +237,7 @@ func _start_game_loop() -> void:
 			NotificationSystem.NotificationType.SUCCESS
 		)
 	
-	print("🎮 Jogo iniciado - Fase: %s" % GamePhase.keys()[current_phase])
+	print("🎮 Jogo iniciado - Fase: %s" % GamePhase.find_key(current_phase))
 
 # =====================================
 #  LOOP PRINCIPAL DO JOGO
@@ -621,6 +625,8 @@ func _show_no_country_data(country_name: String) -> void:
 			NotificationSystem.NotificationType.ERROR
 		)
 
+# Em main.gd, verifique se sua função está assim:
+
 func _build_country_info_UI(country_name: String, country_data: Dictionary) -> void:
 	# Título
 	var title = Label.new()
@@ -635,9 +641,10 @@ func _build_country_info_UI(country_name: String, country_data: Dictionary) -> v
 		var indicator = Label.new()
 		match current_phase:
 			GamePhase.POLITICAL_AGENT:
+				# AQUI ESTÁ A CORREÇÃO: Usamos a função get_position_name()
 				indicator.text = "👤 %s (%s)" % [
-					player_agent.agent_name if player_agent else "N/A", 
-					player_agent.position_name if player_agent else "N/A"
+					player_agent.agent_name if player_agent else "N/A",
+					player_agent.get_position_name() if player_agent else "N/A"
 				]
 			GamePhase.NATIONAL_LEADER:
 				indicator.text = "👑 SEU PAÍS"
@@ -645,7 +652,6 @@ func _build_country_info_UI(country_name: String, country_data: Dictionary) -> v
 		indicator.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		info_container.add_child(indicator)
 	
-	# Dados principais
 	var data_items = [
 		"💰 Dinheiro: $%s" % _format_number(country_data.get("money", 0)),
 		"⚖️ Estabilidade: %d%%" % country_data.get("stability", 50),
@@ -709,8 +715,8 @@ func _add_action_buttons(country_name: String) -> void:
 		match current_phase:
 			GamePhase.POLITICAL_AGENT:
 				button.text = "🎯 Ações Políticas"
-				if player_agent:
-					button.pressed.connect(_on_political_action_button_pressed)
+				# AQUI ESTÁ A CONEXÃO IMPORTANTE:
+				button.pressed.connect(_on_political_action_button_pressed)
 			GamePhase.NATIONAL_LEADER:
 				button.text = "👑 Governar"
 				button.pressed.connect(_govern_country.bind(country_name))
@@ -724,28 +730,89 @@ func _add_action_buttons(country_name: String) -> void:
 #  AÇÕES POLÍTICAS
 # =====================================
 func _on_political_action_button_pressed() -> void:
-	print("🎮 Botão de ação política pressionado!")
+	print("Botão 'Ações Políticas' pressionado. Mostrando opções...")
+
+	if not player_agent or not info_container:
+		return
+
+	# Limpa o painel para as novas opções
+	for child in info_container.get_children():
+		child.queue_free()
+		
+	var actions = player_agent.get_available_actions()
 	
-	if current_phase != GamePhase.POLITICAL_AGENT:
-		if notification_system:
-			notification_system.show_notification(
-				"🚫 Erro de Fase",
-				"Ações políticas apenas disponíveis na fase de agente político.",
-				NotificationSystem.NotificationType.WARNING
-			)
+	if actions.is_empty():
+		var label = Label.new()
+		label.text = "Nenhuma ação disponível no momento."
+		info_container.add_child(label)
 		return
 		
-	if not player_agent:
-		if notification_system:
-			notification_system.show_notification(
-				"🚫 Erro de Sistema",
-				"Agente político não inicializado corretamente.",
-				NotificationSystem.NotificationType.ERROR
-			)
-		return
-	
-	_show_political_actions()
+	# Adiciona um título para a lista de ações
+	var title = Label.new()
+	title.text = "AÇÕES DISPONÍVEIS"
+	info_container.add_child(title)
 
+	# Cria um botão para cada ação disponível
+	for action in actions:
+		var action_button = Button.new()
+		action_button.text = "%s (Custo: %d)" % [action.name, action.cost]
+		
+		# Conecta o clique deste novo botão à função que EXECUTA a ação
+		action_button.pressed.connect(_on_dynamic_action_pressed.bind(action))
+		
+		info_container.add_child(action_button)
+	print("Botão 'Ações Políticas' pressionado. Mostrando opções...")
+
+	if not player_agent or not info_container:
+		return
+
+	# Limpa o painel lateral para mostrar as novas opções
+	for child in info_container.get_children():
+		child.queue_free()
+		
+	var actions = player_agent.get_available_actions()
+	
+	if actions.is_empty():
+		var label = Label.new()
+		label.text = "Nenhuma ação disponível no momento."
+		info_container.add_child(label)
+		return
+		
+	# Adiciona um título para a lista de ações
+	var title = Label.new()
+	title.text = "AÇÕES DISPONÍVEIS"
+	info_container.add_child(title)
+
+	# Cria um botão para cada ação disponível
+	for action in actions:
+		var action_button = Button.new()
+		action_button.text = "%s (Custo: %d)" % [action.name, action.cost]
+		action_button.pressed.connect(_on_dynamic_action_pressed.bind(action))
+		info_container.add_child(action_button)
+		
+	_show_political_actions()
+func _on_dynamic_action_pressed(action_to_execute: Dictionary) -> void:
+	if not player_agent:
+		return
+
+	var result = player_agent.execute_action(action_to_execute)
+
+	var notification_type = NotificationSystem.NotificationType.SUCCESS if result.success else NotificationSystem.NotificationType.ERROR
+	if notification_system:
+		notification_system.show_notification(
+			"Resultado: %s" % action_to_execute.name,
+			result.message, # A mensagem de sucesso ou falha vem direto do PlayerAgent
+			notification_type
+		)
+
+	await get_tree().process_frame
+
+	_update_all_ui()
+	
+	show_country_info(player_agent.country)
+	
+	# Mostra novamente as informações do país para o jogador ver o impacto
+	show_country_info(player_agent.country)
 func _show_political_actions() -> void:
 	var agent_actions = []
 	if player_agent:
@@ -1115,3 +1182,15 @@ func _on_quit_to_main_menu() -> void:
 	# Mude o caminho abaixo se sua cena de menu principal tiver outro nome/caminho.
 	# Se você ainda não tem um menu principal, esta linha dará erro, o que é normal.
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+func _on_area_2d_input_event(viewport, event, shape_idx):
+	# 1. Verifica se o evento foi um clique do MOUSE (e não apenas o mouse passando por cima)
+	# 2. Verifica se foi o BOTÃO ESQUERDO
+	# 3. Verifica se o botão foi PRESSIONADO (e não solto)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		
+		# Se todas as condições forem verdadeiras, chama a função para mostrar as infos do Chile
+		show_country_info("Chile")
+	pass # Replace with function body.
+	

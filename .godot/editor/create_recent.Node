@@ -1,3 +1,5 @@
+CollisionPolygon2D
+Area2D
 PanelContainer
 Button
 VBoxContainer
@@ -10,5 +12,3 @@ Label
 CenterContainer
 ColorRect
 Node2D
-Timer
-Sprite2D
