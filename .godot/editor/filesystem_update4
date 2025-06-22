@@ -1,12 +1,8 @@
 res://scenes/main.tscn
-res://scenes/main2.tscn
-res://scripts/CharacterCreation.gd
-res://scripts/main.gd
+res://data/eventos.json
+res://scripts/Eventregistry.gd
+res://scripts/EventSystem.gd
 res://scripts/PlayerAgent.gd
-res://scripts/PlayerManager.gd
-res://scenes/Main.gd
-res://scripts/NotificationSystem.gd
-res://scripts/UIManager.gd
-res://scripts/Svg.gd
-res://scripts/PoliticalActionUI.gd
+res://scripts/TurnManager.gd
 res://scripts/Globals.gd
+res://scripts/main.gd

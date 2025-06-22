@@ -1,63 +1,56 @@
 # =====================================
-#  MAIN.GD - VERSÃO ROBUSTA SÊNIOR
-#  Arquitetura limpa com sistema de notificações e UI Manager integrados
+#  MAIN.GD - VERSÃO COMPLETA PROFISSIONAL
+#  Arquitetura limpa com todas as funções implementadas
 # =====================================
 extends Node
 
-# Carregar os scripts dos componentes
-# NOTA: Removido 'const UIManager = preload("res://scripts/UIManager.gd")'
-# porque Godot já o registra como classe global (SHADOWED_GLOBAL_IDENTIFIER)
-# REMOVIDO: const PlayerAgent = preload("res://scripts/PlayerAgent.gd") # Não é mais necessário devido a class_name
-
-const NotificationSystem = preload("res://scripts/NotificationSystem.gd") # Certifique-se que este preload existe!
+# =====================================
+#  PRELOADS E IMPORTS
+# =====================================
+const NotificationSystem = preload("res://scripts/NotificationSystem.gd")
 
 # =====================================
-#  CONSTANTES E CONFIGURAÇÕES
+#  CONSTANTES E CONFIGURAÇÕES
 # =====================================
 const MONTH_NAMES: Array[String] = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 const AUTO_SAVE_INTERVAL: float = 30.0
 const DEBUG_MODE: bool = true
 
 # =====================================
-#  ENUMS
+#  ENUMS
 # =====================================
 enum GamePhase {
 	POLITICAL_AGENT = 1,
 	NATIONAL_LEADER = 2
 }
 
-# NotificationType foi movido para NotificationSystem.gd, mas mantido aqui se precisar como fallback
-# enum NotificationType {
-# 	INFO,
-# 	WARNING,
-# 	SUCCESS,
-# 	ERROR
-# }
-
 # =====================================
-#  SINAIS
+#  SINAIS
 # =====================================
 signal game_phase_changed(old_phase: GamePhase, new_phase: GamePhase)
 signal month_advanced(month: int, year: int)
 signal agent_status_changed()
+signal condor_event_triggered(event_data: Dictionary)
+signal military_opportunity_offered(opportunity: Dictionary)
 
 # =====================================
-#  ESTADO DO JOGO
+#  ESTADO DO JOGO
 # =====================================
 @export var time_running: bool = true
 @export var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
 @export var auto_save_enabled: bool = true
 
 # =====================================
-#  COMPONENTES PRINCIPAIS
+#  COMPONENTES PRINCIPAIS
 # =====================================
 var player_agent: PlayerAgent
 var notification_system: NotificationSystem
 var ui_manager: UIManager
 var timer: Timer
+var auto_save_timer: Timer
 
 # =====================================
-#  REFERÊNCIAS DA UI
+#  REFERÊNCIAS DA UI
 # =====================================
 var date_label: Label
 var money_label: Label
@@ -67,63 +60,85 @@ var next_button: Button
 var info_container: VBoxContainer
 
 # =====================================
-#  INICIALIZAÇÃO
+#  CACHE DE DADOS
+# =====================================
+var cached_country_data: Dictionary = {}
+var last_cache_update: int = 0
+
+# =====================================
+#  INICIALIZAÇÃO
 # =====================================
 func _ready() -> void:
-	# Inicializar o agente político
-	Globals.init_player_agent()
+	print("🎮 Iniciando sistema principal...")
+	_initialize_globals()
 	_initialize_systems()
 	_setup_ui_references()
-	_setup_timer()
+	_setup_timers()
 	_setup_input_handling()
 	_create_default_agent()
 	_start_game_loop()
 
+func _initialize_globals() -> void:
+	# Inicializar o sistema global
+	if Globals.has_method("init_player_agent"):
+		Globals.init_player_agent()
+	else:
+		push_error("Globals.init_player_agent() não encontrado!")
+
 func _initialize_systems() -> void:
+	# Sistema de notificações
 	notification_system = NotificationSystem.new()
+	notification_system.name = "NotificationSystem"
 	add_child(notification_system)
 	
-	# UIManager agora é acessado diretamente pelo nome da classe global
+	# UI Manager
 	ui_manager = UIManager.new()
+	ui_manager.name = "UIManager"
 	ui_manager.setup(self)
 	add_child(ui_manager)
 	
-	print("🎮 Sistemas inicializados")
+	print("✅ Sistemas principais inicializados")
 
 func _setup_ui_references() -> void:
 	# Busca os elementos da UI de forma robusta
-	var ui_paths = [
-		["CanvasLayer/TopBar/HBoxContainer/DateLabel", "TopBar/HBoxContainer/DateLabel"], # Ordem pode importar, mais específico primeiro
-		["CanvasLayer/TopBar/HBoxContainer/MoneyLabel", "TopBar/HBoxContainer/MoneyLabel"],
-		["CanvasLayer/TopBar/HBoxContainer/StabilityLabel", "TopBar/HBoxContainer/StabilityLabel"],
-		["CanvasLayer/BottomBar/HBoxContainer/PauseButton", "BottomBar/HBoxContainer/PauseButton"],
-		["CanvasLayer/BottomBar/HBoxContainer/NextButton", "BottomBar/HBoxContainer/NextButton"],
-		["CanvasLayer/Sidepanel/InfoContainer", "Sidepanel/InfoContainer"]
-	]
+	var ui_paths = {
+		"date_label": ["CanvasLayer/TopBar/HBoxContainer/DateLabel", "TopBar/HBoxContainer/DateLabel"],
+		"money_label": ["CanvasLayer/TopBar/HBoxContainer/MoneyLabel", "TopBar/HBoxContainer/MoneyLabel"],
+		"stability_label": ["CanvasLayer/TopBar/HBoxContainer/StabilityLabel", "TopBar/HBoxContainer/StabilityLabel"],
+		"pause_button": ["CanvasLayer/BottomBar/HBoxContainer/PauseButton", "BottomBar/HBoxContainer/PauseButton"],
+		"next_button": ["CanvasLayer/BottomBar/HBoxContainer/NextButton", "BottomBar/HBoxContainer/NextButton"],
+		"info_container": ["CanvasLayer/Sidepanel/InfoContainer", "Sidepanel/InfoContainer"]
+	}
 	
-	var references = [
-		"date_label", "money_label", "stability_label",
-		"pause_button", "next_button", "info_container"
-	]
-	
-	for i in range(ui_paths.size()):
+	for ref_name in ui_paths:
 		var found_node = null
-		# Tentar encontrar o nó pelos caminhos alternativos
-		for path in ui_paths[i]:
+		for path in ui_paths[ref_name]:
 			found_node = get_node_or_null(path)
 			if found_node:
 				break
 		
-		set(references[i], found_node)
-		print("UI %s: %s" % [references[i], "✅ Encontrado" if found_node else "❌ Não encontrado"])
+		set(ref_name, found_node)
+		if DEBUG_MODE:
+			print("UI %s: %s" % [ref_name, "✅" if found_node else "❌"])
 
-func _setup_timer() -> void:
+func _setup_timers() -> void:
+	# Timer principal do jogo
 	timer = Timer.new()
 	timer.name = "GameTimer"
 	timer.wait_time = 3.0
 	timer.timeout.connect(_on_timer_timeout)
 	add_child(timer)
 	
+	# Timer de auto-save
+	if auto_save_enabled:
+		auto_save_timer = Timer.new()
+		auto_save_timer.name = "AutoSaveTimer"
+		auto_save_timer.wait_time = AUTO_SAVE_INTERVAL
+		auto_save_timer.timeout.connect(_on_auto_save)
+		add_child(auto_save_timer)
+		auto_save_timer.start()
+	
+	# Configurar botões
 	if pause_button:
 		pause_button.pressed.connect(_on_pause_pressed)
 		pause_button.text = "⏸ Pausar"
@@ -137,21 +152,33 @@ func _setup_input_handling() -> void:
 	set_process_input(true)
 
 func _create_default_agent() -> void:
-	print("DEBUG: Criando PlayerAgent padrão...")
-	# PlayerAgent agora é reconhecido globalmente devido a class_name
-	player_agent = PlayerAgent.create_preset("intelectual_democrata", "Argentina")
-	
-	if player_agent == null:
-		print("CRITICAL ERROR: PlayerAgent.create_preset retornou null! O PlayerAgent.gd pode ter um erro grave ou não foi carregado.")
+	print("🟣 Criando agente político padrão...")
+
+	player_agent = PlayerAgent.new(
+		"Lautaro Silva",
+		"Socialista Reformista",
+		300,
+		15,
+		"Chile"
+	)
+
+	if not player_agent:
+		push_error("Falha ao criar PlayerAgent!")
 		return
-	if not player_agent is PlayerAgent:
-		print("CRITICAL ERROR: player_agent NÃO É uma instância de PlayerAgent! Tipo atual: %s" % player_agent.get_class())
-		return
-		
-	player_agent.agent_name = "Carlos Rodriguez" # Garante que o nome está definido
+
+	# Conectar sinais do agente (ajustar se necessário)
+	if not player_agent.position_advanced.is_connected(_on_agent_position_advanced):
+		player_agent.position_advanced.connect(_on_agent_position_advanced)
+
+	if not player_agent.support_changed.is_connected(_on_agent_support_changed):
+		player_agent.support_changed.connect(_on_agent_support_changed)
+
+	Globals.player_country = player_agent.country
+	_ensure_country_data_exists()
+
+	print("✅ Agente criado: %s (%s)" % [player_agent.agent_name, player_agent.position_name])
 	
 	# Conectar sinais do agente
-	# Adicionado verificação para evitar erro se signals já estiverem conectados
 	if not player_agent.position_advanced.is_connected(_on_agent_position_advanced):
 		player_agent.position_advanced.connect(_on_agent_position_advanced)
 	if not player_agent.support_changed.is_connected(_on_agent_support_changed):
@@ -161,22 +188,9 @@ func _create_default_agent() -> void:
 	Globals.player_country = player_agent.country
 	_ensure_country_data_exists()
 	
-	print("👤 Agente criado: %s (%s)" % [player_agent.agent_name, player_agent.position_name])
-	print("DEBUG: Atributos do PlayerAgent na criação:")
-	print("  Carisma:", player_agent.charisma)
-	print("  Inteligência:", player_agent.intelligence)
-	print("  Conexões:", player_agent.connections)
-	print("  Apoio Militar:", player_agent.military_support)
-	print("  Apoio Empresarial:", player_agent.business_support)
-	print("  Apoio Intelectual:", player_agent.intellectual_support)
-	print("  Apoio Trabalhadores:", player_agent.worker_support)
-	print("  Apoio Estudantes:", player_agent.student_support)
-	print("  Apoio Igreja:", player_agent.church_support)
-	print("  Apoio Camponeses:", player_agent.peasant_support)
-
+	print("✅ Agente criado: %s (%s)" % [player_agent.get_position_name(), player_agent.get_position_name()])
 
 func _ensure_country_data_exists() -> void:
-	# Garante que os dados do país do jogador existem em Globals
 	if not Globals.country_data.has(player_agent.country):
 		Globals.country_data[player_agent.country] = {
 			"money": 50000,
@@ -191,13 +205,18 @@ func _ensure_country_data_exists() -> void:
 func _start_game_loop() -> void:
 	timer.start()
 	_update_all_ui()
-	# Adicionado verificação antes de chamar show_notification
+	
 	if notification_system:
-		notification_system.show_notification("🎮 Jogo Iniciado", "Sistema carregado com sucesso!", NotificationSystem.NotificationType.SUCCESS)
+		notification_system.show_notification(
+			"🎮 Jogo Iniciado", 
+			"Sistema carregado com sucesso!", 
+			NotificationSystem.NotificationType.SUCCESS
+		)
+	
 	print("🎮 Jogo iniciado - Fase: %s" % GamePhase.keys()[current_phase])
 
 # =====================================
-#  LOOP PRINCIPAL DO JOGO
+#  LOOP PRINCIPAL DO JOGO
 # =====================================
 func _on_timer_timeout() -> void:
 	if time_running:
@@ -209,9 +228,13 @@ func advance_month() -> void:
 	if Globals.current_month > 12:
 		Globals.current_month = 1
 		Globals.current_year += 1
-		# Adicionado verificação antes de chamar show_notification
+		
 		if notification_system:
-			notification_system.show_notification("📅 Novo Ano", "Chegamos a %d!" % Globals.current_year, NotificationSystem.NotificationType.SUCCESS)
+			notification_system.show_notification(
+				"📅 Novo Ano", 
+				"Chegamos a %d!" % Globals.current_year, 
+				NotificationSystem.NotificationType.SUCCESS
+			)
 	
 	# Processar sistemas baseado na fase
 	match current_phase:
@@ -224,13 +247,16 @@ func advance_month() -> void:
 	month_advanced.emit(Globals.current_month, Globals.current_year)
 	_update_all_ui()
 	
-	# Debug
 	if DEBUG_MODE:
-		print("📅 %s %d - Fase %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year, current_phase])
+		print("📅 %s %d - Fase %d" % [
+			MONTH_NAMES[Globals.current_month - 1], 
+			Globals.current_year, 
+			current_phase
+		])
 
 func _process_agent_phase() -> void:
-	if not player_agent: # Adicionado: Verificação para garantir que player_agent não é Nil
-		print("WARNING: player_agent é Nil em _process_agent_phase. Não pode processar fase do agente.")
+	if not player_agent:
+		push_warning("player_agent é null em _process_agent_phase")
 		return
 		
 	# Avançar agente
@@ -244,7 +270,7 @@ func _process_agent_phase() -> void:
 	_process_agent_events()
 
 func _process_leader_phase() -> void:
-	# Processar como líder nacional (sistema existente)
+	# Processar como líder nacional
 	if Globals.has_method("simulate_monthly_changes"):
 		Globals.simulate_monthly_changes()
 	
@@ -252,7 +278,7 @@ func _process_leader_phase() -> void:
 	_process_national_events()
 
 func _process_agent_events() -> void:
-	if not player_agent: # Adicionado: Outra verificação de segurança
+	if not player_agent:
 		return
 		
 	# Simulação de atividade política automática
@@ -267,38 +293,25 @@ func _process_agent_events() -> void:
 		_offer_military_opportunity()
 
 func _simulate_political_activity() -> void:
-	if not player_agent: # Adicionado: Verificação para evitar crash se player_agent for Nil
-		print("ERROR: player_agent é Nil em _simulate_political_activity. Abortando atividade.")
+	if not player_agent:
 		return
 		
-	# É CRUCIAL que player_agent.charisma, intelligence, connections não sejam Nil aqui
 	var activity_chance = (player_agent.charisma + player_agent.intelligence + player_agent.connections) / 300.0
 	
 	if randf() < activity_chance:
 		var support_groups = ["military", "business", "intellectual", "worker", "student", "church", "peasant"]
 		var random_group = support_groups[randi() % support_groups.size()]
-		var support_attr = random_group + "_support" # Ex: "military_support"
+		var support_attr = random_group + "_support"
 		var gain = randi_range(1, 3)
 		
-		print("DEBUG: _simulate_political_activity - Atributo alvo: %s" % support_attr)
-		print("DEBUG: _simulate_political_activity - Ganho: %d" % gain)
-		
 		var old_value = player_agent.get(support_attr)
+		if old_value == null:
+			push_error("Atributo %s não existe em player_agent!" % support_attr)
+			old_value = 0
 		
-		# --- LINHA QUE CAUSA O ERRO ANTERIORMENTE (OU ONDE old_value é usado) ---
-		# Adicionado: Verificação para o valor retornado por get()
-		if old_value == null: # Se .get() retornou Nil, significa que a propriedade não existe ou não foi inicializada.
-			print("CRITICAL ERROR: player_agent.get('%s') retornou Nil! A propriedade não existe ou não foi inicializada corretamente em PlayerAgent." % support_attr)
-			# Podemos tentar atribuir um valor padrão para evitar o crash imediato,
-			# mas a causa raiz ainda seria a inicialização do PlayerAgent.
-			old_value = 0 # Define um fallback para evitar o crash
-		# --- FIM DA VERIFICAÇÃO ---
-
-		var new_value = clamp(old_value + gain, 0, 100) # Linha 244 do seu Main.gd anterior
+		var new_value = clamp(old_value + gain, 0, 100)
 		player_agent.set(support_attr, new_value)
 		
-		# Usando NotificationSystem.NotificationType do script NotificationSystem
-		# Adicionado verificação antes de chamar show_notification
 		if notification_system:
 			notification_system.show_notification(
 				"📈 Atividade Política",
@@ -313,7 +326,7 @@ func _process_national_events() -> void:
 
 func _trigger_random_national_event() -> void:
 	var countries = Globals.country_data.keys()
-	if countries.is_empty(): # Usar is_empty() para verificar se o array está vazio
+	if countries.is_empty():
 		return
 		
 	var random_country = countries[randi() % countries.size()]
@@ -322,7 +335,82 @@ func _trigger_random_national_event() -> void:
 		print("📰 EVENTO: %s em %s" % [event.get("name", "Evento"), random_country])
 
 # =====================================
-#  TRANSIÇÃO ENTRE FASES
+#  EVENTOS ESPECIAIS DO AGENTE
+# =====================================
+func _trigger_condor_event() -> void:
+	"""Evento relacionado à Operação Condor"""
+	if not player_agent:
+		return
+	
+	var event_data = {
+		"type": "condor_warning",
+		"severity": player_agent.condor_threat_level,
+		"message": "Inteligência detectou atividade suspeita. Cuidado com suas ações."
+	}
+	
+	# Possíveis consequências
+	if player_agent.condor_threat_level > 80:
+		var consequences = ["surveillance", "intimidation", "arrest_attempt"]
+		event_data["consequence"] = consequences[randi() % consequences.size()]
+		
+		match event_data["consequence"]:
+			"surveillance":
+				player_agent.connections = max(0, player_agent.connections - 5)
+				event_data["message"] = "Você está sendo vigiado. Contatos reduzidos."
+			"intimidation":
+				player_agent.charisma = max(0, player_agent.charisma - 3)
+				event_data["message"] = "Ameaças recebidas afetaram sua confiança."
+			"arrest_attempt":
+				if player_agent.military_support < 50:
+					player_agent.current_position = PlayerAgent.Position.ACTIVIST
+					event_data["message"] = "Tentativa de prisão! Você teve que recuar."
+	
+	if notification_system:
+		notification_system.show_notification(
+			"⚠️ Operação Condor",
+			event_data["message"],
+			NotificationSystem.NotificationType.WARNING,
+			5.0
+		)
+	
+	condor_event_triggered.emit(event_data)
+
+func _offer_military_opportunity() -> void:
+	"""Oferece oportunidade de aliança militar"""
+	if not player_agent:
+		return
+	
+	var opportunity = {
+		"type": "military_alliance",
+		"requirement": 70,
+		"reward": "position_boost"
+	}
+	
+	if notification_system:
+		notification_system.show_notification(
+			"🎖️ Oportunidade Militar",
+			"Os militares querem conversar. Esta pode ser sua chance!",
+			NotificationSystem.NotificationType.INFO,
+			4.0
+		)
+	
+	# Adicionar opção de ação especial temporária
+	player_agent.add_temporary_action({
+		"id": "military_meeting",
+		"name": "Reunião com Militares",
+		"duration": 3, # Disponível por 3 meses
+		"requirements": {"military_support": 70},
+		"effects": {
+			"position_advance": true,
+			"military_support": 10,
+			"condor_threat_level": -20
+		}
+	})
+	
+	military_opportunity_offered.emit(opportunity)
+
+# =====================================
+#  TRANSIÇÃO ENTRE FASES
 # =====================================
 func _transition_to_leader_phase() -> void:
 	var old_phase = current_phase
@@ -334,20 +422,18 @@ func _transition_to_leader_phase() -> void:
 	# Notificar transição
 	game_phase_changed.emit(old_phase, current_phase)
 	
-	# Adicionado verificação antes de chamar show_notification
 	if notification_system:
 		notification_system.show_notification(
 			"🏛️ PRESIDENTE ELEITO!",
 			"%s conquistou a presidência de %s!" % [player_agent.agent_name, player_agent.country],
-			NotificationSystem.NotificationType.SUCCESS, # Usando NotificationSystem.NotificationType
+			NotificationSystem.NotificationType.SUCCESS,
 			5.0
 		)
 	
 	print("🏛️ Transição para Fase 2: PRESIDENTE!")
 
 func _sync_agent_to_country() -> void:
-	if not player_agent or not Globals.has_method("adjust_country_value"): # Adicionado verificação
-		print("ERROR: player_agent ou Globals.adjust_country_value não disponível para sincronização.")
+	if not player_agent or not Globals.has_method("adjust_country_value"):
 		return
 		
 	# Transferir influência do agente para dados nacionais
@@ -360,10 +446,12 @@ func _sync_agent_to_country() -> void:
 	Globals.adjust_country_value(player_agent.country, "gov_power", gov_power_modifier)
 
 # =====================================
-#  CALLBACKS DOS AGENTES
+#  CALLBACKS DOS AGENTES
 # =====================================
 func _on_agent_position_advanced(old_position: String, new_position: String) -> void:
-	if not notification_system: return
+	if not notification_system: 
+		return
+		
 	notification_system.show_notification(
 		"🎖️ Avanço Político!",
 		"%s avançou de %s para %s!" % [player_agent.agent_name, old_position, new_position],
@@ -372,7 +460,9 @@ func _on_agent_position_advanced(old_position: String, new_position: String) -> 
 	agent_status_changed.emit()
 
 func _on_agent_support_changed(group: String, old_value: int, new_value: int) -> void:
-	if not notification_system: return
+	if not notification_system: 
+		return
+		
 	if abs(new_value - old_value) >= 5: # Só notificar mudanças significativas
 		var change_text = "aumentou" if new_value > old_value else "diminuiu"
 		notification_system.show_notification(
@@ -382,7 +472,7 @@ func _on_agent_support_changed(group: String, old_value: int, new_value: int) ->
 		)
 
 # =====================================
-#  CONTROLES DO JOGO
+#  CONTROLES DO JOGO
 # =====================================
 func _on_pause_pressed() -> void:
 	time_running = not time_running
@@ -392,10 +482,12 @@ func _on_pause_pressed() -> void:
 	
 	if time_running:
 		timer.start()
-		if notification_system: notification_system.show_notification("⏰ Tempo", "Jogo retomado.", NotificationSystem.NotificationType.INFO) # Adicionando notificação
+		if notification_system: 
+			notification_system.show_notification("⏰ Tempo", "Jogo retomado.", NotificationSystem.NotificationType.INFO)
 	else:
 		timer.stop()
-		if notification_system: notification_system.show_notification("⏸️ Pausa", "Jogo pausado.", NotificationSystem.NotificationType.WARNING) # Adicionando notificação
+		if notification_system: 
+			notification_system.show_notification("⏸️ Pausa", "Jogo pausado.", NotificationSystem.NotificationType.WARNING)
 	
 	print("🎮 Jogo %s" % ("retomado" if time_running else "pausado"))
 
@@ -404,19 +496,15 @@ func _on_next_month_pressed() -> void:
 		advance_month()
 
 # =====================================
-#  SISTEMA DE UI
+#  SISTEMA DE UI
 # =====================================
 func _update_all_ui() -> void:
 	_update_date_display()
 	_update_resource_display()
 	_update_stability_display()
-	if ui_manager: # Adicionado verificação
-		# Certifique-se que o UIManager tem um método update_phase_specific_ui
-		# e que ele usa os parâmetros '_current_phase' e '_player_agent'
-		# ou remova-os se não forem realmente necessários dentro dessa função.
+	
+	if ui_manager:
 		ui_manager.update_phase_specific_ui(current_phase, player_agent)
-	else:
-		print("WARNING: UI Manager não está disponível para atualizar a UI específica da fase.")
 
 func _update_date_display() -> void:
 	if date_label:
@@ -432,13 +520,12 @@ func _update_resource_display() -> void:
 	
 	match current_phase:
 		GamePhase.POLITICAL_AGENT:
-			# Adicionado verificação para player_agent.wealth
 			money_value = (player_agent.wealth * 100) if player_agent else 0
 			money_text = "💰 Recursos: %d" % money_value
 		GamePhase.NATIONAL_LEADER:
 			var player_data = Globals.get_player_data()
 			money_value = player_data.get("money", 0)
-			money_text = "$ %s" % _format_number(money_value) # Corrigido para _format_number
+			money_text = "$ %s" % _format_number(money_value)
 	
 	money_label.text = money_text
 	money_label.modulate = Color.GREEN
@@ -452,12 +539,9 @@ func _update_stability_display() -> void:
 	
 	match current_phase:
 		GamePhase.POLITICAL_AGENT:
-			# Adicionado verificação para player_agent.total_support
-			stability_text = "📊 Apoio: %d%% (%s)" % [stability_value, str(player_agent.position_name) if player_agent else "N/A"] # Garante que ambos são Strings
-			# Linha 453 (ou próxima): INCOMPATIBLE_TERNARY
-			# Garante que ambos os lados do ternário retornem string compatível.
-			# `player_agent.position_name` é uma String. Se `player_agent` for Nil, a alternativa deve ser String.
-			stability_text = "📊 Apoio: %d%% (%s)" % [stability_value, player_agent.position_name if player_agent else "N/A"]
+			stability_value = player_agent.total_support if player_agent else 0
+			var position_name = player_agent.get_position_name() if player_agent else "N/A"
+			stability_text = "📊 Apoio: %d%% (%s)" % [stability_value, position_name]
 		GamePhase.NATIONAL_LEADER:
 			var player_data = Globals.get_player_data()
 			stability_value = player_data.get("stability", 50)
@@ -474,11 +558,11 @@ func _update_stability_display() -> void:
 		stability_label.modulate = Color.RED
 
 # =====================================
-#  SISTEMA DE INFORMAÇÕES
+#  SISTEMA DE INFORMAÇÕES
 # =====================================
 func show_country_info(country_name: String) -> void:
 	if not info_container:
-		print("WARNING: InfoContainer não disponível para show_country_info.")
+		push_warning("InfoContainer não disponível")
 		return
 		
 	# Limpar container
@@ -494,17 +578,25 @@ func show_country_info(country_name: String) -> void:
 	# Construir interface de informações
 	_build_country_info_UI(country_name, country_data)
 	
-	if notification_system: # Adicionado verificação
-		notification_system.show_notification("🏛️ " + country_name, "Visualizando informações", NotificationSystem.NotificationType.INFO)
-
+	if notification_system:
+		notification_system.show_notification(
+			"🏛️ " + country_name, 
+			"Visualizando informações", 
+			NotificationSystem.NotificationType.INFO
+		)
 
 func _show_no_country_data(country_name: String) -> void:
 	var label = Label.new()
 	label.text = "❌ Dados não disponíveis para %s" % country_name
 	label.modulate = Color.RED
 	info_container.add_child(label)
-	if notification_system: # Adicionado verificação
-		notification_system.show_notification("⚠️ Erro", "Dados do país %s não carregados." % country_name, NotificationSystem.NotificationType.ERROR)
+	
+	if notification_system:
+		notification_system.show_notification(
+			"⚠️ Erro", 
+			"Dados do país %s não carregados." % country_name, 
+			NotificationSystem.NotificationType.ERROR
+		)
 
 func _build_country_info_UI(country_name: String, country_data: Dictionary) -> void:
 	# Título
@@ -520,8 +612,10 @@ func _build_country_info_UI(country_name: String, country_data: Dictionary) -> v
 		var indicator = Label.new()
 		match current_phase:
 			GamePhase.POLITICAL_AGENT:
-				# Adicionado verificação para player_agent
-				indicator.text = "👤 %s (%s)" % [player_agent.agent_name if player_agent else "N/A", player_agent.position_name if player_agent else "N/A"]
+				indicator.text = "👤 %s (%s)" % [
+					player_agent.agent_name if player_agent else "N/A", 
+					player_agent.position_name if player_agent else "N/A"
+				]
 			GamePhase.NATIONAL_LEADER:
 				indicator.text = "👑 SEU PAÍS"
 		indicator.modulate = Color.CYAN
@@ -530,11 +624,11 @@ func _build_country_info_UI(country_name: String, country_data: Dictionary) -> v
 	
 	# Dados principais
 	var data_items = [
-		"💰 Dinheiro: $%s" % _format_number(country_data.get("money", 0)), # Corrigido para _format_number
+		"💰 Dinheiro: $%s" % _format_number(country_data.get("money", 0)),
 		"⚖️ Estabilidade: %d%%" % country_data.get("stability", 50),
 		"🏛️ Poder Gov.: %d%%" % country_data.get("gov_power", 50),
 		"🔥 Rebelião: %d%%" % country_data.get("rebel_power", 50),
-		"👥 População: %s" % _format_number(country_data.get("population", 0)), # Corrigido para _format_number
+		"👥 População: %s" % _format_number(country_data.get("population", 0)),
 		"🏭 Indústria: %d%%" % country_data.get("industry", 0),
 		"🛡️ Defesa: %d%%" % country_data.get("defense", 0)
 	]
@@ -553,8 +647,7 @@ func _build_country_info_UI(country_name: String, country_data: Dictionary) -> v
 	_add_action_buttons(country_name)
 
 func _add_agent_info_to_panel() -> void:
-	if not player_agent: # Adicionado verificação
-		print("WARNING: PlayerAgent é Nil ao tentar adicionar info do agente ao painel.")
+	if not player_agent:
 		return
 		
 	# Separador
@@ -593,8 +686,8 @@ func _add_action_buttons(country_name: String) -> void:
 		match current_phase:
 			GamePhase.POLITICAL_AGENT:
 				button.text = "🎯 Ações Políticas"
-				if player_agent: # Adicionado verificação
-					button.pressed.connect(_show_political_actions)
+				if player_agent:
+					button.pressed.connect(_on_political_action_button_pressed)
 			GamePhase.NATIONAL_LEADER:
 				button.text = "👑 Governar"
 				button.pressed.connect(_govern_country.bind(country_name))
@@ -605,21 +698,36 @@ func _add_action_buttons(country_name: String) -> void:
 	info_container.add_child(button)
 
 # =====================================
-#  AÇÕES POLÍTICAS
+#  AÇÕES POLÍTICAS
 # =====================================
-func _show_political_actions() -> void:
-	if current_phase != GamePhase.POLITICAL_AGENT or not player_agent:
-		if notification_system: # Adicionado verificação
+func _on_political_action_button_pressed() -> void:
+	print("🎮 Botão de ação política pressionado!")
+	
+	if current_phase != GamePhase.POLITICAL_AGENT:
+		if notification_system:
 			notification_system.show_notification(
 				"🚫 Erro de Fase",
-				"Ações políticas apenas na fase de agente ou player_agent não disponível.",
+				"Ações políticas apenas disponíveis na fase de agente político.",
 				NotificationSystem.NotificationType.WARNING
 			)
 		return
 		
+	if not player_agent:
+		if notification_system:
+			notification_system.show_notification(
+				"🚫 Erro de Sistema",
+				"Agente político não inicializado corretamente.",
+				NotificationSystem.NotificationType.ERROR
+			)
+		return
+	
+	_show_political_actions()
+
+func _show_political_actions() -> void:
 	var actions = player_agent.get_available_actions()
+	
 	if actions.is_empty():
-		if notification_system: # Adicionado verificação
+		if notification_system:
 			notification_system.show_notification(
 				"🚫 Sem Ações",
 				"Nenhuma ação política disponível no momento",
@@ -627,66 +735,42 @@ func _show_political_actions() -> void:
 			)
 		return
 	
-	# Mostrar menu de ações (simplificado - primeira ação disponível)
+	# Executar primeira ação disponível (simplificado)
 	var action = actions[0]
-	_confirm_political_action(action)
+	_execute_political_action_directly(action)
 
-func _confirm_political_action(action: Dictionary) -> void:
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "🎯 Ação Política"
-	
-	var description = "Executar: %s\n\n" % action["name"]
-	description += "Descrição: %s\n" % action.get("description", "Ação política")
-	description += "Risco: %d%%\n" % action.get("risk", 0)
-	
-	if action.has("costs") and not action["costs"].is_empty():
-		description += "Custos: "
-		for cost_type in action["costs"]:
-			description += "%s: %d " % [cost_type, action["costs"][cost_type]]
-		description += "\n"
-	
-	dialog.dialog_text = description
-	dialog.get_ok_button().text = "Executar"
-	add_child(dialog) # Adicionado antes do popup para garantir que esteja na árvore
-	dialog.popup_centered()
-	
-	# Linha 648 (e 650): Confirmado.connect e canceled.connect
-	# Re-digitar essas linhas se o erro persistir aqui.
-	dialog.confirmed.connect(func():
-		_execute_political_action(action)
-		dialog.queue_free()
-	)
-	dialog.canceled.connect(func(): dialog.queue_free())
-
-func _execute_political_action(action: Dictionary) -> void:
-	if not player_agent: return # Adicionado verificação
+func _execute_political_action_directly(action: Dictionary) -> void:
+	if not player_agent:
+		return
 	
 	var result = player_agent.execute_action(action)
 	
-	# Usando NotificationSystem.NotificationType
-	var notification_type = NotificationSystem.NotificationType.SUCCESS if result["success"] else NotificationSystem.NotificationType.ERROR
-	var message = result["message"]
+	var success = result.get("success", false)
+	var message = result.get("message", "")
 	
-	if result.has("events") and not result["events"].is_empty():
-		message += "\n\nEventos:\n"
-		for event in result["events"]:
-			message += "• %s\n" % event
+	var notification_type = NotificationSystem.NotificationType.SUCCESS if success else NotificationSystem.NotificationType.ERROR
 	
-	if notification_system: # Adicionado verificação
+	var display_message = message
+	var events = result.get("events", [])
+	if not events.is_empty():
+		display_message += "\n\nResultados:"
+		for event in events:
+			display_message += "\n• %s" % event
+	
+	if notification_system:
 		notification_system.show_notification(
-			"🎯 " + action["name"],
-			message,
+			"🎯 %s" % action.get("name", "Ação Política"),
+			display_message,
 			notification_type
 		)
 	
 	_update_all_ui()
 
 # =====================================
-#  AÇÕES NACIONAIS
+#  AÇÕES NACIONAIS
 # =====================================
 func _govern_country(country_name: String) -> void:
 	if not Globals.has_method("adjust_country_value"):
-		print("WARNING: Globals.adjust_country_value não encontrado.")
 		return
 		
 	var gov_bonus = randi_range(3, 8)
@@ -695,7 +779,7 @@ func _govern_country(country_name: String) -> void:
 	Globals.adjust_country_value(country_name, "gov_power", gov_bonus)
 	Globals.adjust_country_value(country_name, "money", cost)
 	
-	if notification_system: # Adicionado verificação
+	if notification_system:
 		notification_system.show_notification(
 			"👑 Ação Governamental",
 			"Poder governamental aumentou em %d pontos" % gov_bonus,
@@ -707,7 +791,6 @@ func _govern_country(country_name: String) -> void:
 
 func _negotiate_with_country(country_name: String) -> void:
 	if not Globals.has_method("adjust_country_value"):
-		print("WARNING: Globals.adjust_country_value não encontrado para negociação.")
 		return
 		
 	var trade_bonus = randi_range(200, 800)
@@ -717,201 +800,246 @@ func _negotiate_with_country(country_name: String) -> void:
 	
 	if Globals.has_method("adjust_relation"):
 		Globals.adjust_relation(Globals.player_country, country_name, relation_bonus)
-	else:
-		print("WARNING: Globals.adjust_relation não encontrado para negociação.")
 	
-	if notification_system: # Adicionado verificação
+	if notification_system:
 		notification_system.show_notification(
 			"🤝 Negociação",
-			"Acordo comercial rendeu $%s" % _format_number(trade_bonus), # Corrigido para _format_number
+			"Acordo comercial rendeu $%s" % _format_number(trade_bonus),
 			NotificationSystem.NotificationType.SUCCESS
 		)
 	
 	_update_all_ui()
 
 # =====================================
-#  EVENTOS ESPECIAIS
+#  SISTEMA DE AUTO-SAVE
 # =====================================
-func _trigger_condor_event() -> void:
-	if not notification_system: return
-	if not player_agent: # Adicionado verificação
-		print("WARNING: PlayerAgent é Nil ao tentar trigger_condor_event.")
-		return
-	
-	notification_system.show_notification(
-		"⚠️ Operação Condor",
-		"%s está sendo monitorado pelas forças de segurança!" % player_agent.agent_name,
-		NotificationSystem.NotificationType.WARNING,
-		4.0
-	)
-
-func _offer_military_opportunity() -> void:
-	var dialog = ConfirmationDialog.new()
-	dialog.title = "🎖️ Oportunidade Militar"
-	dialog.dialog_text = "Contatos militares oferecem apoio para acelerar sua ascensão política. Aceitar?"
-	dialog.get_ok_button().text = "Aceitar"
-	dialog.get_cancel_button().text = "Recusar"
-	
-	add_child(dialog)
-	dialog.popup_centered()
-	
-	dialog.confirmed.connect(func():
-		_accept_military_support()
-		dialog.queue_free()
-	)
-	dialog.canceled.connect(func():
-		_refuse_military_support()
-		dialog.queue_free()
-	)
-
-func _accept_military_support() -> void:
-	if not player_agent: return # Adicionado verificação
-	
-	player_agent.military_support = clamp(player_agent.military_support + 15, 0, 100)
-	player_agent.usa_influence = clamp(player_agent.usa_influence + 10, 0, 100)
-	player_agent.worker_support = clamp(player_agent.worker_support - 10, 0, 100)
-	player_agent.student_support = clamp(player_agent.student_support - 8, 0, 100)
-	
-	if notification_system: # Adicionado verificação
-		notification_system.show_notification(
-			"🎖️ Apoio Militar",
-			"Acordou colaboração com as forças armadas",
-			NotificationSystem.NotificationType.INFO
-		)
-
-func _refuse_military_support() -> void:
-	if not player_agent: return # Adicionado verificação
-	
-	player_agent.intellectual_support = clamp(player_agent.intellectual_support + 5, 0, 100)
-	player_agent.worker_support = clamp(player_agent.worker_support + 8, 0, 100)
-	
-	if notification_system: # Adicionado verificação
-		notification_system.show_notification(
-			"🎖️ Recusa Militar",
-			"Recusou colaboração militar - manteve princípios",
-			NotificationSystem.NotificationType.INFO
-		)
-
-# =====================================
-#  INPUT E CONTROLES
-# =====================================
-func _input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed:
+func _on_auto_save() -> void:
+	if not auto_save_enabled:
 		return
 		
-	match event.keycode:
-		KEY_SPACE:
-			_on_pause_pressed()
-		KEY_RIGHT:
-			_on_next_month_pressed()
-		KEY_F1:
-			if DEBUG_MODE:
-				_debug_advance_to_president()
-		KEY_F2:
-			if DEBUG_MODE:
-				_debug_show_agent_info()
-		KEY_F3:
-			if DEBUG_MODE:
-				_debug_boost_support()
-		KEY_F4:
-			if DEBUG_MODE:
-				_show_political_actions()
-		KEY_F5:
-			if DEBUG_MODE:
-				_debug_create_new_agent()
+	var save_data = {
+		"version": "1.0",
+		"timestamp": Time.get_unix_time_from_system(),
+		"game_state": {
+			"current_phase": current_phase,
+			"current_month": Globals.current_month,
+			"current_year": Globals.current_year,
+			"player_country": Globals.player_country,
+			"time_running": time_running
+		},
+		"player_agent": _serialize_player_agent() if player_agent else null,
+		"country_data": Globals.country_data
+	}
+	
+	# Salvar em arquivo
+	var save_file = FileAccess.open("user://autosave.dat", FileAccess.WRITE)
+	if save_file:
+		save_file.store_var(save_data)
+		save_file.close()
+		
+		if DEBUG_MODE:
+			print("💾 Auto-save realizado")
+
+func _serialize_player_agent() -> Dictionary:
+	if not player_agent:
+		return {}
+		
+	return {
+		"agent_name": player_agent.agent_name,
+		"country": player_agent.country,
+		"current_position": player_agent.current_position,
+		"attributes": {
+			"charisma": player_agent.charisma,
+			"intelligence": player_agent.intelligence,
+			"connections": player_agent.connections,
+			"wealth": player_agent.wealth,
+			"military_knowledge": player_agent.military_knowledge
+		},
+		"support": {
+			"military": player_agent.military_support,
+			"business": player_agent.business_support,
+			"intellectual": player_agent.intellectual_support,
+			"worker": player_agent.worker_support,
+			"student": player_agent.student_support,
+			"church": player_agent.church_support,
+			"peasant": player_agent.peasant_support
+		},
+		"stats": {
+			"political_experience": player_agent.political_experience,
+			"condor_threat_level": player_agent.condor_threat_level,
+			"total_support": player_agent.total_support
+		}
+	}
 
 # =====================================
-#  SISTEMA DE CLIQUES NO MAPA
+#  SISTEMA DE INPUT
 # =====================================
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var country_name = _detect_country_click(event.global_position)
-		if not country_name.is_empty():
-			show_country_info(country_name)
+	# Atalhos de teclado
+	if event.is_action_pressed("ui_accept"): # Espaço
+		_on_pause_pressed()
+	elif event.is_action_pressed("ui_right"): # Seta direita
+		if not time_running:
+			_on_next_month_pressed()
+	elif event.is_action_pressed("ui_cancel"): # ESC
+		_toggle_game_menu()
+	
+	# Atalhos de debug (apenas em modo debug)
+	if DEBUG_MODE:
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_F1:
+					_debug_show_game_state()
+				KEY_F2:
+					_debug_advance_phase()
+				KEY_F3:
+					_debug_add_resources()
+				KEY_F5:
+					_on_auto_save()
 
-func _detect_country_click(global_pos: Vector2) -> String:
-	print("--- Debug de Clique no Mapa ---")
-	print("Posição global do clique: ", global_pos)
-	var map = get_node_or_null("NodeMapaSVG2D")
-	if not map:
-		print("❌ Erro: Nó 'NodeMapaSVG2D' não encontrado na cena.")
-		return ""
-	print("✅ Sucesso: Nó 'NodeMapaSVG2D' encontrado.")
-	
-	for child in map.get_children():
-		if child is Polygon2D:
-			var local_pos = child.to_local(global_pos)
-			if Geometry2D.is_point_in_polygon(local_pos, child.polygon):
-				print("✨ Clique detectado no Polygon2D: ", child.name)
-				return child.name
-		# else:
-		# 	print("Filho do mapa não é Polygon2D: ", child.name, " (Tipo: ", child.get_class(), ")")
-	
-	print("🚫 Nenhum Polygon2D (país) foi clicado na posição.")
-	return ""
+func _toggle_game_menu() -> void:
+	# Implementar menu de pausa/opções
+	print("🎮 Menu toggle (não implementado)")
 
 # =====================================
-#  FUNÇÕES DE DEBUG
+#  FUNÇÕES DE DEBUG
 # =====================================
-func _debug_advance_to_president() -> void:
-	if not player_agent:
-		print("WARNING: player_agent é Nil ao tentar _debug_advance_to_president.")
-		return
-		
-	player_agent.current_position = PlayerAgent.Position.PRESIDENT
-	_transition_to_leader_phase()
-	print("🔧 DEBUG: Avançado para presidente")
-
-func _debug_show_agent_info() -> void:
-	if not player_agent:
-		print("WARNING: player_agent é Nil ao tentar _debug_show_agent_info.")
-		return
-		
-	print(player_agent.get_status_summary())
-
-func _debug_boost_support() -> void:
-	if not player_agent or current_phase != GamePhase.POLITICAL_AGENT:
-		print("WARNING: player_agent é Nil ou fase incorreta ao tentar _debug_boost_support.")
-		return
-		
-	var boost = 10
-	player_agent.military_support = clamp(player_agent.military_support + boost, 0, 100)
-	player_agent.business_support = clamp(player_agent.business_support + boost, 0, 100)
-	player_agent.intellectual_support = clamp(player_agent.intellectual_support + boost, 0, 100)
-	player_agent.worker_support = clamp(player_agent.worker_support + boost, 0, 100)
-	player_agent.student_support = clamp(player_agent.student_support + boost, 0, 100)
-	player_agent.church_support = clamp(player_agent.church_support + boost, 0, 100)
-	player_agent.peasant_support = clamp(player_agent.peasant_support + boost, 0, 100)
+func _debug_show_game_state() -> void:
+	print("\n=== DEBUG: ESTADO DO JOGO ===")
+	print("Fase: %s" % GamePhase.keys()[current_phase])
+	print("Data: %s %d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year])
+	print("País: %s" % Globals.player_country)
 	
-	if notification_system: # Adicionado verificação
-		notification_system.show_notification(
-			"🔧 DEBUG",
-			"Apoio aumentado em +%d para todos os grupos" % boost,
-			NotificationSystem.NotificationType.INFO
-		)
-	
-	print("🔧 DEBUG: Apoio aumentado - Total: %d/700" % player_agent.total_support)
+	if player_agent:
+		print("Nome: %s" % player_agent.agent_name)
+		print("Posição: %s" % player_agent.get_position_name())
+		print("Apoio Total: %d/700" % player_agent.total_support)
+		print("Ameaça Condor: %d%%" % player_agent.condor_threat_level)
 
-func _debug_create_new_agent() -> void:
-	_create_default_agent()
-	current_phase = GamePhase.POLITICAL_AGENT
+	
+	print("\n--- PAÍS ---")
+	var country_data = Globals.get_player_data()
+	for key in country_data:
+		print("%s: %s" % [key, country_data[key]])
+	print("=============================\n")
+
+func _debug_advance_phase() -> void:
+	if current_phase == GamePhase.POLITICAL_AGENT and player_agent:
+		player_agent.current_position = PlayerAgent.Position.PRESIDENT
+		_transition_to_leader_phase()
+		print("🔧 DEBUG: Avançado para Fase 2")
+
+func _debug_add_resources() -> void:
+	match current_phase:
+		GamePhase.POLITICAL_AGENT:
+			if player_agent:
+				player_agent.wealth = min(100, player_agent.wealth + 20)
+				player_agent.political_experience += 50
+				print("🔧 DEBUG: +20 riqueza, +50 experiência")
+		GamePhase.NATIONAL_LEADER:
+			Globals.adjust_country_value(Globals.player_country, "money", 10000)
+			Globals.adjust_country_value(Globals.player_country, "stability", 10)
+			print("🔧 DEBUG: +$10k, +10 estabilidade")
 	_update_all_ui()
-	print("🔧 DEBUG: Novo agente criado e fase resetada para Agente Político.")
 
 # =====================================
-#  UTILITÁRIOS
+#  FUNÇÕES UTILITÁRIAS
 # =====================================
 func _format_number(num: int) -> String:
-	if num >= 1_000_000: return "%.1fM" % (float(num) / 1_000_000.0)
-	elif num >= 1_000: return "%.1fK" % (float(num) / 1_000.0)
-	else: return str(num)
+	"""Formata números grandes de forma legível"""
+	if num >= 1_000_000_000:
+		return "%.1fB" % (num / 1_000_000_000.0)
+	elif num >= 1_000_000:
+		return "%.1fM" % (num / 1_000_000.0)
+	elif num >= 1_000:
+		return "%.1fK" % (num / 1_000.0)
+	else:
+		return str(num)
 
-# Função auxiliar para Globals.get_country - deve estar em Globals.gd
-# Esta função pode ser removida se Globals.gd já tiver 'get_country'
-# ou se você a usou para simulação temporária.
-func _get_country_data(country_name: String) -> Dictionary:
-	if Globals.has_method("get_country"):
-		return Globals.get_country(country_name)
-	elif Globals.country_data.has(country_name):
-		return Globals.country_data[country_name]
-	return {}
+func _get_phase_name() -> String:
+	"""Retorna o nome legível da fase atual"""
+	match current_phase:
+		GamePhase.POLITICAL_AGENT:
+			return "Agente Político"
+		GamePhase.NATIONAL_LEADER:
+			return "Líder Nacional"
+		_:
+			return "Desconhecida"
+
+func _validate_game_state() -> bool:
+	"""Valida o estado atual do jogo"""
+	var is_valid = true
+	
+	# Verificar componentes essenciais
+	if not notification_system:
+		push_error("Sistema de notificações não inicializado!")
+		is_valid = false
+	
+	if not ui_manager:
+		push_error("UI Manager não inicializado!")
+		is_valid = false
+	
+	if current_phase == GamePhase.POLITICAL_AGENT and not player_agent:
+		push_error("PlayerAgent não inicializado na fase de agente!")
+		is_valid = false
+	
+	# Verificar dados globais
+	if not Globals.country_data.has(Globals.player_country):
+		push_error("Dados do país do jogador não encontrados!")
+		is_valid = false
+	
+	return is_valid
+
+# =====================================
+#  GETTERS PÚBLICOS
+# =====================================
+func get_current_date() -> String:
+	return "%s/%d" % [MONTH_NAMES[Globals.current_month - 1], Globals.current_year]
+
+func get_current_money() -> int:
+	match current_phase:
+		GamePhase.POLITICAL_AGENT:
+			# CORREÇÃO: Usando um bloco if/else padrão
+			if player_agent:
+				return player_agent.wealth * 100
+			else:
+				return 0
+		GamePhase.NATIONAL_LEADER:
+			return Globals.get_country_value(Globals.player_country, "money", 0)
+	return 0
+func get_current_stability() -> int:
+	match current_phase:
+		GamePhase.POLITICAL_AGENT:
+			# CORREÇÃO: Usando um bloco if/else padrão
+			if player_agent:
+				return player_agent.total_support
+			else:
+				return 0
+		GamePhase.NATIONAL_LEADER:
+			return Globals.get_country_value(Globals.player_country, "stability", 50)
+	return 50
+
+func is_time_running() -> bool:
+	return time_running
+
+func get_current_phase() -> GamePhase:
+	return current_phase
+
+func get_player_agent() -> PlayerAgent:
+	return player_agent
+
+# =====================================
+#  CLEANUP
+# =====================================
+func _exit_tree() -> void:
+	# Salvar antes de sair
+	if auto_save_enabled:
+		_on_auto_save()
+	
+	# Limpar referencias
+	if timer:
+		timer.stop()
+	if auto_save_timer:
+		auto_save_timer.stop()
+	
+	print("🎮 Sistema principal finalizado")

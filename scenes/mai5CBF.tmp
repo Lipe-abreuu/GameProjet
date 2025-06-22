@@ -27,9 +27,6 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.43527, 0.200359)
 script = ExtResource("1_5o5fk")
-time_running = null
-current_phase = null
-auto_save_enabled = null
 metadata/_edit_use_anchors_ = true
 
 [node name="Market" type="Node" parent="Main"]

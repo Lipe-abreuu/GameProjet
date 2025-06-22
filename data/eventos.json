@@ -1,0 +1,16 @@
+[
+  {
+	"id": "independencia_brasil",
+	"titulo": "Independência do Brasil",
+	"descricao": "O Brasil declarou independência de Portugal.",
+	"ano": 1822,
+	"mes": 9
+  },
+  {
+	"id": "rev_francesa",
+	"titulo": "Revolução Francesa",
+	"descricao": "O povo francês derrubou a monarquia.",
+	"ano": 1789,
+	"mes": 7
+  }
+]

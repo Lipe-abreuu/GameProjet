@@ -705,11 +705,8 @@ func _ready() -> void:
 #  SISTEMA DE AGENTE POLÍTICO
 # =====================================
 func init_player_agent() -> void:
+	# ↳ use TAB (⇥) em cada nível; nada de espaços!
 	if current_player_agent == null:
-		current_player_agent = PlayerAgent.create_preset("sindicalista_marxista", "Argentina")
-		print("✅ Agente político inicializado: " + current_player_agent.agent_name)
-
-func get_player_agent() -> PlayerAgent:
-	if current_player_agent == null:
-		init_player_agent()
-	return current_player_agent
+		# placeholder até implementarmos presets (Dia 3-5)
+		current_player_agent = PlayerAgent.new()
+		print("✅ Agente político inicializado.")
