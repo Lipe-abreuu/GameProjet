@@ -6,3 +6,7 @@ res://scripts/PlayerAgent.gd
 res://scripts/TurnManager.gd
 res://scripts/Globals.gd
 res://scripts/main.gd
+res://scripts/Market.gd
+res://game_menu.gd
+res://scenes/game_menu.tscn
+res://scenes/GameMenu.tscn

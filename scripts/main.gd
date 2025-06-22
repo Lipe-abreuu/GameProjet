@@ -8,6 +8,7 @@ extends Node
 #  PRELOADS E IMPORTS
 # =====================================
 const NotificationSystem = preload("res://scripts/NotificationSystem.gd")
+const GameMenu = preload("res://scenes/GameMenu.tscn")
 
 # =====================================
 #  CONSTANTES E CONFIGURAÇÕES
@@ -72,12 +73,27 @@ func _ready() -> void:
 	print("🎮 Iniciando sistema principal...")
 	_initialize_globals()
 	_initialize_systems()
+
+	# --- Bloco de Criação do Menu de Pausa ---
+	var GameMenu = preload("res://scenes/GameMenu.tscn")
+	var game_menu_instance = GameMenu.instantiate()
+	game_menu_instance.name = "GameMenu"
+	# Importante: Faz o menu funcionar mesmo quando o jogo está pausado
+	game_menu_instance.process_mode = Node.PROCESS_MODE_ALWAYS
+	game_menu_instance.hide() # O menu começa escondido
+	add_child(game_menu_instance)
+
+	# Conecta os sinais do menu às funções que já criamos em main.gd
+	game_menu_instance.resume_game.connect(_on_resume_game)
+	game_menu_instance.quit_to_main_menu.connect(_on_quit_to_main_menu)
+	# --- Fim do Bloco do Menu ---
+
 	_setup_ui_references()
 	_setup_timers()
 	_setup_input_handling()
 	_create_default_agent()
 	_start_game_loop()
-
+	
 func _initialize_globals() -> void:
 	# Inicializar o sistema global
 	if Globals.has_method("init_player_agent"):
@@ -152,15 +168,18 @@ func _setup_input_handling() -> void:
 	set_process_input(true)
 
 func _create_default_agent() -> void:
-	print("🟣 Criando agente político padrão...")
+	print(">> Criando agente político padrão...")
 
-	player_agent = PlayerAgent.new(
-		"Lautaro Silva",
-		"Socialista Reformista",
-		300,
-		15,
-		"Chile"
-	)
+	player_agent = PlayerAgent.new()
+	# Atribuir os valores diretamente às variáveis do agente
+	player_agent.agent_name = "Lautaro Silva"
+	player_agent.ideology = "Socialista Reformista"
+	player_agent.wealth = 300
+	player_agent.age = 35 # Adicionei uma idade padrão
+	player_agent.country = "Chile"
+	
+	# Adiciona o agente à cena para que ele possa funcionar
+	add_child(player_agent)
 
 	if not player_agent:
 		push_error("Falha ao criar PlayerAgent!")
@@ -176,7 +195,8 @@ func _create_default_agent() -> void:
 	Globals.player_country = player_agent.country
 	_ensure_country_data_exists()
 
-	print("✅ Agente criado: %s (%s)" % [player_agent.agent_name, player_agent.position_name])
+	print("✅ Agente criado: %s (%s)" % [player_agent.agent_name, player_agent.get_position_name()])
+
 	
 	# Conectar sinais do agente
 	if not player_agent.position_advanced.is_connected(_on_agent_position_advanced):
@@ -263,7 +283,7 @@ func _process_agent_phase() -> void:
 	player_agent.advance_month()
 	
 	# Verificar transição para fase 2
-	if player_agent.current_position == PlayerAgent.Position.PRESIDENT:
+	if player_agent.position_level == 5: # Verifica se o nível do jogador é 5 (Presidente)
 		_transition_to_leader_phase()
 	
 	# Eventos aleatórios de agente
@@ -289,7 +309,8 @@ func _process_agent_events() -> void:
 	if player_agent.condor_threat_level > 60 and randf() < 0.1:
 		_trigger_condor_event()
 	
-	if player_agent.military_support >= 70 and randf() < 0.05:
+	if player_agent.personal_support["military"] >= 70 and randf() < 0.05:
+
 		_offer_military_opportunity()
 
 func _simulate_political_activity() -> void:
@@ -299,25 +320,27 @@ func _simulate_political_activity() -> void:
 	var activity_chance = (player_agent.charisma + player_agent.intelligence + player_agent.connections) / 300.0
 	
 	if randf() < activity_chance:
+		# A lista de grupos deve corresponder exatamente às chaves do nosso dicionário
 		var support_groups = ["military", "business", "intellectual", "worker", "student", "church", "peasant"]
 		var random_group = support_groups[randi() % support_groups.size()]
-		var support_attr = random_group + "_support"
+		
+		# Pegamos o valor atual diretamente do dicionário
+		var old_value = player_agent.personal_support[random_group]
 		var gain = randi_range(1, 3)
+		var new_value = old_value + gain
 		
-		var old_value = player_agent.get(support_attr)
-		if old_value == null:
-			push_error("Atributo %s não existe em player_agent!" % support_attr)
-			old_value = 0
+		# Usamos a função set_support() que já criamos.
+		# Ela vai atualizar o valor, o total_support e emitir o sinal, tudo de forma segura.
+		player_agent.set_support(random_group, new_value)
 		
-		var new_value = clamp(old_value + gain, 0, 100)
-		player_agent.set(support_attr, new_value)
-		
+		# A notificação agora é mais simples
 		if notification_system:
 			notification_system.show_notification(
 				"📈 Atividade Política",
-				"%s ganhou %d apoio com %s" % [player_agent.agent_name, gain, random_group],
+				"%s ganhou %d de apoio com o grupo %s." % [player_agent.agent_name, gain, random_group],
 				NotificationSystem.NotificationType.SUCCESS
 			)
+
 
 func _process_national_events() -> void:
 	# Eventos aleatórios nacionais
@@ -362,8 +385,8 @@ func _trigger_condor_event() -> void:
 				event_data["message"] = "Ameaças recebidas afetaram sua confiança."
 			"arrest_attempt":
 				if player_agent.military_support < 50:
-					player_agent.current_position = PlayerAgent.Position.ACTIVIST
-					event_data["message"] = "Tentativa de prisão! Você teve que recuar."
+					if player_agent.current_position == "Ativista":
+						event_data["message"] = "Tentativa de prisão! Você teve que recuar."
 	
 	if notification_system:
 		notification_system.show_notification(
@@ -724,9 +747,11 @@ func _on_political_action_button_pressed() -> void:
 	_show_political_actions()
 
 func _show_political_actions() -> void:
-	var actions = player_agent.get_available_actions()
+	var agent_actions = []
+	if player_agent:
+		agent_actions = player_agent.get_available_actions()
 	
-	if actions.is_empty():
+	if agent_actions.is_empty():
 		if notification_system:
 			notification_system.show_notification(
 				"🚫 Sem Ações",
@@ -736,10 +761,12 @@ func _show_political_actions() -> void:
 		return
 	
 	# Executar primeira ação disponível (simplificado)
-	var action = actions[0]
+	var action = agent_actions[0]
 	_execute_political_action_directly(action)
 
+# A função _execute_political_action_directly vem logo depois
 func _execute_political_action_directly(action: Dictionary) -> void:
+	# ...
 	if not player_agent:
 		return
 	
@@ -847,6 +874,29 @@ func _serialize_player_agent() -> Dictionary:
 	return {
 		"agent_name": player_agent.agent_name,
 		"country": player_agent.country,
+		# CORREÇÃO: Salvamos o 'position_level' (o número), que é o dado principal.
+		"position_level": player_agent.position_level,
+		"attributes": {
+			"charisma": player_agent.charisma,
+			"intelligence": player_agent.intelligence,
+			"connections": player_agent.connections,
+			"wealth": player_agent.wealth,
+			"military_knowledge": player_agent.military_knowledge
+		},
+		# CORREÇÃO: Usamos o dicionário 'personal_support' diretamente.
+		"support": player_agent.personal_support,
+		"stats": {
+			"political_experience": player_agent.political_experience,
+			"condor_threat_level": player_agent.condor_threat_level
+			# O 'total_support' não precisa ser salvo, pois ele é sempre calculado.
+		}
+	}
+	if not player_agent:
+		return {}
+		
+	return {
+		"agent_name": player_agent.agent_name,
+		"country": player_agent.country,
 		"current_position": player_agent.current_position,
 		"attributes": {
 			"charisma": player_agent.charisma,
@@ -874,16 +924,22 @@ func _serialize_player_agent() -> Dictionary:
 # =====================================
 #  SISTEMA DE INPUT
 # =====================================
+
+func _input(event: InputEvent) -> void:
+	# Ação de pausa pelo teclado
+	if event.is_action_pressed("ui_accept"):
+		# Marcamos o evento como "manuseado" para que outras funções
+		# como _unhandled_input não o processem novamente.
+		get_viewport().set_input_as_handled()
+		_on_pause_pressed()
 func _unhandled_input(event: InputEvent) -> void:
 	# Atalhos de teclado
-	if event.is_action_pressed("ui_accept"): # Espaço
-		_on_pause_pressed()
-	elif event.is_action_pressed("ui_right"): # Seta direita
+	if event.is_action_pressed("ui_right"): # Seta direita
 		if not time_running:
 			_on_next_month_pressed()
 	elif event.is_action_pressed("ui_cancel"): # ESC
 		_toggle_game_menu()
-	
+
 	# Atalhos de debug (apenas em modo debug)
 	if DEBUG_MODE:
 		if event is InputEventKey and event.pressed:
@@ -925,7 +981,7 @@ func _debug_show_game_state() -> void:
 
 func _debug_advance_phase() -> void:
 	if current_phase == GamePhase.POLITICAL_AGENT and player_agent:
-		player_agent.current_position = PlayerAgent.Position.PRESIDENT
+		player_agent.set_position_level(5) # Define o nível do jogador como 5 (Presidente)
 		_transition_to_leader_phase()
 		print("🔧 DEBUG: Avançado para Fase 2")
 
@@ -1043,3 +1099,19 @@ func _exit_tree() -> void:
 		auto_save_timer.stop()
 	
 	print("🎮 Sistema principal finalizado")
+# =====================================
+#  CALLBACKS DO MENU DE PAUSA
+# =====================================
+
+# Esta função é chamada quando o botão "Retomar" do menu é pressionado.
+func _on_resume_game() -> void:
+	_toggle_game_menu() # Apenas chama a função de alternar o menu novamente para fechar e despausar.
+
+# Esta função é chamada quando o botão "Sair" é pressionado.
+func _on_quit_to_main_menu() -> void:
+	# Importante: Sempre despause o jogo antes de trocar de cena para evitar bugs.
+	get_tree().paused = false
+	
+	# Mude o caminho abaixo se sua cena de menu principal tiver outro nome/caminho.
+	# Se você ainda não tem um menu principal, esta linha dará erro, o que é normal.
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

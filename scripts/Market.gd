@@ -11,3 +11,9 @@ func next_month():
 		var data = goods[g]
 		var price = data.base_price * (data.demand / data.supply)
 		print("%s: %.2f" % [g, price])
+		
+func update_prices(current_month: int):
+	# TODO: Implementar a lógica de atualização de preços de commodities aqui.
+	# Por enquanto, apenas imprimimos uma mensagem para saber que a função foi chamada.
+	print("📈 Market: Atualizando preços para o mês %d." % current_month)
+	pass
