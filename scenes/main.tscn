@@ -27,9 +27,6 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.43527, 0.200359)
 script = ExtResource("1_5o5fk")
-time_running = null
-current_phase = null
-auto_save_enabled = null
 metadata/_edit_use_anchors_ = true
 
 [node name="Market" type="Node" parent="Main"]
@@ -81,6 +78,7 @@ texture = ExtResource("10_tbl38")
 [node name="Area2D" type="Area2D" parent="Main/NodeMapaSVG2D/Chile"]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Main/NodeMapaSVG2D/Chile/Area2D"]
+visible = false
 position = Vector2(-395.605, -32.8383)
 polygon = PackedVector2Array(79.8032, -415.392, 128.056, -298.82, 3.71179, 394.048, -44.5413, 366.136, -11.1353, 95.2282)
 

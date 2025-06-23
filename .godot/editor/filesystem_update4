@@ -1,4 +1,2 @@
 res://scenes/main.tscn
 res://scenes/GameMenu.tscn
-res://scripts/main.gd
-res://scripts/PlayerAgent.gd

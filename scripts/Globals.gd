@@ -2,14 +2,18 @@
 # Adicionar como Autoload: Project → Autoload → Name: Globals, Path: res://scripts/Globals.gd
 
 extends Node
-# Referência à classe PlayerAgent
-var current_player_agent: PlayerAgent
+
+# Referência ao controlador do agente do jogador
+var current_player_agent: PlayerAgentController
+
 # =====================================
 #  DADOS CENTRALIZADOS DOS PAÍSES
 # =====================================
 var country_data := {
 	"Argentina": {
 		"money": 10_000,
+		"income": 1_500,
+		"expenses": 1_200,
 		"stability": 60,
 		"gov_power": 60,
 		"rebel_power": 40,
@@ -23,6 +27,8 @@ var country_data := {
 	},
 	"Uruguay": {
 		"money": 3_500,
+		"income": 800,
+		"expenses": 700,
 		"stability": 75,
 		"gov_power": 75,
 		"rebel_power": 25,
@@ -36,6 +42,8 @@ var country_data := {
 	},
 	"Chile": {
 		"money": 8_200,
+		"income": 1_300,
+		"expenses": 1_100,
 		"stability": 68,
 		"gov_power": 68,
 		"rebel_power": 32,
@@ -49,6 +57,8 @@ var country_data := {
 	},
 	"Paraguay": {
 		"money": 2_800,
+		"income": 600,
+		"expenses": 550,
 		"stability": 45,
 		"gov_power": 45,
 		"rebel_power": 55,
@@ -62,6 +72,8 @@ var country_data := {
 	},
 	"Bolivia": {
 		"money": 2_200,
+		"income": 500,
+		"expenses": 480,
 		"stability": 40,
 		"gov_power": 40,
 		"rebel_power": 60,
@@ -75,6 +87,8 @@ var country_data := {
 	},
 	"Brasil": {
 		"money": 8_500,
+		"income": 1_400,
+		"expenses": 1_150,
 		"stability": 65,
 		"gov_power": 65,
 		"rebel_power": 35,
@@ -85,7 +99,7 @@ var country_data := {
 		"defense": 20,
 		"relations": {},
 		"last_update": 0,
-		"is_player": true
+		"is_player": false
 	}
 }
 
@@ -96,7 +110,7 @@ var player_country := "Argentina"
 var current_month := 1
 var current_year := 1973
 
-# Sistema de relações diplomáticas (variável estava faltando)
+# Sistema de relações diplomáticas
 var country_relations := {}
 
 # =====================================
@@ -115,6 +129,10 @@ func set_country_value(country: String, field: String, value) -> void:
 		
 		# Aplicar limites para certos campos
 		_apply_field_limits(country, field)
+		
+		# Emitir sinal se for o país do jogador
+		if country == player_country:
+			_emit_country_changed_signal(field, value)
 	else:
 		print("Aviso: País '%s' não encontrado" % country)
 
@@ -122,11 +140,7 @@ func set_country_value(country: String, field: String, value) -> void:
 func adjust_country_value(country: String, field: String, delta: float) -> void:
 	if country_data.has(country):
 		var current_value = country_data[country].get(field, 0)
-		country_data[country][field] = current_value + delta
-		country_data[country]["last_update"] = Time.get_ticks_msec()
-		
-		# Aplicar limites para certos campos
-		_apply_field_limits(country, field)
+		set_country_value(country, field, current_value + delta)
 	else:
 		print("Aviso: País '%s' não encontrado" % country)
 
@@ -141,6 +155,11 @@ func _apply_field_limits(country: String, field: String) -> void:
 			country_data[country][field] = max(0, value)
 		"population":
 			country_data[country][field] = max(1000, value)
+
+# Emite sinal quando dados do país mudam
+func _emit_country_changed_signal(field: String, value) -> void:
+	# Aqui você pode adicionar sinais específicos se necessário
+	pass
 
 # Retorna valor específico de um campo
 func get_country_value(country: String, field: String, default_value = 0):
@@ -161,12 +180,17 @@ func set_player_country(country: String) -> void:
 		# Definir novo país do jogador
 		player_country = country
 		country_data[country]["is_player"] = true
+		
+		# Atualizar agente se existir
+		if current_player_agent and current_player_agent.agent_data:
+			current_player_agent.agent_data.country = country
+		
 		print("País do jogador alterado para: ", country)
 	else:
 		print("Erro: País '%s' não existe" % country)
 
 # =====================================
-#  SIMULAÇÃO PASSIVA DOS PAÍSES (BALANCEADA)
+#  SIMULAÇÃO PASSIVA DOS PAÍSES
 # =====================================
 
 # Chamado a cada mês por Main.gd
@@ -205,29 +229,29 @@ func simulate_ai_country(country: String) -> void:
 	
 	match action:
 		0:  # Reformas sociais
-			d.stability = clamp(d.stability + r, 0, 100)
-			d.money -= 500
+			adjust_country_value(country, "stability", r)
+			adjust_country_value(country, "money", -500)
 			print("📋 [%s] Reformas sociais: estab+%d, dinheiro-500" % [country, r])
 		
 		1:  # Repressão
-			d.gov_power = clamp(d.gov_power + g, 0, 100)
-			d.rebel_power = clamp(d.rebel_power - r, 0, 100)
-			d.stability = max(d.stability - 2, 0)
+			adjust_country_value(country, "gov_power", g)
+			adjust_country_value(country, "rebel_power", -r)
+			adjust_country_value(country, "stability", -2)
 			print("👮 [%s] Repressão: gov+%d, rebel-%d, estab-2" % [country, g, r])
 		
 		2:  # Propaganda
-			d.gov_power = clamp(d.gov_power + g, 0, 100)
-			d.money -= 300
+			adjust_country_value(country, "gov_power", g)
+			adjust_country_value(country, "money", -300)
 			print("📺 [%s] Propaganda: gov+%d, dinheiro-300" % [country, g])
 		
 		3:  # Corrupção
-			d.money -= 800
-			d.stability = max(d.stability - 5, 0)
+			adjust_country_value(country, "money", -800)
+			adjust_country_value(country, "stability", -5)
 			print("💰 [%s] Corrupção: dinheiro-800, estab-5" % country)
 		
 		4:  # Investimento
-			d.money -= 600
-			d.stability = clamp(d.stability + 2, 0, 100)
+			adjust_country_value(country, "money", -600)
+			adjust_country_value(country, "stability", 2)
 			print("🏗️ [%s] Investimento: dinheiro-600, estab+2" % country)
 	
 	# 4. Evento ocasional (10% chance)
@@ -242,13 +266,10 @@ func simulate_ai_country(country: String) -> void:
 	if d.rebel_power >= 100 and not d.has("in_revolution"):
 		print("💥 [%s] REVOLUÇÃO DA IA! País entra em colapso!" % country)
 		d["in_revolution"] = true
-		d.stability = 0
-		d.gov_power = 0
+		set_country_value(country, "stability", 0)
+		set_country_value(country, "gov_power", 0)
 	
 	print("🤖 === FIM IA: %s ===" % country)
-
-# Simula mudanças mensais para um país (DEPRECIADA - removida para IA)
-# func _simulate_country_month(country: String) -> void:
 
 # =====================================
 #  SISTEMA DE ORÇAMENTO MENSAL
@@ -261,7 +282,7 @@ func apply_monthly_budget(country: String) -> void:
 	# Calcular saldo base
 	var base_balance = income - expenses
 	
-	# Adicionar variação econômica aleatória (±0-600, raramente ±1000)
+	# Adicionar variação econômica aleatória
 	var economic_event = 0
 	var event_chance = randi() % 100
 	if event_chance < 10:  # 10% chance de evento econômico grande
@@ -282,7 +303,7 @@ func apply_monthly_budget(country: String) -> void:
 		country, income, expenses, economic_event, total_change, current_money
 	])
 	
-	# Verificar falência (money < -2000)
+	# Verificar falência
 	if current_money < -2000:
 		print("💸 FALÊNCIA! %s perdeu 10 pontos de estabilidade" % country)
 		adjust_country_value(country, "stability", -10)
@@ -320,11 +341,8 @@ func apply_monthly_political_shift(country: String) -> void:
 	var new_stability = (new_gov_power + (100 - new_rebel_power)) / 2
 	set_country_value(country, "stability", new_stability)
 	
-	print("🏛️ %s: Gov %d → %d, Rebel %d → %d, Estab → %d" % [
-		country, 
-		new_gov_power - gov_shift, new_gov_power,
-		new_rebel_power - rebel_shift, new_rebel_power,
-		new_stability
+	print("🏛️ %s: Gov %d, Rebel %d, Estab → %d" % [
+		country, new_gov_power, new_rebel_power, new_stability
 	])
 
 # =====================================
@@ -356,7 +374,7 @@ func adjust_relation(country1: String, country2: String, delta: int) -> void:
 	set_relation(country1, country2, current_relation + delta)
 
 # =====================================
-#  SISTEMA DE EVENTOS ALEATÓRIOS (BALANCEADO)
+#  SISTEMA DE EVENTOS ALEATÓRIOS
 # =====================================
 
 # Aplica evento aleatório a um país
@@ -367,14 +385,14 @@ func apply_random_event(country: String) -> Dictionary:
 			"description": "Sindicatos paralisam o país",
 			"type": "economic",
 			"effects": {"expenses": 400, "stability": -5},
-			"duration": 2  # Efeito dura 2 meses
+			"duration": 2
 		},
 		{
 			"name": "Descoberta de Recursos",
 			"description": "Novos recursos naturais são descobertos",
 			"type": "economic", 
 			"effects": {"income": 300, "industry": 5},
-			"duration": 0  # Efeito permanente
+			"duration": 0
 		},
 		{
 			"name": "Escândalo de Corrupção",
@@ -387,7 +405,7 @@ func apply_random_event(country: String) -> Dictionary:
 			"description": "Forças armadas são modernizadas",
 			"type": "military",
 			"effects": {"defense": 8, "expenses": 200},
-			"duration": 3  # Custo extra por 3 meses
+			"duration": 3
 		},
 		{
 			"name": "Boa Colheita",
@@ -405,11 +423,11 @@ func apply_random_event(country: String) -> Dictionary:
 	
 	var event = events[randi() % events.size()]
 	
-	# Aplicar efeitos do evento (limitados a ±10% das variáveis)
+	# Aplicar efeitos do evento
 	for field in event.effects.keys():
 		var effect_value = event.effects[field]
 		
-		# Limitar efeitos para não serem muito extremos
+		# Limitar efeitos
 		if field == "money":
 			effect_value = clamp(effect_value, -1000, 1000)
 		elif field in ["stability", "gov_power", "rebel_power"]:
@@ -428,7 +446,7 @@ func apply_random_event(country: String) -> Dictionary:
 	return event
 
 # =====================================
-#  RESETAR JOGO (para GameOver)
+#  RESETAR JOGO
 # =====================================
 func reset_game() -> void:
 	print("🔄 Resetando dados do jogo...")
@@ -437,15 +455,18 @@ func reset_game() -> void:
 	current_month = 1
 	current_year = 1973
 	
-	# Resetar país do jogador para Argentina (Cone Sul)
+	# Resetar país do jogador
 	player_country = "Argentina"
 	
-	# Recriar dados dos países com valores iniciais
+	# Recriar dados dos países
 	country_data = _create_initial_country_data()
 	
 	# Resetar relações diplomáticas
 	country_relations = {}
 	_initialize_relations()
+	
+	# Resetar agente do jogador
+	current_player_agent = null
 	
 	print("✅ Jogo resetado com sucesso!")
 
@@ -453,98 +474,104 @@ func reset_game() -> void:
 #  CRIAR DADOS INICIAIS DOS PAÍSES
 # =====================================
 func _create_initial_country_data() -> Dictionary:
-	var initial_data = {}
-	
-	# Dados específicos por país (Cone Sul com economia balanceada)
-	initial_data["Argentina"] = {
-		"money": 10_000,
-		"income": 1_500,      # Receitas fixas mensais
-		"expenses": 1_200,    # Despesas fixas mensais
-		"stability": 60,
-		"gov_power": 60,
-		"rebel_power": 40,
-		"population": 45_000_000,
-		"gdp": 380_000_000_000,
-		"industry": 35,
-		"agriculture": 25,
-		"defense": 15,
-		"relations": {},
-		"last_update": 0,
-		"is_player": true
+	return {
+		"Argentina": {
+			"money": 10_000,
+			"income": 1_500,
+			"expenses": 1_200,
+			"stability": 60,
+			"gov_power": 60,
+			"rebel_power": 40,
+			"population": 45_000_000,
+			"gdp": 380_000_000_000,
+			"industry": 35,
+			"agriculture": 25,
+			"defense": 15,
+			"relations": {},
+			"last_update": 0,
+			"is_player": true
+		},
+		"Chile": {
+			"money": 8_200,
+			"income": 1_300,
+			"expenses": 1_100,
+			"stability": 68,
+			"gov_power": 68,
+			"rebel_power": 32,
+			"population": 19_000_000,
+			"gdp": 250_000_000_000,
+			"industry": 42,
+			"agriculture": 18,
+			"defense": 22,
+			"relations": {},
+			"last_update": 0,
+			"is_player": false
+		},
+		"Uruguay": {
+			"money": 3_500,
+			"income": 800,
+			"expenses": 700,
+			"stability": 75,
+			"gov_power": 75,
+			"rebel_power": 25,
+			"population": 3_500_000,
+			"gdp": 55_000_000_000,
+			"industry": 20,
+			"agriculture": 45,
+			"defense": 10,
+			"relations": {},
+			"last_update": 0,
+			"is_player": false
+		},
+		"Paraguay": {
+			"money": 2_800,
+			"income": 600,
+			"expenses": 550,
+			"stability": 45,
+			"gov_power": 45,
+			"rebel_power": 55,
+			"population": 7_000_000,
+			"gdp": 35_000_000_000,
+			"industry": 15,
+			"agriculture": 60,
+			"defense": 8,
+			"relations": {},
+			"last_update": 0,
+			"is_player": false
+		},
+		"Bolivia": {
+			"money": 2_200,
+			"income": 500,
+			"expenses": 480,
+			"stability": 40,
+			"gov_power": 40,
+			"rebel_power": 60,
+			"population": 11_500_000,
+			"gdp": 38_000_000_000,
+			"industry": 18,
+			"agriculture": 55,
+			"defense": 12,
+			"relations": {},
+			"last_update": 0,
+			"is_player": false
+		},
+		"Brasil": {
+			"money": 8_500,
+			"income": 1_400,
+			"expenses": 1_150,
+			"stability": 65,
+			"gov_power": 65,
+			"rebel_power": 35,
+			"population": 110_000_000,
+			"gdp": 450_000_000_000,
+			"industry": 40,
+			"agriculture": 30,
+			"defense": 20,
+			"relations": {},
+			"last_update": 0,
+			"is_player": false
+		}
 	}
-	
-	initial_data["Chile"] = {
-		"money": 8_200,
-		"income": 1_300,
-		"expenses": 1_100,
-		"stability": 68,
-		"gov_power": 68,
-		"rebel_power": 32,
-		"population": 19_000_000,
-		"gdp": 250_000_000_000,
-		"industry": 42,
-		"agriculture": 18,
-		"defense": 22,
-		"relations": {},
-		"last_update": 0,
-		"is_player": false
-	}
-	
-	initial_data["Uruguay"] = {
-		"money": 3_500,
-		"income": 800,
-		"expenses": 700,
-		"stability": 75,
-		"gov_power": 75,
-		"rebel_power": 25,
-		"population": 3_500_000,
-		"gdp": 55_000_000_000,
-		"industry": 20,
-		"agriculture": 45,
-		"defense": 10,
-		"relations": {},
-		"last_update": 0,
-		"is_player": false
-	}
-	
-	initial_data["Paraguay"] = {
-		"money": 2_800,
-		"income": 600,
-		"expenses": 550,
-		"stability": 45,
-		"gov_power": 45,
-		"rebel_power": 55,
-		"population": 7_000_000,
-		"gdp": 35_000_000_000,
-		"industry": 15,
-		"agriculture": 60,
-		"defense": 8,
-		"relations": {},
-		"last_update": 0,
-		"is_player": false
-	}
-	
-	initial_data["Bolivia"] = {
-		"money": 2_200,
-		"income": 500,
-		"expenses": 480,
-		"stability": 40,
-		"gov_power": 40,
-		"rebel_power": 60,
-		"population": 11_500_000,
-		"gdp": 38_000_000_000,
-		"industry": 18,
-		"agriculture": 55,
-		"defense": 12,
-		"relations": {},
-		"last_update": 0,
-		"is_player": false
-	}
-	
-	# Não adicionar países extras - apenas Cone Sul
-	# var additional_countries = ["Colombia", "Venezuela", "Peru", "Equador", "USA", "Mexico", "Canada", "Cuba"]
-	
-	return initial_data
 
 # =====================================
 #  INICIALIZAR RELAÇÕES DIPLOMÁTICAS
@@ -598,23 +625,28 @@ func reset_country_data(country: String) -> void:
 		print("País '%s' não encontrado" % country)
 		return
 	
-	# Valores padrão baseados no país
-	var default_data = {
-		"money": randi_range(2000, 10000),
-		"stability": randi_range(40, 80),
-		"gov_power": randi_range(40, 80),
-		"rebel_power": randi_range(20, 60),
-		"population": randi_range(1000000, 50000000),
-		"gdp": randi_range(10000000000, 500000000000),
-		"industry": randi_range(10, 50),
-		"agriculture": randi_range(15, 70),
-		"defense": randi_range(5, 30),
-		"relations": {},
-		"last_update": Time.get_ticks_msec(),
-		"is_player": (country == player_country)
-	}
+	var initial_data = _create_initial_country_data()
+	if initial_data.has(country):
+		country_data[country] = initial_data[country]
+	else:
+		# Valores padrão genéricos
+		country_data[country] = {
+			"money": randi_range(2000, 10000),
+			"income": randi_range(500, 1500),
+			"expenses": randi_range(400, 1200),
+			"stability": randi_range(40, 80),
+			"gov_power": randi_range(40, 80),
+			"rebel_power": randi_range(20, 60),
+			"population": randi_range(1000000, 50000000),
+			"gdp": randi_range(10000000000, 500000000000),
+			"industry": randi_range(10, 50),
+			"agriculture": randi_range(15, 70),
+			"defense": randi_range(5, 30),
+			"relations": {},
+			"last_update": Time.get_ticks_msec(),
+			"is_player": (country == player_country)
+		}
 	
-	country_data[country] = default_data
 	print("Dados de %s resetados" % country)
 
 # =====================================
@@ -636,6 +668,21 @@ func save_game_data(file_path: String = "user://game_save.dat") -> bool:
 		"country_relations": country_relations,
 		"save_timestamp": Time.get_unix_time_from_system()
 	}
+	
+	# Adicionar dados do agente se existir
+	if current_player_agent and current_player_agent.agent_data:
+		save_data["player_agent_data"] = {
+			"agent_name": current_player_agent.agent_data.agent_name,
+			"age": current_player_agent.agent_data.age,
+			"ideology": current_player_agent.agent_data.ideology,
+			"charisma": current_player_agent.agent_data.charisma,
+			"intelligence": current_player_agent.agent_data.intelligence,
+			"connections": current_player_agent.agent_data.connections,
+			"wealth": current_player_agent.agent_data.wealth,
+			"political_experience": current_player_agent.agent_data.political_experience,
+			"position_level": current_player_agent.agent_data.position_level,
+			"personal_support": current_player_agent.agent_data.personal_support
+		}
 	
 	file.store_string(JSON.stringify(save_data))
 	file.close()
@@ -672,6 +719,20 @@ func load_game_data(file_path: String = "user://game_save.dat") -> bool:
 	current_year = save_data.get("current_year", current_year)
 	country_relations = save_data.get("country_relations", {})
 	
+	# Carregar dados do agente se existir
+	if save_data.has("player_agent_data") and current_player_agent and current_player_agent.agent_data:
+		var agent_save = save_data["player_agent_data"]
+		current_player_agent.agent_data.agent_name = agent_save.get("agent_name", "")
+		current_player_agent.agent_data.age = agent_save.get("age", 35)
+		current_player_agent.agent_data.ideology = agent_save.get("ideology", "")
+		current_player_agent.agent_data.charisma = agent_save.get("charisma", 50)
+		current_player_agent.agent_data.intelligence = agent_save.get("intelligence", 50)
+		current_player_agent.agent_data.connections = agent_save.get("connections", 50)
+		current_player_agent.agent_data.wealth = agent_save.get("wealth", 300)
+		current_player_agent.agent_data.political_experience = agent_save.get("political_experience", 0)
+		current_player_agent.agent_data.position_level = agent_save.get("position_level", 0)
+		current_player_agent.agent_data.personal_support = agent_save.get("personal_support", {})
+	
 	print("Jogo carregado de: ", file_path)
 	return true
 
@@ -683,6 +744,26 @@ func get_current_month() -> int:
 
 func get_current_year() -> int:
 	return current_year
+
+# =====================================
+#  SISTEMA DE AGENTE POLÍTICO
+# =====================================
+func init_player_agent() -> void:
+	if current_player_agent == null:
+		# Criar controlador do agente
+		current_player_agent = PlayerAgentController.new()
+		
+		# Configurar dados do agente para o país do jogador
+		if current_player_agent.agent_data:
+			current_player_agent.agent_data.country = player_country
+		
+		print("✅ Agente político inicializado para %s" % player_country)
+
+# Retorna o agente atual (para compatibilidade)
+func get_player_agent() -> PlayerAgentController:
+	if not current_player_agent:
+		init_player_agent()
+	return current_player_agent
 
 # =====================================
 #  INICIALIZAÇÃO
@@ -698,15 +779,133 @@ func _ready() -> void:
 	
 	print("Sistema de relações diplomáticas inicializado")
 	print("==============================")
-	# =====================================
-#  SISTEMA DE AGENTE POLÍTICO
+
 # =====================================
+#  INTEGRAÇÃO COM SISTEMA PRINCIPAL
 # =====================================
-#  SISTEMA DE AGENTE POLÍTICO
+
+# Conecta o agente ao sistema global
+func connect_player_agent(agent: PlayerAgentController) -> void:
+	current_player_agent = agent
+	if agent and agent.agent_data:
+		agent.agent_data.country = player_country
+		print("✅ Agente conectado ao sistema global")
+
+# Sincroniza dados do país com o agente
+func sync_agent_with_country() -> void:
+	if not current_player_agent or not current_player_agent.agent_data:
+		return
+	
+	var country = player_country
+	var agent = current_player_agent.agent_data
+	
+	# Sincronizar recursos do agente com o país
+	var country_money = get_country_value(country, "money", 0)
+	var agent_wealth_ratio = 0.001  # Agente tem acesso a 0.1% dos recursos do país
+	agent.wealth = int(country_money * agent_wealth_ratio)
+	
+	# Influência do agente na estabilidade do país baseada na posição
+	var influence_multiplier = agent.position_level * 0.1
+	var base_support = agent.get_average_support()
+	
+	if base_support > 50:
+		var stability_bonus = (base_support - 50) * influence_multiplier
+		adjust_country_value(country, "stability", stability_bonus * 0.1)
+
 # =====================================
-func init_player_agent() -> void:
-	# ↳ use TAB (⇥) em cada nível; nada de espaços!
-	if current_player_agent == null:
-		# placeholder até implementarmos presets (Dia 3-5)
-		current_player_agent = PlayerAgent.new()
-		print("✅ Agente político inicializado.")
+#  EVENTOS ESPECÍFICOS DO AGENTE
+# =====================================
+
+# Aplica consequências das ações do agente no país
+func apply_agent_action_consequences(action_name: String, success: bool) -> void:
+	if not success:
+		return
+	
+	match action_name:
+		"Distribuir Panfletos":
+			# Pequeno aumento na conscientização política
+			adjust_country_value(player_country, "rebel_power", 1)
+			
+		"Fazer Discurso":
+			# Pode aumentar ou diminuir estabilidade
+			var impact = randi_range(-2, 3)
+			adjust_country_value(player_country, "stability", impact)
+			
+		"Organizar Reunião":
+			# Aumenta organização política
+			adjust_country_value(player_country, "gov_power", 1)
+
+# Verifica se o agente pode se tornar líder nacional
+func check_agent_leadership_eligibility() -> bool:
+	if not current_player_agent or not current_player_agent.agent_data:
+		return false
+	
+	var agent = current_player_agent.agent_data
+	var country = player_country
+	
+	# Requisitos para liderança nacional
+	var is_president = agent.position_level >= 5  # Presidente
+	var has_support = agent.get_average_support() >= 60
+	var country_unstable = get_country_value(country, "stability", 100) < 40
+	var high_influence = agent.get_total_support() >= 500
+	
+	return is_president and (has_support or (country_unstable and high_influence))
+
+# =====================================
+#  UTILITÁRIOS ADICIONAIS
+# =====================================
+
+# Retorna lista de países ordenados por poder
+func get_countries_by_power() -> Array:
+	var countries_array = []
+	
+	for country_name in country_data.keys():
+		var power_score = calculate_country_power(country_name)
+		countries_array.append({
+			"name": country_name,
+			"power": power_score
+		})
+	
+	countries_array.sort_custom(func(a, b): return a.power > b.power)
+	return countries_array
+
+# Calcula o poder de um país
+func calculate_country_power(country: String) -> float:
+	var data = get_country(country)
+	if data.is_empty():
+		return 0.0
+	
+	# Fórmula de poder: economia + militar + estabilidade
+	var economic_power = (data.get("gdp", 0) / 1_000_000_000.0) * 0.3
+	var military_power = data.get("defense", 0) * 2.0
+	var stability_power = data.get("stability", 0) * 1.5
+	var industrial_power = data.get("industry", 0) * 1.0
+	
+	return economic_power + military_power + stability_power + industrial_power
+
+# Retorna vizinhos de um país (para o Cone Sul)
+func get_country_neighbors(country: String) -> Array:
+	var neighbors_map = {
+		"Argentina": ["Chile", "Brasil", "Uruguay", "Paraguay", "Bolivia"],
+		"Brasil": ["Argentina", "Uruguay", "Paraguay", "Bolivia"],
+		"Chile": ["Argentina", "Bolivia"],
+		"Uruguay": ["Argentina", "Brasil"],
+		"Paraguay": ["Argentina", "Brasil", "Bolivia"],
+		"Bolivia": ["Argentina", "Brasil", "Chile", "Paraguay"]
+	}
+	
+	return neighbors_map.get(country, [])
+
+# Calcula a influência regional de um país
+func calculate_regional_influence(country: String) -> float:
+	var influence = 0.0
+	var neighbors = get_country_neighbors(country)
+	
+	for neighbor in neighbors:
+		var relation = get_relation(country, neighbor)
+		influence += relation * 0.01  # Converter para porcentagem
+	
+	# Adicionar poder do país
+	influence += calculate_country_power(country) * 0.1
+	
+	return clamp(influence, 0.0, 100.0)

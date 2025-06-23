@@ -1,48 +1,7 @@
 # =====================================
-#  PLAYERAGENTRESOURCE.GD - DADOS DO AGENTE
-# =====================================
-class_name PlayerAgentResource
-extends Resource
-
-# --- SINAIS ---
-signal property_changed(property_name: String, old_value, new_value)
-
-# --- DADOS ---
-@export var agent_name: String = "Lautaro Silva"
-@export var age: int = 35
-@export var ideology: String = "Socialista Reformista"
-@export var country: String = "Chile"
-@export_range(0, 100) var charisma: int = 50
-@export_range(0, 100) var intelligence: int = 50
-@export_range(0, 100) var connections: int = 50
-@export var wealth: int = 300
-@export var political_experience: int = 0
-@export var position_level: int = 0
-
-@export var personal_support: Dictionary = {
-	"military": 10, "business": 10, "intellectual": 10,
-	"worker": 10, "student": 10, "church": 10, "peasant": 10
-}
-
-var position_hierarchy = ["Cidadão", "Ativista", "Deputado", "Senador", "Ministro", "Presidente"]
-
-func get_position_name() -> String:
-	if position_level >= 0 and position_level < position_hierarchy.size():
-		return position_hierarchy[position_level]
-	return "Desconhecido"
-
-func get_total_support() -> int:
-	var total = 0
-	for value in personal_support.values():
-		total += value
-	return total
-
-func get_average_support() -> float:
-	return float(get_total_support()) / personal_support.size()
-
-# =====================================
 #  PLAYERAGENTCONTROLLER.GD - LÓGICA DO AGENTE
 # =====================================
+# IMPORTANTE: Este arquivo deve ser salvo como PlayerAgentController.gd
 class_name PlayerAgentController
 extends Node
 
@@ -210,30 +169,3 @@ func get_available_actions() -> Array:
 				"available": agent_data.wealth >= action.cost
 			})
 	return actions
-
-# =====================================
-#  MAIN.GD - VERSÃO CORRIGIDA E INTEGRADA
-# =====================================
-extends Node
-
-# --- PRELOADS E CONSTANTES ---
-const NotificationSystem = preload("res://scripts/NotificationSystem.gd")
-const GameMenu = preload("res://scenes/GameMenu.tscn")
-const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
-
-enum GamePhase { POLITICAL_AGENT = 1, NATIONAL_LEADER = 2 }
-enum GameSpeed { PAUSED = 0, SLOW = 4, NORMAL = 2, FAST = 1 }
-
-# --- CONFIGURAÇÕES ---
-@export var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
-@export var game_speed: GameSpeed = GameSpeed.NORMAL
-
-# --- SISTEMAS ---
-var player_controller: PlayerAgentController
-var notification_system: NotificationSystem
-var game_timer: Timer
-var ui_manager: UIManager
-
-# --- DADOS DO JOGO ---
-var current_year: int = 1973
-var current_month: int = 1

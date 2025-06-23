@@ -1,76 +1,65 @@
 # =====================================
-#  UIManager.gd
-#  Gerencia a interface de usuário baseada na fase do jogo.
+#  UIMANAGER.GD - GERENCIADOR DE UI
 # =====================================
 class_name UIManager
-extends Node # Garante que pode ser adicionado à árvore de cena
+extends Node
 
-# =====================================
-#  REFERÊNCIAS
-# =====================================
-var main_node: Node # Referência ao nó principal (Main.gd)
-var game_phase_label: Label # Exemplo: Label para exibir a fase do jogo
-var agent_info_panel: Control # Exemplo: Painel para informações do agente
-var leader_info_panel: Control # Exemplo: Painel para informações do líder nacional
+var date_label: Label
+var money_label: Label
+var support_label: Label
+var position_label: Label
+var speed_label: Label
+var info_container: VBoxContainer
 
-# =====================================
-#  INICIALIZAÇÃO
-# =====================================
-func _init() -> void:
-	# Inicialização de variáveis, se necessário
-	pass
-
-func setup(main: Node) -> void:
-	main_node = main
-	# Tentar buscar referências de nós da UI (se existirem na cena)
-	# Estes caminhos são exemplos e devem corresponder à sua cena
-	game_phase_label = main_node.get_node_or_null("CanvasLayer/TopBar/GamePhaseLabel")
-	agent_info_panel = main_node.get_node_or_null("CanvasLayer/Sidepanel/AgentInfoPanel")
-	leader_info_panel = main_node.get_node_or_null("CanvasLayer/Sidepanel/LeaderInfoPanel")
+func setup_ui_references(main_node: Node):
+	# Usa caminhos mais robustos
+	var canvas = main_node.get_node_or_null("CanvasLayer")
+	if not canvas:
+		push_error("CanvasLayer não encontrado!")
+		return
 	
-	if game_phase_label:
-		print("UI Manager: GamePhaseLabel encontrado.")
-	if agent_info_panel:
-		print("UI Manager: AgentInfoPanel encontrado.")
-	if leader_info_panel:
-		print("UI Manager: LeaderInfoPanel encontrado.")
-
-# =====================================
-#  ATUALIZAÇÃO DA UI ESPECÍFICA DA FASE
-# =====================================
-func update_phase_specific_ui(_current_phase: int, _player_agent: PlayerAgent) -> void: # CORREÇÃO AQUI: adicionado _ aos parâmetros
-	# Este é um esqueleto. Você implementaria a lógica para mostrar/ocultar painéis
-	# e atualizar informações com base na fase e no player_agent
+	# TopBar
+	var topbar = canvas.get_node_or_null("TopBar/HBoxContainer")
+	if topbar:
+		date_label = topbar.get_node_or_null("DateLabel")
+		money_label = topbar.get_node_or_null("MoneyLabel")
+		support_label = topbar.get_node_or_null("StabilityLabel")
+		position_label = topbar.get_node_or_null("PositionLabel")
 	
-	# Exemplo: Lógica para mostrar/ocultar painéis de acordo com a fase
-	# if game_phase_label:
-	# 	game_phase_label.text = "Fase: %s" % GamePhase.keys()[_current_phase] # Usar _current_phase
+	# Speed indicator
+	var bottombar = canvas.get_node_or_null("BottomBar/HBoxContainer")
+	if bottombar:
+		speed_label = bottombar.get_node_or_null("SpeedLabel")
 	
-	# if _current_phase == main_node.GamePhase.POLITICAL_AGENT:
-	# 	if agent_info_panel: agent_info_panel.visible = true
-	# 	if leader_info_panel: leader_info_panel.visible = false
-	# 	# Atualizar informações específicas do agente usando _player_agent
-	# elif _current_phase == main_node.GamePhase.NATIONAL_LEADER:
-	# 	if agent_info_panel: agent_info_panel.visible = false
-	# 	if leader_info_panel: leader_info_panel.visible = true
-	# 	# Atualizar informações específicas do líder usando _player_agent ou Globals
-	pass
+	# Info panel
+	var sidepanel = canvas.get_node_or_null("Sidepanel")
+	if sidepanel:
+		info_container = sidepanel.get_node_or_null("InfoContainer")
 
-# =====================================
-#  MÉTODOS DE CONTROLE DA UI (Exemplos)
-# =====================================
-func show_game_over_screen() -> void:
-	# Lógica para exibir a tela de Game Over
-	print("UI Manager: Exibindo tela de Game Over.")
-	# Você precisaria de uma referência à sua tela de game over aqui
-	# Por exemplo: main_node.get_node("GameOverScreen").show()
-	pass
+func update_date(month: String, year: int):
+	if date_label:
+		date_label.text = "%s %d" % [month, year]
 
-func hide_game_over_screen() -> void:
-	# Lógica para esconder a tela de Game Over
-	print("UI Manager: Escondendo tela de Game Over.")
-	# Por exemplo: main_node.get_node("GameOverScreen").hide()
-	pass
+func update_wealth_display(wealth: int):
+	if money_label:
+		money_label.text = "💰 %d" % wealth
 
-# Adicione outras funções de gerenciamento de UI conforme necessário
-# Por exemplo, para popups, menus, etc.
+func update_support_display(average_support: float):
+	if support_label:
+		support_label.text = "📊 %.1f%%" % average_support
+
+func update_position_display(position: String):
+	if position_label:
+		position_label.text = "👤 " + position
+
+func update_speed_display(speed: int) -> void:
+	if speed_label:
+		match speed:
+			0: # PAUSED
+				speed_label.text = "⏸️ Pausado"
+			4: # SLOW
+				speed_label.text = "▶ Devagar"
+			2: # NORMAL
+				speed_label.text = "▶▶ Normal"
+			1: # FAST
+				speed_label.text = "▶▶▶ Rápido"
