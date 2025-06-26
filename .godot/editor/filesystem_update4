@@ -1,12 +1,5 @@
 res://scenes/main.tscn
-res://scripts/main.gd
-res://scripts/PartyController.gd
-res://scripts/PartyResource.gd
-res://scenes/GameMenu.tscn
-res://scripts/Globals.gd
-res://scripts/NarrativeSystem.gd
-res://scripts/PlayerActions.gd
 res://scripts/ChileHistoricalEvents.gd
-res://scripts/ChoiceDialog.gd
-res://scenes/ChoiceDialog.tscn
-res://scripts/PartyActions.gd
+res://scripts/PartyResource.gd
+res://scripts/PartyController.gd
+res://scripts/main.gd

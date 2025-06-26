@@ -1,23 +1,27 @@
 # res://scripts/PartyController.gd
-# Versão final e corrigida.
+# Versão final corrigida
 
 class_name PartyController
 extends Node
 
+# --- SINAIS ---
 signal phase_advanced(old_phase, new_phase)
 signal support_changed(group_name, old_value, new_value)
 signal treasury_changed(old_value, new_value)
 signal action_executed(action_name, success, message)
 
+# --- DADOS E SISTEMAS ---
 var party_data: PartyResource
-# CORREÇÃO: Carregando o novo PartyActions.gd
 const PartyActions = preload("res://scripts/PartyActions.gd")
 var actions_manager: Node
 
 func _ready():
 	party_data = PartyResource.new()
-	# CORREÇÃO: Instanciando o novo PartyActions
 	actions_manager = PartyActions.new()
+
+# =====================================
+# LÓGICA DE AÇÕES DO PARTIDO
+# =====================================
 
 func get_available_actions() -> Array:
 	if not actions_manager: return []
@@ -41,6 +45,7 @@ func execute_action(action_name: String):
 			emit_signal("treasury_changed", old_treasury, party_data.treasury)
 
 			var success = randf() < (party_data.influence / 10.0)
+			
 			if success:
 				var message = "Ação do partido '%s' bem-sucedida!" % action_name
 				var amplifier = TraumaSystem.check_trauma_activation(action_name)
@@ -56,14 +61,42 @@ func execute_action(action_name: String):
 
 				emit_signal("action_executed", action_name, true, message)
 			else:
-				var message = "A ação do partido '%s' não teve o efeito esperado." % action_name
+				var message = "Ação do partido '%s' não teve o efeito esperado." % action_name
 				party_data.influence = max(0, party_data.influence - 0.2)
 				emit_signal("action_executed", action_name, false, message)
 			return
 
+# =====================================
+# FUNÇÕES DE EVENTOS HISTÓRICOS
+# =====================================
+
+func handle_coup_response(consequence: String):
+	# Aplica os efeitos baseados na escolha do jogador durante o golpe
+	match consequence:
+		"resist":
+			party_data.influence -= 10
+			_change_support("military", -20)
+			_change_support("workers", 15)
+		"wait_and_see":
+			party_data.influence -= 5
+			_change_support("intellectuals", -10)
+			_change_support("workers", -10)
+		"exile":
+			party_data.influence = 1.0
+			party_data.treasury /= 10
+			party_data.militants /= 4
+
+	# Emite os sinais para que a UI seja atualizada pelo main.gd
+	emit_signal("treasury_changed", party_data.treasury, party_data.treasury)
+
+# =====================================
+# FUNÇÕES AUXILIARES E MENSAIS
+# =====================================
+
 func _change_support(group_name: String, base_amount: int, trauma_amplifier: float = 1.0):
 	var final_amount = int(base_amount * trauma_amplifier)
 	if not party_data.group_support.has(group_name):
+		printerr("ERRO: Tentou alterar apoio para um grupo inexistente: ", group_name)
 		return
 	var old_support = party_data.group_support[group_name]
 	party_data.group_support[group_name] = clamp(old_support + final_amount, 0, 100)
@@ -89,6 +122,7 @@ func attempt_network_discovery(network_id: String):
 	
 	var network = PowerNetworks.hidden_networks.get(network_id)
 	if not network:
+		printerr("Tentou investigar uma rede que não existe: ", network_id)
 		return
 	
 	var discovery_chance = (party_data.influence + party_data.militants) / 1000.0
