@@ -16,6 +16,10 @@ const PartyActions = preload("res://scripts/PartyActions.gd")
 var actions_manager: Node
 
 func _ready():
+	# --- LÓGICA ATUALIZADA ---
+	# Anuncia a sua existência para todo o jogo
+	Globals.party_controller = self
+	
 	party_data = PartyResource.new()
 	actions_manager = PartyActions.new()
 

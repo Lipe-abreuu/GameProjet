@@ -3,7 +3,7 @@
 # Adicionar como Autoload: Projeto -> Configurações do Projeto -> Autoload -> Name: Globals
 
 extends Node
-
+var party_controller = null
 # Referência ao controlador do partido do jogador
 # CORREÇÃO: Usando o novo nome da classe e da variável
 var current_party_controller: PartyController
@@ -56,7 +56,11 @@ var country_data := {
 		"agriculture": 18,
 		"defense": 22,
 		"relations": {},
+		"repression": 10,
+		"international_pressure": 0,
 		"last_update": 0
+		
+		
 	},
 	"Paraguay": {
 		"money": 2_800,
@@ -140,12 +144,10 @@ func set_country_value(country: String, field: String, value) -> void:
 		print("Aviso: País '%s' não encontrado" % country)
 
 # Ajusta um valor (soma/subtrai delta)
-func adjust_country_value(country: String, field: String, delta: float) -> void:
-	if country_data.has(country):
-		var current_value = country_data[country].get(field, 0)
-		set_country_value(country, field, current_value + delta)
-	else:
-		print("Aviso: País '%s' não encontrado" % country)
+func adjust_country_value(country: String, key: String, value: int):
+	if country_data.has(country) and country_data[country].has(key):
+		country_data[country][key] += value
+		print("GLOBALS: %s de %s agora é %s" % [key, country, country_data[country][key]])
 
 # Aplica limites aos campos (ex: estabilidade 0-100)
 func _apply_field_limits(country: String, field: String) -> void:

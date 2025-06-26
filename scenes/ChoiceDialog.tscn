@@ -1,6 +1,25 @@
-[gd_scene format=3 uid="uid://b6ekh66agqxj0"]
+[gd_scene load_steps=2 format=3 uid="uid://b6ekh66agqxj0"]
 
-[node name="ChoiceDialog" type="PanelContainer"]
+[ext_resource type="Script" path="res://scripts/ChoiceDialog.gd" id="1_wxga6"]
+
+[node name="ChoiceDialog" type="PanelContainer" node_paths=PackedStringArray("title_label", "description_label", "buttons_container")]
+process_mode = 3
+custom_minimum_size = Vector2(300, 100)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -50.0
+offset_right = 150.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wxga6")
+title_label = NodePath("MarginContainer/VBoxContainer3/Titulo")
+description_label = NodePath("MarginContainer/VBoxContainer3/Descricao")
+buttons_container = NodePath("MarginContainer/VBoxContainer3/VBoxContainer")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -11,7 +30,7 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer3"]
 layout_mode = 2
 
-[node name="Descricao" type="Label" parent="MarginContainer/VBoxContainer3/VBoxContainer"]
+[node name="Descricao" type="Label" parent="MarginContainer/VBoxContainer3"]
 layout_mode = 2
 
 [node name="Titulo" type="Label" parent="MarginContainer/VBoxContainer3"]

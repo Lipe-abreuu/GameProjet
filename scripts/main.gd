@@ -6,8 +6,12 @@ extends Node
 const GameMenu = preload("res://scenes/GameMenu.tscn")
 const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
 
+# --- ENUMS E VARIÁVEIS DE MEMBRO ---
+# A declaração do enum e da variável game_speed foi movida para o topo do script,
+# tornando-os acessíveis a todas as funções.
 enum GamePhase { POLITICAL_AGENT = 1, NATIONAL_LEADER = 2 }
 enum GameSpeed { PAUSED = 0, SLOW = 4, NORMAL = 2, FAST = 1 }
+var game_speed: GameSpeed = GameSpeed.NORMAL
 
 @export_category("UI References")
 @export var canvas_layer: CanvasLayer
@@ -22,12 +26,10 @@ enum GameSpeed { PAUSED = 0, SLOW = 4, NORMAL = 2, FAST = 1 }
 @export var normal_speed_button: Button
 @export var fast_speed_button: Button
 @export var narrative_panel: PanelContainer
-@export var investigate_button: Button # Adicione o botão "Investigar Redes" aqui
-@export var narrativas_button: Button # 
+@export var investigate_button: Button
+@export var narrativas_button: Button
 
 var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
-var game_speed: GameSpeed = GameSpeed.NORMAL
-
 var party_controller: PartyController
 var notification_system: Node
 var game_timer: Timer
@@ -35,9 +37,6 @@ var game_timer: Timer
 var current_year: int = 1973
 var current_month: int = 1
 
-# =====================================
-# INICIALIZAÇÃO
-# =====================================
 func _ready():
 	print("=== INICIALIZANDO JOGO ===")
 	_create_systems()
@@ -52,9 +51,7 @@ func _create_systems():
 	add_child(notification_system)
 	if is_instance_valid(canvas_layer):
 		notification_system.setup(canvas_layer)
-	else:
-		printerr("ERRO: CanvasLayer não foi atribuído no inspetor do nó Main!")
-
+	
 	game_timer = Timer.new()
 	game_timer.name = "GameTimer"
 	game_timer.wait_time = float(game_speed)
@@ -74,7 +71,6 @@ func _setup_party():
 func _connect_signals():
 	_connect_map_signals()
 	
-	# Conecta os botões de velocidade
 	if pause_button and not pause_button.is_connected("pressed", set_game_speed):
 		pause_button.pressed.connect(set_game_speed.bind(GameSpeed.PAUSED))
 	if normal_speed_button and not normal_speed_button.is_connected("pressed", set_game_speed):
@@ -82,18 +78,15 @@ func _connect_signals():
 	if fast_speed_button and not fast_speed_button.is_connected("pressed", set_game_speed):
 		fast_speed_button.pressed.connect(set_game_speed.bind(GameSpeed.FAST))
 	
-	# Conecta os sinais dos Autoloads
 	if NarrativeSystem and not NarrativeSystem.is_connected("narrative_consequence_triggered", _on_narrative_consequence_triggered):
 		NarrativeSystem.narrative_consequence_triggered.connect(_on_narrative_consequence_triggered)
 		
 	if ChileEvents and not ChileEvents.is_connected("historical_event_notification", _on_historical_event_notification):
 		ChileEvents.historical_event_notification.connect(_on_historical_event_notification)
 		
-	# Conecta os botões de ação da UI
 	if investigate_button and not investigate_button.is_connected("pressed", _on__investigar_redes_pressed):
 		investigate_button.pressed.connect(_on__investigar_redes_pressed)
 	
-	# --- ADICIONE ESTA CONEXÃO PARA O BOTÃO DE NARRATIVAS ---
 	if narrativas_button and not narrativas_button.is_connected("pressed", _on_narrativas_button_pressed):
 		narrativas_button.pressed.connect(_on_narrativas_button_pressed)
 
@@ -106,9 +99,6 @@ func _start_game():
 		NotificationSystem.NotificationType.INFO
 	)
 
-# =====================================
-# GAME LOOP
-# =====================================
 func _input(event: InputEvent):
 	if event.is_action_pressed("ui_cancel"):
 		toggle_pause()
@@ -125,17 +115,10 @@ func advance_month():
 		notification_system.show_notification("Novo Ano", "Chegamos a %d!" % current_year, NotificationSystem.NotificationType.INFO)
 	
 	party_controller.advance_month()
-	
-	# Chama os sistemas a cada mês
 	ChileEvents.check_for_events(current_year, current_month)
 	NarrativeSystem.process_narrative_spread()
 	NarrativeSystem.check_narrative_consequences()
-	
 	_update_all_ui()
-
-# =====================================
-# GERENCIAMENTO DE UI E PAUSA
-# =====================================
 
 func toggle_pause():
 	var tree = get_tree()
@@ -147,7 +130,6 @@ func toggle_pause():
 			menu_instance.name = "GameMenu"
 			add_child(menu_instance)
 			menu_instance.resume_game.connect(toggle_pause)
-			# Adicione aqui outras conexões se necessário (ex: Sair)
 	else:
 		if menu_instance:
 			menu_instance.queue_free()
@@ -164,8 +146,7 @@ func set_game_speed(speed: GameSpeed):
 	_update_speed_display()
 
 func _update_all_ui():
-	if date_label:
-		date_label.text = "%s %d" % [MONTH_NAMES[current_month - 1], current_year]
+	if date_label: date_label.text = "%s %d" % [MONTH_NAMES[current_month - 1], current_year]
 	if party_controller and party_controller.party_data:
 		_set_treasury_label(party_controller.party_data.treasury)
 		_set_support_label(party_controller.party_data.get_average_support())
@@ -189,10 +170,6 @@ func _update_speed_display():
 			GameSpeed.NORMAL: speed_label.text = "▶▶ Normal"
 			GameSpeed.FAST: speed_label.text = "▶▶▶ Rápido"
 
-# =====================================
-# HANDLERS DE SINAIS
-# =====================================
-
 func _on_treasury_changed(_old_val: int, new_val: int):
 	_set_treasury_label(new_val)
 
@@ -200,8 +177,6 @@ func _on_phase_advanced(old_pos: String, new_pos: String):
 	notification_system.show_notification("🎉 Partido Cresceu!", "Sua organização avançou de '%s' para '%s'!" % [old_pos, new_pos], NotificationSystem.NotificationType.SUCCESS)
 
 func _on_support_changed(_group: String, _old_val: int, _new_val: int):
-	# A notificação de mudança de apoio individual pode ser muito repetitiva.
-	# Vamos apenas atualizar a média geral na UI.
 	if party_controller:
 		_set_support_label(party_controller.get_average_support())
 
@@ -218,10 +193,6 @@ func _on_historical_event_notification(title: String, message: String, type: int
 func _on_narrative_consequence_triggered(group_name: String, narrative_content: String):
 	notification_system.show_notification("Reação Política!", "O grupo '%s' foi convencido pela narrativa de que '%s' e está a mudar o seu comportamento." % [group_name.capitalize(), narrative_content], NotificationSystem.NotificationType.INFO)
 
-# =====================================
-# LÓGICA DE INTERAÇÃO (MAPA E PAINÉIS)
-# =====================================
-
 func _connect_map_signals():
 	if not map_node: return
 	for country_node in map_node.get_children():
@@ -237,20 +208,16 @@ func _on_country_clicked(_viewport, event: InputEvent, _shape_idx, country_name:
 func show_country_info(country_name: String):
 	if not info_container: return
 	for c in info_container.get_children(): c.queue_free()
-
 	var title = Label.new()
 	title.text = "🏛️ " + country_name.to_upper()
 	info_container.add_child(title)
-
 	if party_controller and party_controller.party_data and country_name == party_controller.party_data.country:
 		var info = Label.new()
 		info.text = "🚩 %s (%s)" % [party_controller.party_data.party_name, party_controller.party_data.get_phase_name()]
 		info_container.add_child(info)
-		
 		var actions_title = Label.new()
 		actions_title.text = "\n🎯 Ações do Partido:"
 		info_container.add_child(actions_title)
-
 		var actions = party_controller.get_available_actions()
 		for action in actions:
 			var btn = Button.new()
@@ -264,18 +231,73 @@ func show_country_info(country_name: String):
 		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 		info_container.add_child(info_label)
 
+func _on_narrativas_button_pressed():
+	if not narrative_panel: return
+	narrative_panel.visible = not narrative_panel.visible
+	if not narrative_panel.visible: return
+	var narrative_list = narrative_panel.get_node_or_null("NarrativeList")
+	if not narrative_list: return
+	for c in narrative_list.get_children(): c.queue_free()
+	var title = Label.new()
+	title.text = "NARRATIVAS ATIVAS"
+	narrative_list.add_child(title)
+	if NarrativeSystem.active_narratives.is_empty():
+		var empty_label = Label.new()
+		empty_label.text = "Nenhuma narrativa importante circulando."
+		narrative_list.add_child(empty_label)
+		return
+	for narrative in NarrativeSystem.active_narratives:
+		var narrative_box = HBoxContainer.new()
+		narrative_box.add_theme_constant_override("separation", 15)
+		var content_label = Label.new()
+		content_label.text = '"' + narrative.content + '"'
+		content_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		content_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var buttons_vbox = VBoxContainer.new()
+		var counter_btn = Button.new()
+		counter_btn.text = "Contra-narrativa"
+		counter_btn.pressed.connect(_on_create_counter_narrative.bind(narrative))
+		var amplify_btn = Button.new()
+		amplify_btn.text = "Amplificar"
+		amplify_btn.pressed.connect(_on_amplify_narrative.bind(narrative))
+		buttons_vbox.add_child(counter_btn)
+		buttons_vbox.add_child(amplify_btn)
+		narrative_box.add_child(content_label)
+		narrative_box.add_child(buttons_vbox)
+		narrative_list.add_child(narrative_box)
+		narrative_list.add_child(HSeparator.new())
+
+func _on_create_counter_narrative(original_narrative):
+	var cost = 100
+	if party_controller.party_data.treasury < cost:
+		notification_system.show_notification("Sem Fundos", "Custa %d para criar uma contra-narrativa." % cost, NotificationSystem.NotificationType.ERROR)
+		return
+	party_controller.party_data.treasury -= cost
+	var counter_content = "Fontes seguras desmentem os rumores de que '%s'" % original_narrative.content.to_lower()
+	var counter_narrative = NarrativeSystem.Narrative.new({
+		"content": counter_content,
+		"source_group": "party_media",
+		"intensity": 40 + (party_controller.party_data.influence / 2),
+		"credibility": party_controller.party_data.militants / 1000.0,
+		"target_groups": original_narrative.target_groups
+	})
+	NarrativeSystem.active_narratives.append(counter_narrative)
+	notification_system.show_notification("Mídia", "Contra-narrativa lançada!", NotificationSystem.NotificationType.SUCCESS)
+	_on_narrativas_button_pressed()
+	_on_narrativas_button_pressed()
+
+func _on_amplify_narrative(_narrative):
+	notification_system.show_notification("Ação Indisponível", "A lógica para amplificar narrativas ainda não foi implementada.", NotificationSystem.NotificationType.INFO)
+
 func _on__investigar_redes_pressed():
 	if not info_container: return
 	for c in info_container.get_children(): c.queue_free()
-	
 	var title = Label.new()
 	title.text = "REDES DE PODER INVISÍVEIS"
 	info_container.add_child(title)
-	
 	for network_id in PowerNetworks.hidden_networks:
 		var network = PowerNetworks.hidden_networks[network_id]
 		var network_box = VBoxContainer.new()
-		
 		if network["discovered"]:
 			var name_label = Label.new()
 			name_label.text = "✅ %s" % network["name"]
@@ -287,15 +309,9 @@ func _on__investigar_redes_pressed():
 			var hint_label = Label.new()
 			hint_label.text = "❓ Rede Suspeita (%s)" % network["connection_type"]
 			network_box.add_child(hint_label)
-			
 			var investigate_btn = Button.new()
 			investigate_btn.text = "Investigar (Custo: 50)"
 			investigate_btn.pressed.connect(party_controller.attempt_network_discovery.bind(network_id))
 			network_box.add_child(investigate_btn)
-			
 		info_container.add_child(network_box)
 		info_container.add_child(HSeparator.new())
-
-func _on_narrativas_button_pressed():
-	# Lógica para o painel de narrativas...
-	pass
