@@ -3,3 +3,5 @@ res://scripts/ChileHistoricalEvents.gd
 res://scripts/PartyResource.gd
 res://scripts/PartyController.gd
 res://scripts/main.gd
+res://scenes/GameMenu.tscn
+res://scenes/ChoiceDialog.tscn

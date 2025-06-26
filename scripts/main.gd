@@ -23,6 +23,7 @@ enum GameSpeed { PAUSED = 0, SLOW = 4, NORMAL = 2, FAST = 1 }
 @export var fast_speed_button: Button
 @export var narrative_panel: PanelContainer
 @export var investigate_button: Button # Adicione o botão "Investigar Redes" aqui
+@export var narrativas_button: Button # 
 
 var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
 var game_speed: GameSpeed = GameSpeed.NORMAL
@@ -73,21 +74,28 @@ func _setup_party():
 func _connect_signals():
 	_connect_map_signals()
 	
-	if pause_button:
+	# Conecta os botões de velocidade
+	if pause_button and not pause_button.is_connected("pressed", set_game_speed):
 		pause_button.pressed.connect(set_game_speed.bind(GameSpeed.PAUSED))
-	if normal_speed_button:
+	if normal_speed_button and not normal_speed_button.is_connected("pressed", set_game_speed):
 		normal_speed_button.pressed.connect(set_game_speed.bind(GameSpeed.NORMAL))
-	if fast_speed_button:
+	if fast_speed_button and not fast_speed_button.is_connected("pressed", set_game_speed):
 		fast_speed_button.pressed.connect(set_game_speed.bind(GameSpeed.FAST))
 	
 	# Conecta os sinais dos Autoloads
-	if NarrativeSystem:
+	if NarrativeSystem and not NarrativeSystem.is_connected("narrative_consequence_triggered", _on_narrative_consequence_triggered):
 		NarrativeSystem.narrative_consequence_triggered.connect(_on_narrative_consequence_triggered)
-	if ChileEvents:
+		
+	if ChileEvents and not ChileEvents.is_connected("historical_event_notification", _on_historical_event_notification):
 		ChileEvents.historical_event_notification.connect(_on_historical_event_notification)
-	if investigate_button:
+		
+	# Conecta os botões de ação da UI
+	if investigate_button and not investigate_button.is_connected("pressed", _on__investigar_redes_pressed):
 		investigate_button.pressed.connect(_on__investigar_redes_pressed)
-
+	
+	# --- ADICIONE ESTA CONEXÃO PARA O BOTÃO DE NARRATIVAS ---
+	if narrativas_button and not narrativas_button.is_connected("pressed", _on_narrativas_button_pressed):
+		narrativas_button.pressed.connect(_on_narrativas_button_pressed)
 
 func _start_game():
 	game_timer.start()

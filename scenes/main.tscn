@@ -19,7 +19,7 @@
 position = Vector2(593, 320)
 scale = Vector2(1.2557, 0.99641)
 
-[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button")]
+[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button", "narrativas_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,6 +41,7 @@ normal_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NormalSpeedB
 fast_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/FastSpeedButton")
 narrative_panel = NodePath("CanvasLayer/NarrativePanel")
 investigate_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes")
+narrativas_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NarrativasButton")
 metadata/_edit_use_anchors_ = true
 
 [node name="Market" type="Node" parent="Main"]
@@ -219,13 +220,13 @@ layout_mode = 2
 layout_mode = 2
 text = "Fast"
 
-[node name="NarrativasButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
-layout_mode = 2
-text = "📜 Narrativas"
-
 [node name="🕵️ Investigar Redes" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "Investigar Redes"
+
+[node name="NarrativasButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+text = "📜 Narrativas"
 
 [node name="Sidepanel" type="Panel" parent="Main/CanvasLayer"]
 custom_minimum_size = Vector2(250, 300)
@@ -363,5 +364,5 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [connection signal="input_event" from="Main/NodeMapaSVG2D/Chile/Area2D" to="Main" method="_on_area_2d_input_event"]
-[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/NarrativasButton" to="Main" method="_on_narrativas_button_pressed"]
 [connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes" to="Main" method="_on__investigar_redes_pressed"]
+[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/NarrativasButton" to="Main" method="_on_narrativas_button_pressed"]
