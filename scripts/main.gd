@@ -28,6 +28,8 @@ var game_speed: GameSpeed = GameSpeed.NORMAL
 @export var narrative_panel: PanelContainer
 @export var investigate_button: Button
 @export var narrativas_button: Button
+@onready var ChileEvents: Node = get_node("/root/ChileEvents")
+@onready var NarrativeSystem: Node = get_node("/root/NarrativeSystem")
 
 var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
 var party_controller: PartyController
@@ -103,7 +105,6 @@ func _input(event: InputEvent):
 	if event.is_action_pressed("ui_cancel"):
 		toggle_pause()
 		get_viewport().set_input_as_handled()
-
 func _on_month_timer_timeout():
 	advance_month()
 
@@ -115,9 +116,20 @@ func advance_month():
 		notification_system.show_notification("Novo Ano", "Chegamos a %d!" % current_year, NotificationSystem.NotificationType.INFO)
 	
 	party_controller.advance_month()
-	ChileEvents.check_for_events(current_year, current_month)
-	NarrativeSystem.process_narrative_spread()
-	NarrativeSystem.check_narrative_consequences()
+	
+	# Verificação segura para ChileEvents
+	var chile_events = get_node_or_null("/root/ChileEvents")
+	if chile_events and chile_events.has_method("check_for_events"):
+		chile_events.check_for_events(current_year, current_month)
+	
+	# Verificação segura para NarrativeSystem  
+	var narrative_system = get_node_or_null("/root/NarrativeSystem")
+	if narrative_system:
+		if narrative_system.has_method("process_narrative_spread"):
+			narrative_system.process_narrative_spread()
+		if narrative_system.has_method("check_narrative_consequences"):
+			narrative_system.check_narrative_consequences()
+	
 	_update_all_ui()
 
 func toggle_pause():
