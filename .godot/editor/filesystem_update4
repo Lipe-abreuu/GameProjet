@@ -7,3 +7,4 @@ res://scenes/GameMenu.tscn
 res://scenes/ChoiceDialog.tscn
 res://scripts/Globals.gd
 res://scripts/NarrativeSystem.gd
+res://scripts/TurnManager.gd

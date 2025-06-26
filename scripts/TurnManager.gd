@@ -10,7 +10,7 @@ Compatível com:
 signal month_advanced(mes, ano)
 
 var current_month: int = 1
-var current_year:  int = 1836
+var current_year:  int = 1973
 
 @onready var market          = $"../Market"
 @onready var event_registry  = $"../Events"

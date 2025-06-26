@@ -1,5 +1,5 @@
 # res://scripts/ChileHistoricalEvents.gd
-# Eventos históricos do Chile - Versão completa e corrigida
+# Eventos históricos do Chile - Versão completa corrigida
 
 extends Node
 
@@ -74,8 +74,11 @@ func _are_conditions_met(event_id: String) -> bool:
 # --- PERÍODO 1: GOLPE E CONSOLIDAÇÃO (1973-1976) ---
 
 func execute_golpe_1973():
-	"""Execução do evento do Golpe de 1973"""
+	"""Execução do evento do Golpe de 1973 - Versão com debug melhorado"""
 	get_tree().paused = true
+	
+	print("=== EXECUTANDO GOLPE DE 1973 ===")
+	print("PartyController no Globals: ", Globals.get("party_controller"))
 	
 	emit_signal("historical_event_notification", 
 		"Golpe de Estado", 
@@ -96,6 +99,10 @@ func execute_golpe_1973():
 	if _system_exists("NarrativeSystem"):
 		NarrativeSystem.create_narrative_from_action("golpe_militar", "system")
 	
+	# Debug: Lista todos os nós para ajudar a encontrar o PartyController
+	print("=== DEBUG: ESTRUTURA DE NÓS ===")
+	_print_node_tree(get_tree().root, 0, 3)  # Máximo 3 níveis
+	
 	# Mostra escolhas para o jogador
 	var choices = [
 		{"text": "Condenar e resistir.", "consequence": "resist"}, 
@@ -109,12 +116,31 @@ func _on_golpe_1973_choice_made(consequence: String):
 	"""Processa a escolha do jogador durante o golpe"""
 	get_tree().paused = false
 	
-	# Encontra o PartyController e aplica as consequências
-	var party_controller_node = _find_node_by_class("PartyController")
-	if party_controller_node:
-		party_controller_node.handle_coup_response(consequence)
-	else:
-		print("ERRO: PartyController não encontrado para processar consequências do golpe")
+	print("=== PROCESSANDO ESCOLHA DO GOLPE: %s ===" % consequence)
+	
+	# MÉTODO 1: Usar referência do Globals (Recomendado)
+	if "party_controller" in Globals and Globals.party_controller:
+		print("GOLPE: Usando PartyController do Globals")
+		Globals.party_controller.handle_coup_response(consequence)
+		return
+	
+	# MÉTODO 2: Busca direta por classe
+	var party_controller = _find_party_controller_improved()
+	if party_controller:
+		print("GOLPE: PartyController encontrado via busca direta")
+		party_controller.handle_coup_response(consequence)
+		return
+	
+	# MÉTODO 3: Busca na árvore de nós
+	party_controller = _search_tree_for_party_controller(get_tree().root)
+	if party_controller:
+		print("GOLPE: PartyController encontrado via busca na árvore")
+		party_controller.handle_coup_response(consequence)
+		return
+	
+	# FALLBACK: Se ainda não encontrou, aplica efeitos manuais
+	print("ERRO: PartyController não encontrado. Aplicando efeitos manuais.")
+	_apply_manual_coup_effects(consequence)
 
 func execute_criacao_dina():
 	"""Criação da DINA - polícia secreta do regime"""
@@ -156,10 +182,10 @@ func execute_operacao_condor():
 		_get_notification_type("ERROR"))
 	
 	# Ativa a mecânica global da Operação Condor
-	if _system_exists("Globals"):
-		Globals.condor_active = true
-	
-	print("MECÂNICA DE JOGO: Operação Condor está agora ATIVA.")
+	if _system_exists("Globals") and Globals.has_method("activate_condor"):
+		Globals.activate_condor()
+	else:
+		print("MECÂNICA DE JOGO: Operação Condor ativada (funcionalidade básica)")
 	
 	# Cria trauma relacionado à perseguição internacional
 	if _system_exists("TraumaSystem"):
@@ -303,6 +329,32 @@ func execute_protestas_1983():
 			"triggers": ["protesto", "manifestação", "resistência", "ruas"], 
 			"year": 1983
 		})
+	
+	# Oferece escolhas ao jogador se o partido ainda existir
+	var party_controller = _find_party_controller_safe()
+	if party_controller and party_controller.party_data.influence > 1.0:
+		var choices = [
+			{"text": "Apoiar os protestos ativamente.", "consequence": "support_protests"},
+			{"text": "Observar cautelosamente.", "consequence": "observe_protests"}, 
+			{"text": "Manter-se afastado.", "consequence": "avoid_protests"}
+		]
+		_show_choice_dialog("Protestos Nacionais", "Como seu partido reage às manifestações?", choices, "_on_protestos_choice_made")
+
+func _on_protestos_choice_made(consequence: String):
+	"""Processa a escolha do jogador durante os protestos"""
+	var party_controller = _find_party_controller_safe()
+	if party_controller:
+		match consequence:
+			"support_protests":
+				party_controller.party_data.influence += 1.0
+				party_controller._change_support("workers", 5)
+				party_controller._change_support("students", 3)
+				party_controller._change_support("military", -3)
+			"observe_protests":
+				party_controller.party_data.influence += 0.2
+			"avoid_protests":
+				party_controller._change_support("workers", -2)
+				party_controller._change_support("students", -1)
 
 # --- PERÍODO 4: TRANSIÇÃO (1984-1990) ---
 
@@ -329,6 +381,32 @@ func execute_acordo_nacional_1985():
 	if _system_exists("Globals"):
 		Globals.adjust_country_value("Chile", "democratic_opposition", 20)
 		Globals.adjust_country_value("Chile", "political_polarization", -5)
+	
+	# Oferece escolha ao partido se for de esquerda
+	var party_controller = _find_party_controller_safe()
+	if party_controller:
+		var choices = [
+			{"text": "Tentar participar do acordo.", "consequence": "join_agreement"},
+			{"text": "Formar oposição alternativa.", "consequence": "alternative_opposition"},
+			{"text": "Manter posição radical.", "consequence": "stay_radical"}
+		]
+		_show_choice_dialog("Acordo Nacional", "A oposição moderada exclui a esquerda. Como reagir?", choices, "_on_acordo_choice_made")
+
+func _on_acordo_choice_made(consequence: String):
+	"""Processa a escolha do jogador sobre o Acordo Nacional"""
+	var party_controller = _find_party_controller_safe()
+	if party_controller:
+		match consequence:
+			"join_agreement":
+				party_controller._change_support("intellectuals", 3)
+				party_controller._change_support("workers", -2)
+				party_controller.party_data.influence += 0.5
+			"alternative_opposition":
+				party_controller._change_support("students", 3)
+				party_controller._change_support("workers", 2)
+			"stay_radical":
+				party_controller._change_support("workers", 1)
+				party_controller._change_support("intellectuals", -2)
 
 func execute_atentado_pinochet_1986():
 	"""Atentado contra Pinochet"""
@@ -364,6 +442,32 @@ func execute_plebiscito_1988():
 			"triggers": ["plebiscito", "democracia", "vitória", "transição"], 
 			"year": 1988
 		})
+	
+	# Oferece escolha final ao partido
+	var party_controller = _find_party_controller_safe()
+	if party_controller and party_controller.party_data.influence > 0.5:
+		var choices = [
+			{"text": "Participar da transição democrática.", "consequence": "join_transition"},
+			{"text": "Manter oposição crítica.", "consequence": "critical_opposition"},
+			{"text": "Preparar para eleições.", "consequence": "prepare_elections"}
+		]
+		_show_choice_dialog("Vitória do NO", "A democracia retorna. Qual o papel do seu partido?", choices, "_on_plebiscito_choice_made")
+
+func _on_plebiscito_choice_made(consequence: String):
+	"""Processa a escolha do jogador após o plebiscito"""
+	var party_controller = _find_party_controller_safe()
+	if party_controller:
+		match consequence:
+			"join_transition":
+				party_controller.party_data.influence += 2.0
+				party_controller._change_support("intellectuals", 5)
+				party_controller._change_support("middle_class", 3)
+			"critical_opposition":
+				party_controller._change_support("workers", 3)
+				party_controller._change_support("students", 2)
+			"prepare_elections":
+				party_controller.party_data.influence += 1.5
+				party_controller.party_data.militants += 20
 
 # =====================================
 # FUNÇÕES DE CONDIÇÕES
@@ -392,6 +496,106 @@ func _check_acordo_conditions() -> bool:
 		polarization = Globals.get_country_value("Chile", "political_polarization", 0)
 	
 	return opposition > 15 and polarization < 30
+
+# =====================================
+# FUNÇÕES DE BUSCA DO PARTYCONTROLLER
+# =====================================
+
+func _find_party_controller_improved() -> Node:
+	"""Busca melhorada do PartyController"""
+	var search_paths = [
+		# Caminhos mais prováveis primeiro
+		"/root/Main/PartyController",
+		"/root/PartyController", 
+		"Main/PartyController",
+		"PartyController",
+		# Busca por qualquer nó filho do Main
+		"/root/Main"
+	]
+	
+	for path in search_paths:
+		var node = get_node_or_null(path)
+		if node:
+			# Se encontrou um nó, verifica se é PartyController
+			if node.get_script() and "PartyController" in str(node.get_script()):
+				return node
+			
+			# Se é o Main, procura PartyController entre seus filhos
+			if node.name == "Main":
+				for child in node.get_children():
+					if child.get_script() and "PartyController" in str(child.get_script()):
+						return child
+	
+	return null
+
+func _search_tree_for_party_controller(node: Node) -> Node:
+	"""Busca recursiva por qualquer nó PartyController na árvore"""
+	# Verifica se o nó atual é PartyController
+	if node.get_script() and "PartyController" in str(node.get_script()):
+		return node
+	
+	# Busca nos filhos
+	for child in node.get_children():
+		var result = _search_tree_for_party_controller(child)
+		if result:
+			return result
+	
+	return null
+
+func _find_party_controller_safe() -> Node:
+	"""Versão segura que não gera erros se não encontrar"""
+	# Primeiro tenta usar o Globals
+	if Globals.has("party_controller") and Globals.party_controller:
+		return Globals.party_controller
+	
+	# Senão, tenta busca melhorada
+	var party_controller = _find_party_controller_improved()
+	if party_controller:
+		return party_controller
+	
+	# Por último, busca na árvore
+	return _search_tree_for_party_controller(get_tree().root)
+
+# =====================================
+# FUNÇÕES DE FALLBACK MANUAL
+# =====================================
+
+func _apply_manual_coup_effects(consequence: String):
+	"""Aplica efeitos do golpe manualmente se PartyController não for encontrado"""
+	print("APLICANDO EFEITOS MANUAIS DO GOLPE: %s" % consequence)
+	
+	# Efeitos básicos dependendo da escolha
+	match consequence:
+		"resist":
+			print("- Partido escolheu resistir: -10 influência, apoio militar reduzido")
+			if _system_exists("Globals"):
+				Globals.adjust_country_value("Chile", "resistance_strength", 15)
+		
+		"wait_and_see":
+			print("- Partido manteve silêncio: -5 influência, apoio geral reduzido")
+			if _system_exists("Globals"):
+				Globals.adjust_country_value("Chile", "political_uncertainty", 10)
+		
+		"exile":
+			print("- Partido buscou exílio: influência severamente reduzida")
+			if _system_exists("Globals"):
+				Globals.adjust_country_value("Chile", "exile_population", 20)
+	
+	# Notifica o jogador sobre o que aconteceu
+	var message = ""
+	match consequence:
+		"resist":
+			message = "Seu partido decidiu resistir ao golpe. A repressão será severa, mas a resistência se organiza."
+		"wait_and_see":
+			message = "Seu partido manteve silêncio durante o golpe. A incerteza política aumenta."
+		"exile":
+			message = "Seu partido buscou exílio. A influência local foi perdida, mas a sobrevivência está garantida."
+	
+	# Emite notificação
+	emit_signal("historical_event_notification", 
+		"Resposta ao Golpe", 
+		message, 
+		_get_notification_type("INFO"))
 
 # =====================================
 # FUNÇÕES AUXILIARES SEGURAS
@@ -433,22 +637,6 @@ func _get_notification_type(type_name: String) -> int:
 			_:
 				return 1
 
-func _find_node_by_class(target_class_name: String) -> Node:
-	"""Encontra um node pela sua classe de forma segura"""
-	var candidates = [
-		"Main/PartyController",
-		"PartyController",
-		"/root/Main/PartyController",
-		"/root/PartyController"
-	]
-	
-	for path in candidates:
-		var node = get_node_or_null(path)
-		if node and node.get_script() and node.get_script().get_global_name() == target_class_name:
-			return node
-	
-	return null
-
 func _show_choice_dialog(title: String, message: String, choices: Array, callback_method: String):
 	"""Mostra diálogo de escolha de forma segura"""
 	if choice_dialog_scene:
@@ -465,6 +653,21 @@ func _show_choice_dialog(title: String, message: String, choices: Array, callbac
 		print("FALLBACK: Executando primeira escolha para '%s'" % title)
 		if choices.size() > 0:
 			call(callback_method, choices[0].consequence)
+
+func _print_node_tree(node: Node, level: int, max_level: int):
+	"""Imprime a estrutura da árvore de nós para debug"""
+	if level > max_level:
+		return
+	
+	var indent = "  ".repeat(level)
+	var script_info = ""
+	if node.get_script():
+		script_info = " (%s)" % str(node.get_script()).get_file()
+	
+	print("%s%s%s" % [indent, node.name, script_info])
+	
+	for child in node.get_children():
+		_print_node_tree(child, level + 1, max_level)
 
 # =====================================
 # FUNÇÕES DE UTILIDADE E DEBUG
@@ -510,3 +713,25 @@ func get_all_historical_events() -> Array:
 func get_scheduled_events() -> Dictionary:
 	"""Retorna o cronograma completo de eventos"""
 	return scheduled_events.duplicate()
+
+func get_country_status() -> Dictionary:
+	"""Retorna status atual do país para debug"""
+	var status = {}
+	if _system_exists("Globals"):
+		status = {
+			"repression": Globals.get_country_value("Chile", "repression", 0),
+			"economic_growth": Globals.get_country_value("Chile", "economic_growth", 0),
+			"civil_resistance": Globals.get_country_value("Chile", "civil_resistance", 0),
+			"international_pressure": Globals.get_country_value("Chile", "international_pressure", 0),
+			"democratic_opposition": Globals.get_country_value("Chile", "democratic_opposition", 0),
+			"condor_active": Globals.condor_active if "condor_active" in Globals else false
+		}
+	return status
+
+func debug_print_country_status():
+	"""Imprime status completo do país no console"""
+	print("=== STATUS DO CHILE ===")
+	var status = get_country_status()
+	for key in status:
+		print("%s: %s" % [key.capitalize(), status[key]])
+	print("=======================")
