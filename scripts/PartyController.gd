@@ -342,16 +342,10 @@ func attempt_network_discovery(network_id: String):
 	party_data.treasury -= cost
 	var success_chance = party_data.influence / 100.0
 	
-        if randf() < success_chance:
-                var message := "Rede '%s' descoberta com sucesso!" % network_id
-                if PowerNetworks and PowerNetworks.hidden_networks.has(network_id):
-                        var network = PowerNetworks.hidden_networks[network_id]
-                        network["discovered"] = true
-                        PowerNetworks.hidden_networks[network_id] = network
-                        message = "Rede '%s' descoberta! Membros: %s" % [network["name"], ", ".join(network["members"])]
-                        print("✅ Investigação revelou detalhes da rede '%s'" % network_id)
-                emit_signal("action_executed", "Investigar Rede", true, message)
-        else:
+	if randf() < success_chance:
+		emit_signal("action_executed", "Investigar Rede", true, "Rede '%s' descoberta com sucesso!" % network_id)
+		# TODO: Adicionar lógica para revelar informações da rede
+	else:
 		emit_signal("action_executed", "Investigar Rede", false, "Investigação não revelou informações úteis sobre '%s'." % network_id)
 
 # =====================================

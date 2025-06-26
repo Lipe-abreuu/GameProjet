@@ -8,29 +8,6 @@ signal narrative_consequence_triggered(group_name, narrative_content)
 
 var active_narratives: Array = []
 
-# Ideologia básica atribuída a cada grupo de interesse.
-# Quando um sistema dedicado de ideologias existir, estes valores
-# poderão ser carregados de lá automaticamente.
-const GROUP_IDEOLOGIES: Dictionary = {
-        "workers": "left",
-        "poor": "left",
-        "students": "left",
-        "intellectuals": "left",
-        "peasants": "left",
-        "business": "right",
-        "military": "right",
-        "church": "right",
-        "middle_class": "center"
-}
-
-# Tabela simples de compatibilidade entre ideologias. Valores
-# maiores que 1 aumentam o impacto de crença; menores reduzem.
-const IDEOLOGY_COMPATIBILITY: Dictionary = {
-        "left":   {"left": 1.2, "center": 1.0, "right": 0.8},
-        "center": {"left": 1.0, "center": 1.1, "right": 1.0},
-        "right":  {"left": 0.8, "center": 1.0, "right": 1.2}
-}
-
 # Classe interna que define a estrutura de uma narrativa.
 class Narrative:
 	var content: String
@@ -229,56 +206,41 @@ func get_active_narratives() -> Array:
 
 # Obtém narrativas que afetam um grupo específico
 func get_narratives_affecting_group(group_name: String) -> Array:
-        var relevant_narratives = []
-        for narrative in active_narratives:
-                if group_name in narrative.target_groups:
-                        relevant_narratives.append(narrative)
-        return relevant_narratives
+	var relevant_narratives = []
+	for narrative in active_narratives:
+		if group_name in narrative.target_groups:
+			relevant_narratives.append(narrative)
+	return relevant_narratives
 
 # -----------------------------------------------------------------------------
 # FUNÇÕES AUXILIARES
 # -----------------------------------------------------------------------------
 
-# Retorna a ideologia associada a um grupo. Quando o sistema de
-# ideologias de grupos for implementado em outro lugar, esta função
-# irá buscá-la de Globals; até lá usamos os valores locais.
-func _get_group_ideology(group_name: String) -> String:
-        if Globals and Globals.has("group_ideologies"):
-                return Globals.group_ideologies.get(group_name, "")
-        return GROUP_IDEOLOGIES.get(group_name, "")
-
 # Função interna para calcular o impacto persuasivo de uma narrativa.
 func _calculate_belief_impact(narrative: Narrative, group_name: String) -> float:
-        var base_impact = narrative.intensity * narrative.credibility
-        var compatibility_modifier = 1.0
-
-        # Primeiro tenta usar compatibilidade baseada em ideologias declaradas.
-        var source_ideology = _get_group_ideology(narrative.source_group)
-        var target_ideology = _get_group_ideology(group_name)
-
-        if source_ideology != "" and target_ideology != "":
-                var row = IDEOLOGY_COMPATIBILITY.get(source_ideology, {})
-                compatibility_modifier = row.get(target_ideology, 1.0)
-        else:
-                # Fallback para regras simplificadas se ideologias não estiverem disponíveis
-                match group_name:
-                        "workers", "poor":
-                                if narrative.source_group in ["workers", "opposition_allies"]:
-                                        compatibility_modifier = 1.2
-                                elif narrative.source_group in ["business", "military"]:
-                                        compatibility_modifier = 0.8
-                        "business", "military":
-                                if narrative.source_group in ["government_media", "business"]:
-                                        compatibility_modifier = 1.2
-                                elif narrative.source_group in ["workers", "opposition_allies"]:
-                                        compatibility_modifier = 0.8
-                        "intellectuals", "students":
-                                if narrative.source_group in ["intellectuals", "opposition_underground"]:
-                                        compatibility_modifier = 1.1
-                                elif narrative.source_group in ["government_media"]:
-                                        compatibility_modifier = 0.9
-
-        return (base_impact * compatibility_modifier) / 1000.0
+	var base_impact = narrative.intensity * narrative.credibility
+	var compatibility_modifier = 1.0
+	
+	# Modificadores baseados na compatibilidade ideológica
+	# TODO: Expandir esta lógica com as ideologias dos grupos quando implementadas
+	match group_name:
+		"workers", "poor":
+			if narrative.source_group in ["workers", "opposition_allies"]:
+				compatibility_modifier = 1.2
+			elif narrative.source_group in ["business", "military"]:
+				compatibility_modifier = 0.8
+		"business", "military":
+			if narrative.source_group in ["government_media", "business"]:
+				compatibility_modifier = 1.2
+			elif narrative.source_group in ["workers", "opposition_allies"]:
+				compatibility_modifier = 0.8
+		"intellectuals", "students":
+			if narrative.source_group in ["intellectuals", "opposition_underground"]:
+				compatibility_modifier = 1.1
+			elif narrative.source_group in ["government_media"]:
+				compatibility_modifier = 0.9
+	
+	return (base_impact * compatibility_modifier) / 1000.0
 
 # Função interna para emitir o sinal de consequência.
 func _trigger_consequence(narrative: Narrative, group_name: String):
