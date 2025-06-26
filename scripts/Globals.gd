@@ -164,14 +164,14 @@ func trigger_condor_persecution_event():
 	var target_countries = ["França", "México", "Suécia", "EUA", "Itália"]
 	var target = target_countries[randi() % target_countries.size()]
 	
-	print("🎯 EVENTO CONDOR: Operação de perseguição em %s" % target)
-	
-	# TODO: Conectar com sistema de notificações
-	# NotificationSystem.show_notification(
-	#     "Operação Condor", 
-	#     "Agentes perseguem exilados em %s" % target,
-	#     NotificationSystem.NotificationType.ERROR
-	# )
+        print("🎯 EVENTO CONDOR: Operação de perseguição em %s" % target)
+
+        if get_node_or_null("/root/NotificationSystem"):
+                NotificationSystem.show_notification(
+                        "Operação Condor",
+                        "Agentes perseguem exilados em %s" % target,
+                        NotificationSystem.NotificationType.ERROR
+                )
 
 func get_condor_status_text() -> String:
 	"""Retorna texto descritivo do status da Operação Condor"""
