@@ -1,5 +1,5 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1750631022
+::res://::1750896303
 1.png::CompressedTexture2D::453906929923963489::1749877958::1749877979::1::::<><>::
 2.png::CompressedTexture2D::5380086810490017260::1749877958::1749877979::1::::<><>::
 3.png::CompressedTexture2D::2132027972991069971::1749877958::1749877979::1::::<><>::
@@ -120,28 +120,35 @@ cone_sul.svg::CompressedTexture2D::960783154205423403::1749442086::1749442037::1
 cone_sul.svg::CompressedTexture2D::7972113229646869173::1749446037::1749446079::1::::<><>::
 ::res://data/::1750566461
 eventos.json::JSON::-1::1750566461::0::1::::<><>::
-::res://scenes/::1750630983
-GameMenu.tscn::PackedScene::1477020826691239398::1750630983::0::1::::<><>::res://game_menu.gd
+::res://scenes/::1750900881
+GameMenu.tscn::PackedScene::1477020826691239398::1750900880::0::1::::<><>::res://game_menu.gd
 main2.tscn::PackedScene::5568710339069655355::1750564547::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/EventSystem.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
 Main.gd::GDScript::-1::1750030428::0::1::::<>Control<>::
-main.tscn::PackedScene::5016272992165590914::1750630983::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/Eventregistry.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>res://scripts/TurnManager.gd<>uid://cax0r7x6gosw::::res://Design sem nome (1).png
+main.tscn::PackedScene::5016272992165590914::1750900880::0::1::::<><>::res://scripts/main.gd<>res://scripts/Market.gd<>res://scripts/Eventregistry.gd<>res://scripts/Combat.gd<>res://scripts/Svg.gd<>uid://bonpi1twitq7t::::res://Orange and White Elegant Modern Beauty Skincare Instagram Post.svg<>uid://gp41svk3d3p2::::res://1.png<>uid://b5eebbl3qix5k::::res://5.png<>uid://5m1go0ge12ih::::res://3.png<>uid://ciwfij0q3nk73::::res://2.png<>uid://d4gdm8k6tsyet::::res://4.png<>res://scripts/TurnManager.gd<>uid://cax0r7x6gosw::::res://Design sem nome (1).png<>res://scripts/ChoiceDialog.gd
 Politics.gd::GDScript::-1::1749976484::0::1::::<>Node<>::
-::res://scripts/::1750630983
+ChoiceDialog.tscn::PackedScene::4571153694094808135::1750900881::0::1::::<><>::res://scripts/ChoiceDialog.gd
+::res://scripts/::1750900880
 CharacterCreation.gd::GDScript::-1::1750029694::0::1::::<>Control<>::
+ChileHistoricalEvents.gd::GDScript::-1::1750900823::0::1::::PartyController<>Node<>::
 Combat.gd::GDScript::-1::1749975875::0::1::::<>Node<>::
 Eventregistry.gd::GDScript::-1::1750566461::0::1::::<>Node<>::
 EventSystem.gd::GDScript::-1::1750566461::0::1::::<>Node<>::
 GameOver.gd::GDScript::-1::1750012435::0::1::::<>Control<>::
-Globals.gd::GDScript::-1::1750629398::0::1::::<>Node<>::
-main.gd::GDScript::-1::1750630983::0::1::::<>Node<>::
+Globals.gd::GDScript::-1::1750897596::0::1::::<>Node<>::
+main.gd::GDScript::-1::1750898299::0::1::::<>Node<>::
 Market.gd::GDScript::-1::1750572270::0::1::::<>Node<>::
-NotificationSystem.gd::GDScript::-1::1750047011::0::1::::<>Control<>::
+NarrativeSystem.gd::GDScript::-1::1750897621::0::1::::<>Node<>::
+NotificationSystem.gd::GDScript::-1::1750644862::0::1::::<>Node<>::
+PartyController.gd::GDScript::-1::1750900880::0::1::::PartyController<>Node<>::
+PartyResource.gd::GDScript::-1::1750897171::0::1::::PartyResource<>Resource<>::
+PlayerActions.gd::GDScript::-1::1750897832::0::1::::<>Node<>::
 PlayerAgent.gd::GDScript::-1::1750628891::0::1::::PlayerAgentResource<>Resource<>::
-PlayerAgentController.gd::GDScript::-1::1750629888::0::1::::PlayerAgentController<>Node<>::
-PlayerAgentResource.gd::GDScript::-1::1750629888::0::1::::PlayerAgentResource<>Resource<>::
 PlayerManager.gd::GDScript::-1::1750030551::0::1::::<>RefCounted<>::
 PoliticalActionDialog.gd::GDScript::-1::1750053017::0::1::::<>Control<>::
 PoliticalActionUI.gd::GDScript::-1::1750051327::0::1::::<>Control<>::
+PowerNetworks.gd::GDScript::-1::1750651088::0::1::::<>Node<>::
+ChoiceDialog.gd::GDScript::-1::1750899163::0::1::::<>PanelContainer<>::
 Svg.gd::GDScript::-1::1750055013::0::1::::<>Node2D<>::
+TraumaSystem.gd::GDScript::-1::1750649945::0::1::::<>Node<>::
 TurnManager.gd::GDScript::-1::1750566461::0::1::::<>Node<>::
 UIManager.gd::GDScript::-1::1750630246::0::1::::UIManager<>Node<>::

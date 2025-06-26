@@ -1,10 +1,13 @@
-# Globals.gd - Sistema centralizado de dados dos países
-# Adicionar como Autoload: Project → Autoload → Name: Globals, Path: res://scripts/Globals.gd
+# Globals.gd
+# Sistema centralizado de dados dos países
+# Adicionar como Autoload: Projeto -> Configurações do Projeto -> Autoload -> Name: Globals
 
 extends Node
 
-# Referência ao controlador do agente do jogador
-var current_player_agent: PlayerAgentController
+# Referência ao controlador do partido do jogador
+# CORREÇÃO: Usando o novo nome da classe e da variável
+var current_party_controller: PartyController
+
 
 # =====================================
 #  DADOS CENTRALIZADOS DOS PAÍSES
@@ -182,8 +185,8 @@ func set_player_country(country: String) -> void:
 		country_data[country]["is_player"] = true
 		
 		# Atualizar agente se existir
-		if current_player_agent and current_player_agent.agent_data:
-			current_player_agent.agent_data.country = country
+		if current_party_controller and current_party_controller.agent_data:
+			current_party_controller.agent_data.country = country
 		
 		print("País do jogador alterado para: ", country)
 	else:
@@ -466,7 +469,7 @@ func reset_game() -> void:
 	_initialize_relations()
 	
 	# Resetar agente do jogador
-	current_player_agent = null
+	current_party_controller = null
 	
 	print("✅ Jogo resetado com sucesso!")
 
@@ -670,18 +673,18 @@ func save_game_data(file_path: String = "user://game_save.dat") -> bool:
 	}
 	
 	# Adicionar dados do agente se existir
-	if current_player_agent and current_player_agent.agent_data:
+	if current_party_controller and current_party_controller.agent_data:
 		save_data["player_agent_data"] = {
-			"agent_name": current_player_agent.agent_data.agent_name,
-			"age": current_player_agent.agent_data.age,
-			"ideology": current_player_agent.agent_data.ideology,
-			"charisma": current_player_agent.agent_data.charisma,
-			"intelligence": current_player_agent.agent_data.intelligence,
-			"connections": current_player_agent.agent_data.connections,
-			"wealth": current_player_agent.agent_data.wealth,
-			"political_experience": current_player_agent.agent_data.political_experience,
-			"position_level": current_player_agent.agent_data.position_level,
-			"personal_support": current_player_agent.agent_data.personal_support
+			"agent_name": current_party_controller.agent_data.agent_name,
+			"age": current_party_controller.agent_data.age,
+			"ideology": current_party_controller.agent_data.ideology,
+			"charisma": current_party_controller.agent_data.charisma,
+			"intelligence": current_party_controller.agent_data.intelligence,
+			"connections": current_party_controller.agent_data.connections,
+			"wealth": current_party_controller.agent_data.wealth,
+			"political_experience": current_party_controller.agent_data.political_experience,
+			"position_level": current_party_controller.agent_data.position_level,
+			"personal_support": current_party_controller.agent_data.personal_support
 		}
 	
 	file.store_string(JSON.stringify(save_data))
@@ -720,18 +723,18 @@ func load_game_data(file_path: String = "user://game_save.dat") -> bool:
 	country_relations = save_data.get("country_relations", {})
 	
 	# Carregar dados do agente se existir
-	if save_data.has("player_agent_data") and current_player_agent and current_player_agent.agent_data:
+	if save_data.has("player_agent_data") and current_party_controller and current_party_controller.agent_data:
 		var agent_save = save_data["player_agent_data"]
-		current_player_agent.agent_data.agent_name = agent_save.get("agent_name", "")
-		current_player_agent.agent_data.age = agent_save.get("age", 35)
-		current_player_agent.agent_data.ideology = agent_save.get("ideology", "")
-		current_player_agent.agent_data.charisma = agent_save.get("charisma", 50)
-		current_player_agent.agent_data.intelligence = agent_save.get("intelligence", 50)
-		current_player_agent.agent_data.connections = agent_save.get("connections", 50)
-		current_player_agent.agent_data.wealth = agent_save.get("wealth", 300)
-		current_player_agent.agent_data.political_experience = agent_save.get("political_experience", 0)
-		current_player_agent.agent_data.position_level = agent_save.get("position_level", 0)
-		current_player_agent.agent_data.personal_support = agent_save.get("personal_support", {})
+		current_party_controller.agent_data.agent_name = agent_save.get("agent_name", "")
+		current_party_controller.agent_data.age = agent_save.get("age", 35)
+		current_party_controller.agent_data.ideology = agent_save.get("ideology", "")
+		current_party_controller.agent_data.charisma = agent_save.get("charisma", 50)
+		current_party_controller.agent_data.intelligence = agent_save.get("intelligence", 50)
+		current_party_controller.agent_data.connections = agent_save.get("connections", 50)
+		current_party_controller.agent_data.wealth = agent_save.get("wealth", 300)
+		current_party_controller.agent_data.political_experience = agent_save.get("political_experience", 0)
+		current_party_controller.agent_data.position_level = agent_save.get("position_level", 0)
+		current_party_controller.agent_data.personal_support = agent_save.get("personal_support", {})
 	
 	print("Jogo carregado de: ", file_path)
 	return true
@@ -749,21 +752,21 @@ func get_current_year() -> int:
 #  SISTEMA DE AGENTE POLÍTICO
 # =====================================
 func init_player_agent() -> void:
-	if current_player_agent == null:
+	if current_party_controller == null:
 		# Criar controlador do agente
-		current_player_agent = PlayerAgentController.new()
+		current_party_controller = PartyController.new()
 		
 		# Configurar dados do agente para o país do jogador
-		if current_player_agent.agent_data:
-			current_player_agent.agent_data.country = player_country
+		if current_party_controller.agent_data:
+			current_party_controller.agent_data.country = player_country
 		
 		print("✅ Agente político inicializado para %s" % player_country)
 
 # Retorna o agente atual (para compatibilidade)
-func get_player_agent() -> PlayerAgentController:
-	if not current_player_agent:
+func get_player_agent() -> PartyController:
+	if not current_party_controller:
 		init_player_agent()
-	return current_player_agent
+	return current_party_controller
 
 # =====================================
 #  INICIALIZAÇÃO
@@ -785,19 +788,19 @@ func _ready() -> void:
 # =====================================
 
 # Conecta o agente ao sistema global
-func connect_player_agent(agent: PlayerAgentController) -> void:
-	current_player_agent = agent
+func connect_player_agent(agent: PartyController) -> void:
+	current_party_controller = agent
 	if agent and agent.agent_data:
 		agent.agent_data.country = player_country
 		print("✅ Agente conectado ao sistema global")
 
 # Sincroniza dados do país com o agente
 func sync_agent_with_country() -> void:
-	if not current_player_agent or not current_player_agent.agent_data:
+	if not current_party_controller or not current_party_controller.agent_data:
 		return
 	
 	var country = player_country
-	var agent = current_player_agent.agent_data
+	var agent = current_party_controller.agent_data
 	
 	# Sincronizar recursos do agente com o país
 	var country_money = get_country_value(country, "money", 0)
@@ -837,10 +840,10 @@ func apply_agent_action_consequences(action_name: String, success: bool) -> void
 
 # Verifica se o agente pode se tornar líder nacional
 func check_agent_leadership_eligibility() -> bool:
-	if not current_player_agent or not current_player_agent.agent_data:
+	if not current_party_controller or not current_party_controller.agent_data:
 		return false
 	
-	var agent = current_player_agent.agent_data
+	var agent = current_party_controller.agent_data
 	var country = player_country
 	
 	# Requisitos para liderança nacional

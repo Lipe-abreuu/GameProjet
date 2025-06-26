@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cdp6jvquney6u"]
+[gd_scene load_steps=15 format=3 uid="uid://cdp6jvquney6u"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_5o5fk"]
 [ext_resource type="Script" path="res://scripts/Market.gd" id="2_bx5ix"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://d4gdm8k6tsyet" path="res://4.png" id="12_uuekj"]
 [ext_resource type="Script" path="res://scripts/TurnManager.gd" id="13_4uxrh"]
 [ext_resource type="Texture2D" uid="uid://cax0r7x6gosw" path="res://Design sem nome (1).png" id="13_7c1wy"]
+[ext_resource type="Script" path="res://scripts/ChoiceDialog.gd" id="13_xqiic"]
 
 [node name="Node2D" type="Node2D"]
 position = Vector2(593, 320)
@@ -118,21 +119,21 @@ texture = ExtResource("13_7c1wy")
 metadata/_edit_lock_ = true
 
 [node name="Node2D" type="Node2D" parent="Main"]
-position = Vector2(214.063, 235.424)
+position = Vector2(40.2511, 6.10352e-05)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="Main"]
 
 [node name="TopBar" type="Panel" parent="Main/CanvasLayer"]
-custom_minimum_size = Vector2(120, 200)
+custom_minimum_size = Vector2(120, 150)
 anchors_preset = -1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.21007
-anchor_bottom = 0.5
-offset_left = -1151.0
-offset_top = -324.0
-offset_right = -1031.0
-offset_bottom = -124.0
+anchor_left = 0.008
+anchor_top = 0.049
+anchor_right = 0.461
+anchor_bottom = 0.346
+offset_left = -9.216
+offset_top = -7.752
+offset_right = -0.072998
+offset_bottom = -0.208008
 grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -152,12 +153,18 @@ layout_mode = 2
 
 [node name="MoneyLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
+text = "Riqueza do Agente"
 
 [node name="Spacer2" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
 [node name="StabilityLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
+text = "Apoio Popular Médio"
+
+[node name="PositionLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Posição Política Atual"
 
 [node name="BottomBar" type="Panel" parent="Main/CanvasLayer"]
 custom_minimum_size = Vector2(20, 80)
@@ -178,34 +185,84 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="PauseButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+text = "Pause"
+
+[node name="Speed Label" type="Label" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+
 [node name="Leftspacer" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="PauseButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="NormalSpeedButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
+text = "Normal"
 
 [node name="Leftspacer2" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="NextButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="FastSpeedButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
+text = "Fast"
+
+[node name="NarrativasButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+text = "📜 Narrativas"
+
+[node name="🕵️ Investigar Redes" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+layout_mode = 2
+text = "Investigar Redes"
 
 [node name="Sidepanel" type="Panel" parent="Main/CanvasLayer"]
+custom_minimum_size = Vector2(250, 300)
 anchors_preset = -1
-anchor_left = 0.846
-anchor_top = 0.302469
-anchor_right = 1.0
-anchor_bottom = 0.822
-offset_left = 0.407959
-offset_top = 12.0
-offset_right = 4.0
-offset_bottom = 20.344
+anchor_left = 0.82
+anchor_top = 0.302
+anchor_right = 1.0369
+anchor_bottom = 0.823
+offset_left = -43.6401
+offset_top = 0.303986
+offset_right = -43.504
+offset_bottom = -12.304
 metadata/_edit_use_anchors_ = true
 
 [node name="InfoContainer" type="VBoxContainer" parent="Main/CanvasLayer/Sidepanel"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="NarrativePanel" type="PanelContainer" parent="Main/CanvasLayer"]
+visible = false
+anchors_preset = -1
+anchor_left = 0.498
+anchor_top = 0.91
+anchor_right = 0.498
+anchor_bottom = 0.91
+offset_left = -81.696
+offset_top = -68.68
+offset_right = 39.304
+offset_bottom = 23.32
+
+[node name="NarrativeList" type="VBoxContainer" parent="Main/CanvasLayer/NarrativePanel"]
+layout_mode = 2
+
+[node name="ChoiceDialog" type="PanelContainer" parent="Main/CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 50.0
+script = ExtResource("13_xqiic")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Main/CanvasLayer/ChoiceDialog"]
+layout_mode = 2
+
+[node name="Titulo" type="Label" parent="Main/CanvasLayer/ChoiceDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Descricao" type="Label" parent="Main/CanvasLayer/ChoiceDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Main/CanvasLayer/ChoiceDialog"]
+layout_mode = 2
 
 [node name="AutoTimer" type="Timer" parent="Main"]
 wait_time = 3.0
@@ -293,3 +350,5 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [connection signal="input_event" from="Main/NodeMapaSVG2D/Chile/Area2D" to="Main" method="_on_area_2d_input_event"]
+[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/NarrativasButton" to="Main" method="_on_narrativas_button_pressed"]
+[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes" to="Main" method="_on__investigar_redes_pressed"]

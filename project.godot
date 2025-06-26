@@ -18,6 +18,11 @@ config/icon="res://icon.svg"
 [autoload]
 
 Globals="*res://scripts/Globals.gd"
+NotificationSystem="*res://scripts/NotificationSystem.gd"
+NarrativeSystem="*res://scripts/NarrativeSystem.gd"
+TraumaSystem="*res://scripts/TraumaSystem.gd"
+ChileEvents="*res://scripts/ChileHistoricalEvents.gd"
+PowerNetworks="*res://scripts/PowerNetworks.gd"
 
 [editor_plugins]
 

@@ -1,8 +1,10 @@
+PanelContainer
+HSeparator
+MarginContainer
+VBoxContainer
+Button
 CollisionPolygon2D
 Area2D
-PanelContainer
-Button
-VBoxContainer
 Control
 Node
 Panel
@@ -10,5 +12,3 @@ CanvasLayer
 HBoxContainer
 Label
 CenterContainer
-ColorRect
-Node2D
