@@ -19,7 +19,7 @@
 position = Vector2(593, 320)
 scale = Vector2(1.2557, 0.99641)
 
-[node name="Main" type="Control" parent="."]
+[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,6 +28,19 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.43527, 0.200359)
 script = ExtResource("1_5o5fk")
+canvas_layer = NodePath("CanvasLayer")
+date_label = NodePath("CanvasLayer/TopBar/HBoxContainer/DateLabel")
+money_label = NodePath("CanvasLayer/TopBar/HBoxContainer/MoneyLabel")
+support_label = NodePath("CanvasLayer/TopBar/HBoxContainer/StabilityLabel")
+position_label = NodePath("CanvasLayer/TopBar/HBoxContainer/PositionLabel")
+speed_label = NodePath("CanvasLayer/BottomBar/HBoxContainer/Speed Label")
+info_container = NodePath("CanvasLayer/Sidepanel/InfoContainer")
+map_node = NodePath("NodeMapaSVG2D")
+pause_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/PauseButton")
+normal_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NormalSpeedButton")
+fast_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/FastSpeedButton")
+narrative_panel = NodePath("CanvasLayer/NarrativePanel")
+investigate_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes")
 metadata/_edit_use_anchors_ = true
 
 [node name="Market" type="Node" parent="Main"]
