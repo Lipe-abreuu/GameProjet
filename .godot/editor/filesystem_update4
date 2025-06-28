@@ -5,3 +5,5 @@ res://scenes/ChoiceDialog.tscn
 res://scripts/PartyActions.gd
 res://scripts/PartyController.gd
 res://scripts/PartyResource.gd
+res://scripts/HeatSystem.gd.gd
+res://scripts/HeatUIComponent.gd

@@ -37,7 +37,8 @@ var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
 var party_controller: PartyController
 var notification_system: Node
 var game_timer: Timer
-
+var heat_system: Node
+var heat_ui: Control
 var current_year: int = 1973
 var current_month: int = 1
 
