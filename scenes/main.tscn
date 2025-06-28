@@ -19,7 +19,7 @@
 position = Vector2(593, 320)
 scale = Vector2(1.2557, 0.99641)
 
-[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button", "narrativas_button")]
+[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button", "narrativas_button", "militants_label", "influence_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,6 +42,8 @@ fast_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/FastSpeedButto
 narrative_panel = NodePath("CanvasLayer/NarrativePanel")
 investigate_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes")
 narrativas_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NarrativasButton")
+militants_label = NodePath("CanvasLayer/TopBar/HBoxContainer/Militantes")
+influence_label = NodePath("CanvasLayer/TopBar/HBoxContainer/Influence")
 metadata/_edit_use_anchors_ = true
 
 [node name="Market" type="Node" parent="Main"]
@@ -177,6 +179,14 @@ layout_mode = 2
 text = "Apoio Popular Médio"
 
 [node name="PositionLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Posição Política Atual"
+
+[node name="Militantes" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+layout_mode = 2
+text = "Posição Política Atual"
+
+[node name="Influence" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Posição Política Atual"
 

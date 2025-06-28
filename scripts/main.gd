@@ -30,6 +30,8 @@ var game_speed: GameSpeed = GameSpeed.NORMAL
 @export var narrativas_button: Button
 @onready var ChileEvents: Node = get_node("/root/ChileEvents")
 @onready var NarrativeSystem: Node = get_node("/root/NarrativeSystem")
+@export var militants_label: Label
+@export var influence_label: Label
 
 var current_phase: GamePhase = GamePhase.POLITICAL_AGENT
 var party_controller: PartyController
@@ -163,6 +165,11 @@ func _update_all_ui():
 		_set_treasury_label(party_controller.party_data.treasury)
 		_set_support_label(party_controller.party_data.get_average_support())
 		_set_position_label(party_controller.party_data.get_phase_name())
+		
+		# ADICIONAR ESTAS 2 LINHAS:
+		_set_militants_label(party_controller.party_data.militants)
+		_set_influence_label(party_controller.party_data.influence)
+	
 	_update_speed_display()
 
 func _set_treasury_label(new_val: int):
@@ -327,3 +334,25 @@ func _on__investigar_redes_pressed():
 			network_box.add_child(investigate_btn)
 		info_container.add_child(network_box)
 		info_container.add_child(HSeparator.new())
+		
+func _set_militants_label(militants: int):
+	if militants_label: 
+		militants_label.text = "👥 %d" % militants
+		# Cor baseada na quantidade
+		if militants > 200:
+			militants_label.add_theme_color_override("font_color", Color.GREEN)
+		elif militants > 100:
+			militants_label.add_theme_color_override("font_color", Color.YELLOW)
+		else:
+			militants_label.add_theme_color_override("font_color", Color.RED)
+
+func _set_influence_label(influence: float):
+	if influence_label:
+		influence_label.text = "⚡ %.1f" % influence
+		# Cor baseada na influência
+		if influence > 10:
+			influence_label.add_theme_color_override("font_color", Color.GREEN)
+		elif influence > 5:
+			influence_label.add_theme_color_override("font_color", Color.YELLOW)
+		else:
+			influence_label.add_theme_color_override("font_color", Color.RED)
