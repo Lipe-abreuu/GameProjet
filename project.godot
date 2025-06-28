@@ -14,15 +14,44 @@ config/name="Game - Guerrilhas"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
+"autoload]PowerNetworks"={
+"path": "res://scripts/PowerNetworks.gd",
+"singleton": true
+}
+Globals={
+"path": "res://scripts/Globals.gd",
+"singleton": true
+}
+NotificationSystem={
+"path": "res://scripts/NotificationSystem.gd",
+"singleton": true
+}
+NarrativeSystem={
+"path": "res://scripts/NarrativeSystem.gd",
+"singleton": true
+}
+TraumaSystem={
+"path": "res://scripts/TraumaSystem.gd",
+"singleton": true
+}
+ChileEvents={
+"path": "res://scripts/ChileHistoricalEvents.gd",
+"singleton": true
+}
+HeatSystem={
+"path": "res://scripts/HeatSystem.gd",
+"singleton": true
+}
 
 [autoload]
 
+PowerNetworks="*res://scripts/PowerNetworks.gd"
 Globals="*res://scripts/Globals.gd"
 NotificationSystem="*res://scripts/NotificationSystem.gd"
 NarrativeSystem="*res://scripts/NarrativeSystem.gd"
 TraumaSystem="*res://scripts/TraumaSystem.gd"
 ChileEvents="*res://scripts/ChileHistoricalEvents.gd"
-PowerNetworks="*res://scripts/PowerNetworks.gd"
+HeatSystem="*res://scripts/HeatSystem.gd"
 
 [editor_plugins]
 

@@ -19,7 +19,7 @@
 position = Vector2(593, 320)
 scale = Vector2(1.2557, 0.99641)
 
-[node name="Main" type="Control" parent="." node_paths=PackedStringArray("canvas_layer", "date_label", "money_label", "support_label", "position_label", "speed_label", "info_container", "map_node", "pause_button", "normal_speed_button", "fast_speed_button", "narrative_panel", "investigate_button", "narrativas_button", "militants_label", "influence_label")]
+[node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,104 +28,126 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.43527, 0.200359)
 script = ExtResource("1_5o5fk")
-canvas_layer = NodePath("CanvasLayer")
-date_label = NodePath("CanvasLayer/TopBar/HBoxContainer/DateLabel")
-money_label = NodePath("CanvasLayer/TopBar/HBoxContainer/MoneyLabel")
-support_label = NodePath("CanvasLayer/TopBar/HBoxContainer/StabilityLabel")
-position_label = NodePath("CanvasLayer/TopBar/HBoxContainer/PositionLabel")
-speed_label = NodePath("CanvasLayer/BottomBar/HBoxContainer/Speed Label")
-info_container = NodePath("CanvasLayer/Sidepanel/InfoContainer")
-map_node = NodePath("NodeMapaSVG2D")
-pause_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/PauseButton")
-normal_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NormalSpeedButton")
-fast_speed_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/FastSpeedButton")
-narrative_panel = NodePath("CanvasLayer/NarrativePanel")
-investigate_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes")
-narrativas_button = NodePath("CanvasLayer/BottomBar/HBoxContainer/NarrativasButton")
-militants_label = NodePath("CanvasLayer/TopBar/HBoxContainer/Militantes")
-influence_label = NodePath("CanvasLayer/TopBar/HBoxContainer/Influence")
-metadata/_edit_use_anchors_ = true
+canvas_layer = Object(CanvasLayer,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","layer":1,"visible":true,"offset":Vector2(0, 0),"rotation":0.0,"scale":Vector2(1, 1),"transform":Transform2D(1, 0, 0, 1, 0, 0),"follow_viewport_enabled":false,"follow_viewport_scale":1.0,"script":null)
 
-[node name="Market" type="Node" parent="Main"]
+date_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+money_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"Riqueza do Agente","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+support_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"Apoio Popular Médio","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+position_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"Posição Política Atual","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+militants_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"Posição Política Atual","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+influence_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"Posição Política Atual","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+speed_label = Object(Label,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":4,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":2,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","text":"","label_settings":null,"horizontal_alignment":0,"vertical_alignment":0,"autowrap_mode":0,"justification_flags":163,"clip_text":false,"text_overrun_behavior":0,"uppercase":false,"tab_stops":PackedFloat32Array(),"lines_skipped":0,"max_lines_visible":-1,"visible_characters":-1,"visible_characters_behavior":0,"visible_ratio":1.0,"text_direction":0,"language":"","structured_text_bidi_override":0,"structured_text_bidi_override_options":[],"script":null)
+
+info_container = Object(VBoxContainer,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":40.0,"offset_bottom":40.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":1,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","alignment":0,"script":null)
+
+map_node = Object(Node2D,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"position":Vector2(214.063, 235.424),"rotation":0.0,"scale":Vector2(0.985834, 3.05081),"skew":0.0,"script":ExtResource("6_5p8qb"),"region_colors":{
+"Asuncion": Color(0.2, 0.7, 0.3, 1),
+"Buenos Aires": Color(0.3, 0.5, 0.8, 1),
+"Cordoba": Color(0.9, 0.5, 0.2, 1),
+"Lapaz": Color(0.9, 0.9, 0.2, 1),
+"Montevideo": Color(0.7, 0.2, 0.7, 1),
+"Santiago": Color(0.8, 0.2, 0.2, 1)
+})
+
+pause_button = Object(Button,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":2,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","disabled":false,"toggle_mode":false,"button_pressed":false,"action_mode":1,"button_mask":1,"keep_pressed_outside":false,"button_group":null,"shortcut":null,"shortcut_feedback":true,"shortcut_in_tooltip":true,"text":"Pause","icon":null,"flat":false,"alignment":1,"text_overrun_behavior":0,"clip_text":false,"icon_alignment":0,"vertical_icon_alignment":1,"expand_icon":false,"text_direction":0,"language":"","script":null)
+
+normal_speed_button = Object(Button,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":2,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","disabled":false,"toggle_mode":false,"button_pressed":false,"action_mode":1,"button_mask":1,"keep_pressed_outside":false,"button_group":null,"shortcut":null,"shortcut_feedback":true,"shortcut_in_tooltip":true,"text":"Normal","icon":null,"flat":false,"alignment":1,"text_overrun_behavior":0,"clip_text":false,"icon_alignment":0,"vertical_icon_alignment":1,"expand_icon":false,"text_direction":0,"language":"","script":null)
+
+fast_speed_button = Object(Button,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":2,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","disabled":false,"toggle_mode":false,"button_pressed":false,"action_mode":1,"button_mask":1,"keep_pressed_outside":false,"button_group":null,"shortcut":null,"shortcut_feedback":true,"shortcut_in_tooltip":true,"text":"Fast","icon":null,"flat":false,"alignment":1,"text_overrun_behavior":0,"clip_text":false,"icon_alignment":0,"vertical_icon_alignment":1,"expand_icon":false,"text_direction":0,"language":"","script":null)
+
+narrative_panel = Object(PanelContainer,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":false,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":8,"anchor_left":0.5,"anchor_top":0.5,"anchor_right":0.5,"anchor_bottom":0.5,"offset_left":-129.0,"offset_top":0.0,"offset_right":100.0,"offset_bottom":100.0,"grow_horizontal":2,"grow_vertical":2,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":0,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","script":null)
+
+investigate_button = Object(Button,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":2,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","disabled":false,"toggle_mode":false,"button_pressed":false,"action_mode":1,"button_mask":1,"keep_pressed_outside":false,"button_group":null,"shortcut":null,"shortcut_feedback":true,"shortcut_in_tooltip":true,"text":"Investigar Redes","icon":null,"flat":false,"alignment":1,"text_overrun_behavior":0,"clip_text":false,"icon_alignment":0,"vertical_icon_alignment":1,"expand_icon":false,"text_direction":0,"language":"","script":null)
+
+narrativas_button = Object(Button,"_import_path":NodePath(""),"unique_name_in_owner":false,"process_mode":0,"process_priority":0,"process_physics_priority":0,"process_thread_group":0,"editor_description":"","visible":true,"modulate":Color(1, 1, 1, 1),"self_modulate":Color(1, 1, 1, 1),"show_behind_parent":false,"top_level":false,"clip_children":0,"light_mask":1,"visibility_layer":1,"z_index":0,"z_as_relative":true,"y_sort_enabled":false,"texture_filter":0,"texture_repeat":0,"material":null,"use_parent_material":false,"clip_contents":false,"custom_minimum_size":Vector2(0, 0),"layout_direction":0,"layout_mode":3,"anchors_preset":0,"anchor_left":0.0,"anchor_top":0.0,"anchor_right":0.0,"anchor_bottom":0.0,"offset_left":0.0,"offset_top":0.0,"offset_right":0.0,"offset_bottom":0.0,"grow_horizontal":1,"grow_vertical":1,"rotation":0.0,"scale":Vector2(1, 1),"pivot_offset":Vector2(0, 0),"size_flags_horizontal":1,"size_flags_vertical":1,"size_flags_stretch_ratio":1.0,"auto_translate":true,"localize_numeral_system":true,"tooltip_text":"","focus_neighbor_left":NodePath(""),"focus_neighbor_top":NodePath(""),"focus_neighbor_right":NodePath(""),"focus_neighbor_bottom":NodePath(""),"focus_next":NodePath(""),"focus_previous":NodePath(""),"focus_mode":2,"mouse_filter":0,"mouse_force_pass_scroll_events":true,"mouse_default_cursor_shape":0,"shortcut_context":null,"theme":null,"theme_type_variation":&"","disabled":false,"toggle_mode":false,"button_pressed":false,"action_mode":1,"button_mask":1,"keep_pressed_outside":false,"button_group":null,"shortcut":null,"shortcut_feedback":true,"shortcut_in_tooltip":true,"text":"📜 Narrativas","icon":null,"flat":false,"alignment":1,"text_overrun_behavior":0,"clip_text":false,"icon_alignment":0,"vertical_icon_alignment":1,"expand_icon":false,"text_direction":0,"language":"","script":null)
+
+
+[node name="Market" type="Node" parent="Control"]
 script = ExtResource("2_bx5ix")
 
-[node name="Events" type="Node" parent="Main"]
+[node name="Events" type="Node" parent="Control"]
 script = ExtResource("3_miijh")
 
-[node name="Politics" type="Node" parent="Main"]
+[node name="Politics" type="Node" parent="Control"]
 
-[node name="Combat" type="Node" parent="Main"]
+[node name="Combat" type="Node" parent="Control"]
 script = ExtResource("5_chejw")
 
-[node name="NodeMapaSVG2D" type="Node2D" parent="Main"]
+[node name="NodeMapaSVG2D" type="Node2D" parent="Control"]
 position = Vector2(214.063, 235.424)
 scale = Vector2(0.985834, 3.05081)
 script = ExtResource("6_5p8qb")
 
-[node name="Argentina" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+[node name="Argentina" type="Polygon2D" parent="Control/NodeMapaSVG2D"]
 position = Vector2(-72.0785, -11.492)
 texture = ExtResource("7_b57ln")
 polygon = PackedVector2Array(-289.819, -307.03, -315.802, -87.02, -364.055, 353, -308.378, 377.628, -269.405, 310.312, -239.71, 239.711, -206.304, 91.9434, -42.9863, -193.741, -80.1041, -254.49, -150.628, -333.3)
 
-[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Argentina"]
+[node name="Sprite2D" type="Sprite2D" parent="Control/NodeMapaSVG2D/Argentina"]
 position = Vector2(-273.116, 49.2549)
 scale = Vector2(0.465475, 0.399952)
 texture = ExtResource("8_ioih3")
 
-[node name="Uruguay" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+[node name="Uruguay" type="Polygon2D" parent="Control/NodeMapaSVG2D"]
 position = Vector2(-72.0785, -11.492)
 texture = ExtResource("7_b57ln")
 polygon = PackedVector2Array(-74.5365, -101.797, -44.8423, -85.3781, 27.5374, -70.6013, 36.8168, -126.425, 1.55493, -157.62, -42.9863, -185.532, -46.6981, -185.532, -70.8247, -149.411)
 
-[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Uruguay"]
+[node name="Sprite2D" type="Sprite2D" parent="Control/NodeMapaSVG2D/Uruguay"]
 position = Vector2(-9.11644, -101.797)
 scale = Vector2(0.123439, 0.103377)
 texture = ExtResource("9_1v0qj")
 
-[node name="Chile" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+[node name="Chile" type="Polygon2D" parent="Control/NodeMapaSVG2D"]
 position = Vector2(-72.0785, -11.492)
 texture = ExtResource("7_b57ln")
 polygon = PackedVector2Array(-326.937, -453.156, -430.867, 22.985, -430.867, 359.568, -371.478, 256.13, -338.072, -82.0944, -284.252, -344.793)
 
-[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Chile"]
+[node name="Sprite2D" type="Sprite2D" parent="Control/NodeMapaSVG2D/Chile"]
 position = Vector2(-320.442, -22.9149)
 scale = Vector2(0.412992, 0.372923)
 texture = ExtResource("10_tbl38")
 
-[node name="Area2D" type="Area2D" parent="Main/NodeMapaSVG2D/Chile"]
+[node name="Area2D" type="Area2D" parent="Control/NodeMapaSVG2D/Chile"]
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Main/NodeMapaSVG2D/Chile/Area2D"]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Control/NodeMapaSVG2D/Chile/Area2D"]
 visible = false
 position = Vector2(-395.605, -32.8383)
 polygon = PackedVector2Array(79.8032, -415.392, 128.056, -298.82, 3.71179, 394.048, -44.5413, 366.136, -11.1353, 95.2282)
 
-[node name="Paraguay" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+[node name="Paraguay" type="Polygon2D" parent="Control/NodeMapaSVG2D"]
 position = Vector2(-72.0785, -11.492)
 texture = ExtResource("7_b57ln")
 polygon = PackedVector2Array(-78.2483, -415.393, -146.916, -346.435, -15.1481, -249.565, -5.86865, -274.193, -2.15686, -369.421)
 
-[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Paraguay"]
+[node name="Sprite2D" type="Sprite2D" parent="Control/NodeMapaSVG2D/Paraguay"]
 position = Vector2(-70.8248, -337.405)
 scale = Vector2(0.177569, 0.154558)
 texture = ExtResource("11_pin2s")
 
-[node name="Bolivia" type="Polygon2D" parent="Main/NodeMapaSVG2D"]
+[node name="Bolivia" type="Polygon2D" parent="Control/NodeMapaSVG2D"]
 position = Vector2(-72.0785, -11.492)
 texture = ExtResource("7_b57ln")
 polygon = PackedVector2Array(-104.231, -487.635, -132.069, -425.245, -195.169, -394.049, -263.837, -390.765, -319.514, -451.514, -271.26, -591.073)
 
-[node name="Sprite2D" type="Sprite2D" parent="Main/NodeMapaSVG2D/Bolivia"]
+[node name="Sprite2D" type="Sprite2D" parent="Control/NodeMapaSVG2D/Bolivia"]
 position = Vector2(-182.178, -459.724)
 scale = Vector2(0.131745, 0.117566)
 texture = ExtResource("12_uuekj")
 
-[node name="Agua" type="Node2D" parent="Main/NodeMapaSVG2D"]
+[node name="Agua" type="Node2D" parent="Control/NodeMapaSVG2D"]
 light_mask = 384
 visibility_layer = 524289
 z_index = -5
 position = Vector2(6.10352e-05, 7.62939e-06)
 
-[node name="Sprite2D2" type="Sprite2D" parent="Main/NodeMapaSVG2D/Agua"]
+[node name="Sprite2D2" type="Sprite2D" parent="Control/NodeMapaSVG2D/Agua"]
 process_mode = 1
 process_priority = -6
 process_physics_priority = -1
@@ -134,12 +156,12 @@ scale = Vector2(0.556283, 0.49484)
 texture = ExtResource("13_7c1wy")
 metadata/_edit_lock_ = true
 
-[node name="Node2D" type="Node2D" parent="Main"]
+[node name="Node2D" type="Node2D" parent="Control"]
 position = Vector2(40.2511, 6.10352e-05)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="Main"]
+[node name="CanvasLayer" type="CanvasLayer" parent="Control"]
 
-[node name="TopBar" type="Panel" parent="Main/CanvasLayer"]
+[node name="TopBar" type="Panel" parent="Control/CanvasLayer"]
 custom_minimum_size = Vector2(120, 150)
 anchors_preset = -1
 anchor_left = 0.008
@@ -156,45 +178,45 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/TopBar"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CanvasLayer/TopBar"]
 layout_mode = 0
-offset_right = 40.0
+offset_right = 830.0
 offset_bottom = 40.0
 
-[node name="DateLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="DateLabel" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="Spacer1" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Spacer1" type="Control" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="MoneyLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="MoneyLabel" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Riqueza do Agente"
 
-[node name="Spacer2" type="Control" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Spacer2" type="Control" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="StabilityLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="StabilityLabel" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Apoio Popular Médio"
 
-[node name="PositionLabel" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="PositionLabel" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Posição Política Atual"
 
-[node name="Militantes" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Militantes" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Posição Política Atual"
 
-[node name="Influence" type="Label" parent="Main/CanvasLayer/TopBar/HBoxContainer"]
+[node name="Influence" type="Label" parent="Control/CanvasLayer/TopBar/HBoxContainer"]
 layout_mode = 2
 text = "Posição Política Atual"
 
-[node name="BottomBar" type="Panel" parent="Main/CanvasLayer"]
+[node name="BottomBar" type="Panel" parent="Control/CanvasLayer"]
 custom_minimum_size = Vector2(20, 80)
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.782118
 anchor_bottom = 1.0
 offset_left = 1.0
 offset_top = -75.0
@@ -204,41 +226,41 @@ grow_horizontal = 2
 grow_vertical = 0
 metadata/_edit_use_anchors_ = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Main/CanvasLayer/BottomBar"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/CanvasLayer/BottomBar"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="PauseButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="PauseButton" type="Button" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "Pause"
 
-[node name="Speed Label" type="Label" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="Speed Label" type="Label" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="Leftspacer" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="Leftspacer" type="Control" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="NormalSpeedButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="NormalSpeedButton" type="Button" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "Normal"
 
-[node name="Leftspacer2" type="Control" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="Leftspacer2" type="Control" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 
-[node name="FastSpeedButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="FastSpeedButton" type="Button" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "Fast"
 
-[node name="🕵️ Investigar Redes" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="🕵️ Investigar Redes" type="Button" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "Investigar Redes"
 
-[node name="NarrativasButton" type="Button" parent="Main/CanvasLayer/BottomBar/HBoxContainer"]
+[node name="NarrativasButton" type="Button" parent="Control/CanvasLayer/BottomBar/HBoxContainer"]
 layout_mode = 2
 text = "📜 Narrativas"
 
-[node name="Sidepanel" type="Panel" parent="Main/CanvasLayer"]
+[node name="Sidepanel" type="Panel" parent="Control/CanvasLayer"]
 custom_minimum_size = Vector2(250, 300)
 anchors_preset = -1
 anchor_left = 0.82
@@ -251,51 +273,52 @@ offset_right = -43.504
 offset_bottom = -12.304
 metadata/_edit_use_anchors_ = true
 
-[node name="InfoContainer" type="VBoxContainer" parent="Main/CanvasLayer/Sidepanel"]
+[node name="InfoContainer" type="VBoxContainer" parent="Control/CanvasLayer/Sidepanel"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="NarrativePanel" type="PanelContainer" parent="Main/CanvasLayer"]
+[node name="NarrativePanel" type="PanelContainer" parent="Control/CanvasLayer"]
 visible = false
-anchors_preset = -1
-anchor_left = 0.498
-anchor_top = 0.91
-anchor_right = 0.498
-anchor_bottom = 0.91
-offset_left = -81.696
-offset_top = -68.68
-offset_right = 39.304
-offset_bottom = 23.32
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -129.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="NarrativeList" type="VBoxContainer" parent="Main/CanvasLayer/NarrativePanel"]
+[node name="NarrativeList" type="VBoxContainer" parent="Control/CanvasLayer/NarrativePanel"]
 layout_mode = 2
 
-[node name="ChoiceDialog" type="PanelContainer" parent="Main/CanvasLayer"]
+[node name="ChoiceDialog" type="PanelContainer" parent="Control/CanvasLayer"]
 offset_right = 40.0
 offset_bottom = 50.0
 script = ExtResource("13_xqiic")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Main/CanvasLayer/ChoiceDialog"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/CanvasLayer/ChoiceDialog"]
 layout_mode = 2
 
-[node name="Titulo" type="Label" parent="Main/CanvasLayer/ChoiceDialog/VBoxContainer"]
+[node name="Titulo" type="Label" parent="Control/CanvasLayer/ChoiceDialog/VBoxContainer"]
 layout_mode = 2
 
-[node name="Descricao" type="Label" parent="Main/CanvasLayer/ChoiceDialog/VBoxContainer"]
+[node name="Descricao" type="Label" parent="Control/CanvasLayer/ChoiceDialog/VBoxContainer"]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="Main/CanvasLayer/ChoiceDialog"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control/CanvasLayer/ChoiceDialog"]
 layout_mode = 2
 
-[node name="AutoTimer" type="Timer" parent="Main"]
+[node name="AutoTimer" type="Timer" parent="Control"]
 wait_time = 3.0
 autostart = true
 
-[node name="Gameover" type="CanvasLayer" parent="Main"]
+[node name="Gameover" type="CanvasLayer" parent="Control"]
 layer = 10
 
-[node name="GameOverScreen" type="Control" parent="Main/Gameover"]
+[node name="GameOverScreen" type="Control" parent="Control/Gameover"]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -304,7 +327,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="Main/Gameover/GameOverScreen"]
+[node name="Background" type="ColorRect" parent="Control/Gameover/GameOverScreen"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -313,7 +336,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.784314)
 
-[node name="CenterContainer" type="CenterContainer" parent="Main/Gameover/GameOverScreen"]
+[node name="CenterContainer" type="CenterContainer" parent="Control/Gameover/GameOverScreen"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -321,12 +344,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Main/Gameover/GameOverScreen/CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Gameover/GameOverScreen/CenterContainer"]
 layout_mode = 2
 theme_override_constants/separation = 20
 alignment = 1
 
-[node name="Title" type="Label" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
@@ -334,7 +357,7 @@ text = "🔥 REVOLUÇÃO!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+[node name="Subtitle" type="Label" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.890196, 0.968627, 0, 1)
 theme_override_font_sizes/font_size = 24
@@ -343,14 +366,14 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="Spacer" type="Control" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+[node name="Spacer" type="Control" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="RestartBtn" type="Button" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
+[node name="RestartBtn" type="Button" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 60)
 layout_mode = 2
 theme_override_constants/h_separation = 30
@@ -358,21 +381,15 @@ theme_override_font_sizes/font_size = 18
 text = "🔄 Reiniciar"
 icon_alignment = 1
 
-[node name="QuitBtn" type="Button" parent="Main/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
+[node name="QuitBtn" type="Button" parent="Control/Gameover/GameOverScreen/CenterContainer/VBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(200, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "⏹️ Sair"
 
-[node name="TurnManager" type="Node" parent="Main"]
+[node name="TurnManager" type="Node" parent="Control"]
 script = ExtResource("13_4uxrh")
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[connection signal="input_event" from="Main/NodeMapaSVG2D/Chile/Area2D" to="Main" method="_on_area_2d_input_event"]
-[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes" to="Main" method="_on__investigar_redes_pressed"]
-[connection signal="pressed" from="Main/CanvasLayer/BottomBar/HBoxContainer/NarrativasButton" to="Main" method="_on_narrativas_button_pressed"]
+[connection signal="input_event" from="Control/NodeMapaSVG2D/Chile/Area2D" to="Control" method="_on_area_2d_input_event"]
+[connection signal="pressed" from="Control/CanvasLayer/BottomBar/HBoxContainer/🕵️ Investigar Redes" to="Control" method="_on__investigar_redes_pressed"]
+[connection signal="pressed" from="Control/CanvasLayer/BottomBar/HBoxContainer/NarrativasButton" to="Control" method="_on_narrativas_button_pressed"]

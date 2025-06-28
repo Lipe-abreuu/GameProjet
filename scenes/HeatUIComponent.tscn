@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://cyxutrtyhvc6r"]
+
+[ext_resource type="Script" path="res://scripts/HeatUIComponent.gd" id="1_2lyaj"]
+
+[node name="HeatUIComponent" type="PanelContainer" node_paths=PackedStringArray("heat_bar", "heat_label", "level_label", "stars_container", "warning_panel")]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -100.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("1_2lyaj")
+heat_bar = NodePath("VBoxContainer/HeatBar")
+heat_label = NodePath("VBoxContainer/HeatLabel")
+level_label = NodePath("VBoxContainer/LevelLabel")
+stars_container = NodePath("VBoxContainer/StarsContainer")
+warning_panel = NodePath("VBoxContainer/WarningPanel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(200, 100)
+layout_mode = 2
+
+[node name="HeatBar" type="ProgressBar" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HeatLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="StarsContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="WarningPanel" type="Panel" parent="VBoxContainer"]
+layout_mode = 2

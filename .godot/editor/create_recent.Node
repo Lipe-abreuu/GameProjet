@@ -1,1 +1,8 @@
+Panel
+HBoxContainer
+Label
+ProgressBar
+VBoxContainer
 PanelContainer
+CanvasLayer
+Control
