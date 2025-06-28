@@ -1,66 +1,90 @@
 # res://scripts/NotificationSystem.gd
-# Versão final com a sintaxe corrigida e lógica de espera.
+# Este script deve estar anexado ao nó raiz da sua cena NotificationPanel.tscn,
+# e esse nó raiz DEVE ser um CanvasLayer.
 
-extends Node
-signal narrative_consequence_triggered(group_name, narrative_content)
+
+extends CanvasLayer
+
+# Enum para os tipos de notificação, para facilitar a leitura do código.
 enum NotificationType { INFO, SUCCESS, ERROR }
 
-# Verifique se este caminho para a sua cena de notificação está correto!
-const NOTIFICATION_SCENE = preload("res://scenes/NotificationPanel.tscn") 
+# --- Referências aos Nós da Cena ---
+# ERRO CRÍTICO: O erro "null instance" acontece porque o nome de um destes nós
+# no seu editor de cenas não corresponde EXATAMENTE ao nome que o script espera.
+# Por favor, garanta que os nomes dos nós na sua cena são:
+# - "TitleLabel" (corrigido, com "i")
+# - "MessageLabel"
+# - "Timer"
+# - "AnimationPlayer"
+@onready var title_label: Label = $TitleLabel
+@onready var message_label: Label = $MessageLabel
+@onready var timer: Timer = $Timer
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
 
-var notification_queue: Array = []
-var is_displaying: bool = false
-var notification_container: CanvasLayer
+# --- Variáveis Internas ---
+# Fila para guardar as notificações que ainda não foram mostradas.
+var _notification_queue: Array = []
+# Flag para controlar se uma notificação já está a ser mostrada.
+var _is_showing := false
+# Flag para garantir que o nó está pronto antes de mostrar notificações.
+var _ready_done := false
+# Duração padrão que cada notificação fica no ecrã (em segundos).
+var notification_duration := 5.0
 
-# Esta função é chamada pelo main.gd para dizer onde as notificações devem aparecer.
-func setup(container: CanvasLayer):
-	notification_container = container
+func _ready() -> void:
+	_ready_done = true
+	if not _notification_queue.is_empty():
+		_play_next_notification()
 
-# Função para qualquer script do jogo chamar.
-func show_notification(title: String, message: String, _type: int = 0):
-	# Adiciona o pedido à fila de espera.
-	notification_queue.append({ "title": title, "message": message })
-	# Tenta mostrar a notificação.
-	_attempt_to_show_next()
+# --- Funções Públicas ---
 
-# Função que gere a fila e mostra a próxima notificação.
-func _attempt_to_show_next():
-	# Condições para parar: se já houver algo na tela, ou se a fila estiver vazia.
-	if is_displaying or notification_queue.is_empty():
+# Esta é a função que você chama de qualquer outro script para mostrar uma notificação.
+func show_notification(title: String, msg: String, type: int = NotificationType.INFO) -> void:
+	# Adiciona a nova notificação à fila.
+	_notification_queue.append({"title": title, "message": msg, "type": type})
+	# Se nenhuma notificação estiver a ser mostrada, e o nó estiver pronto, começa o processo.
+	if _ready_done and not _is_showing:
+		_play_next_notification()
+
+# --- Funções Privadas (Lógica Interna) ---
+
+# Função para processar a próxima notificação na fila.
+func _play_next_notification() -> void:
+	# Se a fila estiver vazia, para o processo.
+	if _notification_queue.is_empty():
+		_is_showing = false
 		return
 
-	# Marca que estamos a tentar mostrar algo para evitar chamadas múltiplas.
-	is_displaying = true
-	
-	# Pega o primeiro item da fila.
-	var notification_data = notification_queue.pop_front()
-	
-	# Inicia a rotina de mostrar a notificação, que pode incluir uma espera.
-	_show(notification_data)
+	# Marca que uma notificação está a ser mostrada.
+	_is_showing = true
+	# Retira a notificação mais antiga da fila.
+	var notification_data = _notification_queue.pop_front()
 
-# Função privada que efetivamente cria e mostra o painel.
-# O 'async' foi movido para aqui para garantir que a sintaxe está correta.
-func _show(notification_data: Dictionary) -> void:
-	# Se o container da UI ainda não estiver pronto, espera um frame.
-	# Isto resolve o problema de "timing" do início do jogo.
-	if not is_instance_valid(notification_container):
-		await get_tree().process_frame
-		# Se mesmo depois de esperar o container não for válido, é um erro crítico.
-		if not is_instance_valid(notification_container):
-			print("ERRO CRÍTICO: O container de notificações nunca foi configurado!")
-			is_displaying = false # Liberta a fila
-			return
+	# Define o texto e a cor com base nos dados da notificação.
+	title_label.text = notification_data.title
+	message_label.text = notification_data.message
 
-	# Agora é seguro criar e mostrar a notificação.
-	var notification_instance = NOTIFICATION_SCENE.instantiate()
-	notification_instance.notification_finished.connect(_on_notification_finished)
-	
-	notification_container.add_child(notification_instance)
-	notification_instance.display(notification_data.title, notification_data.message)
+	match notification_data.type:
+		NotificationType.SUCCESS:
+			title_label.modulate = Color.GREEN
+		NotificationType.ERROR:
+			title_label.modulate = Color.RED
+		_: # INFO ou qualquer outro tipo
+			title_label.modulate = Color.WHITE
 
-# Esta função é chamada quando uma notificação avisa que terminou.
-func _on_notification_finished():
-	# Liberta a vaga.
-	is_displaying = false
-	# Tenta imediatamente mostrar a próxima da fila.
-	_attempt_to_show_next()
+	# Torna o painel visível, inicia a animação de entrada e o temporizador.
+	visible = true
+	animation_player.play("fade_in")
+	timer.start(notification_duration)
+
+# --- Handlers de Sinais ---
+
+# Esta função é chamada automaticamente quando o sinal "timeout" do nó Timer é emitido.
+func _on_timer_timeout() -> void:
+	# Quando o tempo acaba, inicia a animação de saída.
+	animation_player.play("fade_out")
+	# Espera a animação terminar antes de continuar.
+	await animation_player.animation_finished
+	# Esconde o painel e chama a próxima notificação da fila.
+	visible = false
+	_play_next_notification()

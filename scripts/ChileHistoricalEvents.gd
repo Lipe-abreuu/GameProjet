@@ -695,6 +695,7 @@ func get_event_by_year(year: int) -> String:
 func execute_event_by_name(event_name: String):
 	"""Executa um evento específico pelo nome"""
 	trigger_historical_event(event_name)
+	
 
 func debug_trigger_event(event_name: String):
 	"""Função para testar eventos específicos durante desenvolvimento"""
