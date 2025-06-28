@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://e1v1r4jgyjjl"]
+[gd_scene load_steps=3 format=3 uid="uid://e1v1r4jgyjjl"]
 
 [ext_resource type="Script" path="res://scripts/NotificationPanel.gd" id="1_baaxf"]
 
-[node name="NotificationPanel" type="PanelContainer" node_paths=PackedStringArray("title_label", "message_label", "lifetime_timer")]
+[sub_resource type="Theme" id="Theme_rx5vl"]
+
+[node name="NotificationPanel" type="PanelContainer" node_paths=PackedStringArray("title_label", "lifetime_timer")]
 custom_minimum_size = Vector2(200, 100)
 anchors_preset = 1
 anchor_left = 1.0
@@ -10,6 +12,8 @@ anchor_right = 1.0
 offset_left = -240.0
 offset_bottom = 193.0
 grow_horizontal = 0
+size_flags_stretch_ratio = 1.1
+theme = SubResource("Theme_rx5vl")
 script = ExtResource("1_baaxf")
 title_label = NodePath("CanvasLayer/Tittle Label")
 message_label = NodePath("CanvasLayer/Message Label")
@@ -17,19 +21,26 @@ lifetime_timer = NodePath("CanvasLayer/Timer")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="fade_in_out" type="AnimationPlayer" parent="CanvasLayer"]
-root_node = NodePath("../..")
-
 [node name="Timer" type="Timer" parent="CanvasLayer"]
+wait_time = 1.998
 
 [node name="Tittle Label" type="Label" parent="CanvasLayer"]
+process_priority = 1
+light_mask = 2
+visibility_layer = 2
 offset_left = 912.0
 offset_top = 85.0
 offset_right = 1152.0
 offset_bottom = 108.0
+text = "Test"
 
 [node name="Message Label" type="Label" parent="CanvasLayer"]
+process_priority = 1
 offset_left = 912.0
 offset_top = 108.0
 offset_right = 1152.0
 offset_bottom = 131.0
+text = "ddsds"
+
+[node name="fade_in_out" type="AnimationPlayer" parent="CanvasLayer"]
+root_node = NodePath("../..")

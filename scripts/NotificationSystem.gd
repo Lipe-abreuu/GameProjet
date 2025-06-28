@@ -3,6 +3,7 @@
 
 extends Node
 signal narrative_consequence_triggered(group_name, narrative_content)
+enum NotificationType { INFO, SUCCESS, ERROR }
 
 # Verifique se este caminho para a sua cena de notificação está correto!
 const NOTIFICATION_SCENE = preload("res://scenes/NotificationPanel.tscn") 

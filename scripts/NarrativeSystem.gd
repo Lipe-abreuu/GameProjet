@@ -35,3 +35,12 @@ func _process(_delta):
 
 func _on_notification_finished():
 	is_displaying = false
+
+func process_narrative_spread():
+	pass
+
+func check_narrative_consequences():
+	pass
+
+func create_narrative_from_action(action_name, party_data):
+	pass

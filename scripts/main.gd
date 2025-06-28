@@ -137,11 +137,8 @@ func _connect_signals():
 			heat_system.raid_triggered.connect(_on_raid_triggered)
 		if heat_system.has_signal("close_call_triggered") and not heat_system.close_call_triggered.is_connected(_on_close_call):
 			heat_system.close_call_triggered.connect(_on_close_call)
-	
-	var narrative_system = get_node_or_null("/root/NarrativeSystem")
-	if is_instance_valid(narrative_system) and not narrative_system.narrative_consequence_triggered.is_connected(_on_narrative_consequence_triggered):
-		narrative_system.narrative_consequence_triggered.connect(_on_narrative_consequence_triggered)
-			
+
+	# Sinais de eventos históricos
 	var chile_events = get_node_or_null("/root/ChileEvents")
 	if is_instance_valid(chile_events) and not chile_events.historical_event_notification.is_connected(_on_historical_event_notification):
 		chile_events.historical_event_notification.connect(_on_historical_event_notification)
@@ -149,6 +146,7 @@ func _connect_signals():
 	# Sinais da UI (botões e mapa)
 	_connect_ui_buttons()
 	_connect_map_signals()
+
 
 func _connect_ui_buttons():
 	# Para cada botão, verificamos se o sinal 'pressed' JÁ NÃO ESTÁ CONECTADO antes de conectar.
@@ -193,27 +191,31 @@ func advance_month():
 	if current_month > 12:
 		current_month = 1
 		current_year += 1
-		if is_instance_valid(notification_system):
+		if notification_system and notification_system.has_method("show_notification"):
 			notification_system.show_notification("Novo Ano", "Chegamos a %d!" % current_year, NotificationType.INFO)
 
-	# Processa o turno para cada sistema
-	if is_instance_valid(party_controller):
+	if is_instance_valid(party_controller) and party_controller.has_method("advance_month"):
 		party_controller.advance_month()
-	
+
 	var heat_system = get_node_or_null("/root/HeatSystem")
-	if heat_system:
+	if is_instance_valid(heat_system) and heat_system.has_method("process_monthly_turn"):
 		heat_system.process_monthly_turn()
-	
+
 	var chile_events = get_node_or_null("/root/ChileEvents")
-	if chile_events:
+	if is_instance_valid(chile_events) and chile_events.has_method("check_for_events"):
 		chile_events.check_for_events(current_year, current_month)
-	
-	var narrative_system = get_node_or_null("/root/NarrativeSystem")
-	if narrative_system:
-		narrative_system.process_narrative_spread()
-		narrative_system.check_narrative_consequences()
-	
-	_update_all_ui()
+
+	# Só chama NarrativeSystem se for autoload e tiver os métodos corretos
+	if Engine.has_singleton("NarrativeSystem"):
+		var narrative = Engine.get_singleton("NarrativeSystem")
+		if narrative.has_method("process_narrative_spread"):
+			narrative.process_narrative_spread()
+		if narrative.has_method("check_narrative_consequences"):
+			narrative.check_narrative_consequences()
+
+	if has_method("_update_all_ui"):
+		_update_all_ui()
+
 
 func toggle_pause():
 	var tree = get_tree()
