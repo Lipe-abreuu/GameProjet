@@ -1,26 +1,22 @@
-# res://scripts/NotificationPanel.gd (Versão Simples e Segura)
 extends PanelContainer
 
-signal notification_finished
-
-@export var title_label: Label
-@export var message_label: Label
-@export var lifetime_timer: Timer
+@onready var label = $Label
+var timer = Timer.new()
 
 func _ready():
-	if is_instance_valid(lifetime_timer):
-		if not lifetime_timer.timeout.is_connected(_on_lifetime_timer_timeout):
-			lifetime_timer.timeout.connect(_on_lifetime_timer_timeout)
+	timer.wait_time = 3.0 # A notificação desaparece após 3 segundos
+	timer.one_shot = true
+	timer.timeout.connect(queue_free)
+	add_child(timer)
+	timer.start()
 
-func display(title: String, message: String):
-	if is_instance_valid(title_label):
-		title_label.text = title
-	if is_instance_valid(message_label):
-		message_label.text = message
-	
-	if is_instance_valid(lifetime_timer):
-		lifetime_timer.start()
-
-func _on_lifetime_timer_timeout():
-	emit_signal("notification_finished")
-	queue_free()
+func show_message(message, type):
+	label.text = message
+	# Pode adicionar lógica para mudar a cor com base no 'type'
+	match type:
+		"warning":
+			modulate = Color.YELLOW
+		"error":
+			modulate = Color.RED
+		_:
+			modulate = Color.WHITE

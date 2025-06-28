@@ -141,16 +141,15 @@ position = Vector2(40.2511, 6.10352e-05)
 [node name="CanvasLayer" type="CanvasLayer" parent="Control"]
 
 [node name="TopBar" type="Panel" parent="Control/CanvasLayer"]
-custom_minimum_size = Vector2(120, 100)
 anchors_preset = -1
-anchor_left = 0.002
+anchor_left = 0.008
 anchor_top = 0.049
-anchor_right = 0.723154
-anchor_bottom = 0.26884
-offset_left = -0.304
-offset_top = -27.752
-offset_right = 1.927
-offset_bottom = -20.208
+anchor_right = 0.728362
+anchor_bottom = 0.129951
+offset_left = -9.216
+offset_top = -7.752
+offset_right = -0.072998
+offset_bottom = -0.208008
 grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -242,14 +241,14 @@ text = "📜 Narrativas"
 [node name="Sidepanel" type="Panel" parent="Control/CanvasLayer"]
 custom_minimum_size = Vector2(250, 300)
 anchors_preset = -1
-anchor_left = 0.793958
+anchor_left = 0.782674
 anchor_top = 0.302
-anchor_right = 1.06815
-anchor_bottom = 0.839975
-offset_left = -75.64
-offset_top = 4.30402
-offset_right = -75.5039
-offset_bottom = -8.30402
+anchor_right = 1.0369
+anchor_bottom = 0.823
+offset_left = -43.6401
+offset_top = -37.696
+offset_right = -43.504
+offset_bottom = -50.304
 metadata/_edit_use_anchors_ = true
 
 [node name="InfoContainer" type="VBoxContainer" parent="Control/CanvasLayer/Sidepanel"]
@@ -283,28 +282,16 @@ script = ExtResource("13_xqiic")
 layout_mode = 2
 
 [node name="Titulo" type="Label" parent="Control/CanvasLayer/ChoiceDialog/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="Descricao" type="Label" parent="Control/CanvasLayer/ChoiceDialog/VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="Control/CanvasLayer/ChoiceDialog"]
 visible = false
 layout_mode = 2
-
-[node name="PopupContainer" type="VBoxContainer" parent="Control/CanvasLayer"]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="AutoTimer" type="Timer" parent="Control"]
 wait_time = 3.0

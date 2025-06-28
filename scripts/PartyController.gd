@@ -9,8 +9,6 @@ signal phase_advanced(old_phase, new_phase)
 signal support_changed(group_name, old_value, new_value)
 signal treasury_changed(old_value, new_value)
 signal action_executed(action_name, success, message)
-signal party_stats_updated(message, type)
-
 
 # --- DADOS E SISTEMAS ---
 var party_data: PartyResource

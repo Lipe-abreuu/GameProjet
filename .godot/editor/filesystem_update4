@@ -1,11 +1,4 @@
-res://scenes/NotificationPanel.tscn
 res://scenes/main.tscn
 res://scenes/GameMenu.tscn
 res://scenes/ChoiceDialog.tscn
 res://scenes/HeatUIComponent.tscn
-res://scripts/main.gd
-res://scripts/PartyController.gd
-res://scripts/ChileHistoricalEvents.gd
-res://scripts/NotificationSystem.gd
-res://scripts/NotificationPanel.gd
-res://scripts/NarrativeSystem.gd

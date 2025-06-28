@@ -45,9 +45,9 @@ HeatSystem={
 
 [autoload]
 
-NotificationSystem="*res://scenes/NotificationPanel.tscn"
 PowerNetworks="*res://scripts/PowerNetworks.gd"
 Globals="*res://scripts/Globals.gd"
+NotificationSystem="*res://scripts/NotificationSystem.gd"
 NarrativeSystem="*res://scripts/NarrativeSystem.gd"
 TraumaSystem="*res://scripts/TraumaSystem.gd"
 ChileEvents="*res://scripts/ChileHistoricalEvents.gd"

@@ -137,8 +137,11 @@ func _connect_signals():
 			heat_system.raid_triggered.connect(_on_raid_triggered)
 		if heat_system.has_signal("close_call_triggered") and not heat_system.close_call_triggered.is_connected(_on_close_call):
 			heat_system.close_call_triggered.connect(_on_close_call)
-
-	# Sinais de eventos históricos
+	
+	var narrative_system = get_node_or_null("/root/NarrativeSystem")
+	if is_instance_valid(narrative_system) and not narrative_system.narrative_consequence_triggered.is_connected(_on_narrative_consequence_triggered):
+		narrative_system.narrative_consequence_triggered.connect(_on_narrative_consequence_triggered)
+			
 	var chile_events = get_node_or_null("/root/ChileEvents")
 	if is_instance_valid(chile_events) and not chile_events.historical_event_notification.is_connected(_on_historical_event_notification):
 		chile_events.historical_event_notification.connect(_on_historical_event_notification)
@@ -146,7 +149,6 @@ func _connect_signals():
 	# Sinais da UI (botões e mapa)
 	_connect_ui_buttons()
 	_connect_map_signals()
-
 
 func _connect_ui_buttons():
 	# Para cada botão, verificamos se o sinal 'pressed' JÁ NÃO ESTÁ CONECTADO antes de conectar.
@@ -164,6 +166,7 @@ func _connect_ui_buttons():
 		
 	if is_instance_valid(narrativas_button) and not narrativas_button.pressed.is_connected(_on_narrativas_button_pressed):
 		narrativas_button.pressed.connect(_on_narrativas_button_pressed)
+
 
 
 func _start_game():
@@ -191,31 +194,27 @@ func advance_month():
 	if current_month > 12:
 		current_month = 1
 		current_year += 1
-		if notification_system and notification_system.has_method("show_notification"):
+		if is_instance_valid(notification_system):
 			notification_system.show_notification("Novo Ano", "Chegamos a %d!" % current_year, NotificationType.INFO)
 
-	if is_instance_valid(party_controller) and party_controller.has_method("advance_month"):
+	# Processa o turno para cada sistema
+	if is_instance_valid(party_controller):
 		party_controller.advance_month()
-
+	
 	var heat_system = get_node_or_null("/root/HeatSystem")
-	if is_instance_valid(heat_system) and heat_system.has_method("process_monthly_turn"):
+	if heat_system:
 		heat_system.process_monthly_turn()
-
+	
 	var chile_events = get_node_or_null("/root/ChileEvents")
-	if is_instance_valid(chile_events) and chile_events.has_method("check_for_events"):
+	if chile_events:
 		chile_events.check_for_events(current_year, current_month)
-
-	# Só chama NarrativeSystem se for autoload e tiver os métodos corretos
-	if Engine.has_singleton("NarrativeSystem"):
-		var narrative = Engine.get_singleton("NarrativeSystem")
-		if narrative.has_method("process_narrative_spread"):
-			narrative.process_narrative_spread()
-		if narrative.has_method("check_narrative_consequences"):
-			narrative.check_narrative_consequences()
-
-	if has_method("_update_all_ui"):
-		_update_all_ui()
-
+	
+	var narrative_system = get_node_or_null("/root/NarrativeSystem")
+	if narrative_system:
+		narrative_system.process_narrative_spread()
+		narrative_system.check_narrative_consequences()
+	
+	_update_all_ui()
 
 func toggle_pause():
 	var tree = get_tree()
@@ -438,6 +437,24 @@ func _on_action_button_pressed(action_name: String):
 	if is_instance_valid(party_controller):
 		party_controller.execute_action(action_name)
 
+func _on_amplify_narrative(narrative_data):
+	if is_instance_valid(notification_system):
+		notification_system.show_notification(
+			"Ação Indisponível",
+			"A lógica para amplificar a narrativa '%s' ainda não foi implementada." % narrative_data.content,
+			NotificationType.INFO
+		)
+	print("Tentativa de amplificar a narrativa: ", narrative_data.content)
+
+func _on_create_counter_narrative(narrative_data):
+	if is_instance_valid(notification_system):
+		notification_system.show_notification(
+			"Ação Indisponível",
+			"A lógica para criar uma contra-narrativa para '%s' ainda não foi implementada." % narrative_data.content,
+			NotificationType.INFO
+		)
+	print("Tentativa de criar contra-narrativa para: ", narrative_data.content)
+	
 func _on_narrativas_button_pressed():
 	if not is_instance_valid(narrative_panel) or not is_instance_valid(info_container):
 		print("ERRO: O painel de narrativas ou o container de informações não foi atribuído no inspetor.")
@@ -569,21 +586,3 @@ func _on_investigate_network_button_pressed(network_id: String):
 			NotificationType.INFO
 		)
 	print("Tentativa de investigar a rede: ", network_id)
-
-func _on_amplify_narrative(narrative_data):
-	if is_instance_valid(notification_system):
-		notification_system.show_notification(
-			"Ação Indisponível",
-			"A lógica para amplificar a narrativa '%s' ainda não foi implementada." % narrative_data.content,
-			NotificationType.INFO
-		)
-	print("Tentativa de amplificar a narrativa: ", narrative_data.content)
-
-func _on_create_counter_narrative(narrative_data):
-	if is_instance_valid(notification_system):
-		notification_system.show_notification(
-			"Ação Indisponível",
-			"A lógica para criar uma contra-narrativa para '%s' ainda não foi implementada." % narrative_data.content,
-			NotificationType.INFO
-		)
-	print("Tentativa de criar contra-narrativa para: ", narrative_data.content)
