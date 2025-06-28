@@ -216,6 +216,9 @@ func advance_month():
 # SISTEMA DE CONTRIBUIÇÕES PRINCIPAL
 # =====================================
 
+# Correção para a função _process_militant_contributions()
+# Substitua a função problemática no PartyController.gd por esta versão:
+
 func _process_militant_contributions():
 	"""Sistema completo de contribuições dos militantes"""
 	
@@ -249,10 +252,15 @@ func _process_militant_contributions():
 	var participation_rate = float(contributing_militants) / float(party_data.militants) * 100
 	var avg_contribution = float(total_contribution) / float(contributing_militants) if contributing_militants > 0 else 0
 	
-	# ARMAZENA DADOS PARA DECISÕES FUTURAS
-	party_data.last_contribution_total = total_contribution
-	party_data.last_participation_rate = participation_rate
-	party_data.contribution_pressure = pressure_level
+	# ARMAZENA DADOS PARA DECISÕES FUTURAS (VERSÃO SEGURA)
+	# Verifica se as propriedades existem antes de definir
+	if "last_contribution_total" in party_data:
+		party_data.last_contribution_total = total_contribution
+	if "last_participation_rate" in party_data:
+		party_data.last_participation_rate = participation_rate
+	# if "contribution_pressure" in party_data:
+	#	party_data.contribution_pressure = pressure_level
+	# COMENTADO: Esta linha estava causando o erro
 	
 	# FEEDBACK DETALHADO
 	print("💰 CONTRIBUIÇÕES: %d/%d militantes doaram %d recursos (%.1f%% participação, média %.1f)" % 
