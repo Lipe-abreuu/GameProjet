@@ -2,3 +2,5 @@ res://scenes/main.tscn
 res://scripts/main.gd
 res://scenes/GameMenu.tscn
 res://scenes/ChoiceDialog.tscn
+res://scenes/HeatUIComponent.tscn
+res://scripts/FixSceneStructure.gd
