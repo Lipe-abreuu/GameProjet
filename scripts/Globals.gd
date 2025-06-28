@@ -10,7 +10,7 @@ signal country_value_changed(country_name, value_name, old_value, new_value)
 # Variáveis globais de tempo
 var current_month: int = 9
 var current_year: int = 1973
-
+var party_controller: Node = null
 # Player info
 var player_country: String = "Chile"
 

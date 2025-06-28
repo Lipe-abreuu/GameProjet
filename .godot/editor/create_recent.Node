@@ -1,8 +1,10 @@
-Panel
-HBoxContainer
-Label
-ProgressBar
 VBoxContainer
+Label
+AnimationPlayer
+Timer
 PanelContainer
 CanvasLayer
+Panel
+HBoxContainer
+ProgressBar
 Control

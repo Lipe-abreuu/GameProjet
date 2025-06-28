@@ -1,75 +1,65 @@
 # res://scripts/NotificationSystem.gd
+# Versão final com a sintaxe corrigida e lógica de espera.
+
 extends Node
+signal narrative_consequence_triggered(group_name, narrative_content)
 
-enum NotificationType { INFO, SUCCESS, ERROR }
+# Verifique se este caminho para a sua cena de notificação está correto!
+const NOTIFICATION_SCENE = preload("res://scenes/NotificationPanel.tscn") 
 
-var notification_container: VBoxContainer
+var notification_queue: Array = []
+var is_displaying: bool = false
+var notification_container: CanvasLayer
 
-func setup(canvas_layer: CanvasLayer):
-	if not is_instance_valid(canvas_layer):
-		printerr("NotificationSystem: CanvasLayer inválido.")
+# Esta função é chamada pelo main.gd para dizer onde as notificações devem aparecer.
+func setup(container: CanvasLayer):
+	notification_container = container
+
+# Função para qualquer script do jogo chamar.
+func show_notification(title: String, message: String, _type: int = 0):
+	# Adiciona o pedido à fila de espera.
+	notification_queue.append({ "title": title, "message": message })
+	# Tenta mostrar a notificação.
+	_attempt_to_show_next()
+
+# Função que gere a fila e mostra a próxima notificação.
+func _attempt_to_show_next():
+	# Condições para parar: se já houver algo na tela, ou se a fila estiver vazia.
+	if is_displaying or notification_queue.is_empty():
 		return
 
-	notification_container = VBoxContainer.new()
-	notification_container.name = "NotificationPanel"
-	notification_container.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	notification_container.position = Vector2(-320, 20)
-	notification_container.size.x = 300
-	notification_container.alignment = BoxContainer.ALIGNMENT_END
+	# Marca que estamos a tentar mostrar algo para evitar chamadas múltiplas.
+	is_displaying = true
 	
-	canvas_layer.add_child(notification_container)
-	print("✅ Sistema de notificações anexado ao CanvasLayer!")
+	# Pega o primeiro item da fila.
+	var notification_data = notification_queue.pop_front()
+	
+	# Inicia a rotina de mostrar a notificação, que pode incluir uma espera.
+	_show(notification_data)
 
-func show_notification(title: String, message: String, type: NotificationType = NotificationType.INFO):
+# Função privada que efetivamente cria e mostra o painel.
+# O 'async' foi movido para aqui para garantir que a sintaxe está correta.
+func _show(notification_data: Dictionary) -> void:
+	# Se o container da UI ainda não estiver pronto, espera um frame.
+	# Isto resolve o problema de "timing" do início do jogo.
 	if not is_instance_valid(notification_container):
-		printerr("Não é possível mostrar notificação, o container não é válido.")
-		return
+		await get_tree().process_frame
+		# Se mesmo depois de esperar o container não for válido, é um erro crítico.
+		if not is_instance_valid(notification_container):
+			print("ERRO CRÍTICO: O container de notificações nunca foi configurado!")
+			is_displaying = false # Liberta a fila
+			return
 
-	var panel = PanelContainer.new()
-	var style_box = StyleBoxFlat.new()
-	style_box.set_corner_radius_all(5)
+	# Agora é seguro criar e mostrar a notificação.
+	var notification_instance = NOTIFICATION_SCENE.instantiate()
+	notification_instance.notification_finished.connect(_on_notification_finished)
+	
+	notification_container.add_child(notification_instance)
+	notification_instance.display(notification_data.title, notification_data.message)
 
-	var margin = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 10)
-	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_top", 5)
-	margin.add_theme_constant_override("margin_bottom", 5)
-	
-	var vbox = VBoxContainer.new()
-	
-	var title_label = Label.new()
-	title_label.text = title
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	
-	var message_label = Label.new()
-	message_label.text = message
-	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	
-	match type:
-		NotificationType.SUCCESS:
-			style_box.bg_color = Color(0.2, 0.5, 0.2, 0.9)
-			# CORREÇÃO: A função correta é 'add_theme_color_override'
-			title_label.add_theme_color_override("font_color", Color.LIGHT_GREEN)
-		NotificationType.ERROR:
-			style_box.bg_color = Color(0.6, 0.2, 0.2, 0.9)
-			# CORREÇÃO: A função correta é 'add_theme_color_override'
-			title_label.add_theme_color_override("font_color", Color.PALE_VIOLET_RED)
-		_: # INFO
-			style_box.bg_color = Color(0.2, 0.3, 0.5, 0.9)
-			# CORREÇÃO: A função correta é 'add_theme_color_override'
-			title_label.add_theme_color_override("font_color", Color.LIGHT_CYAN)
-			
-	panel.add_theme_stylebox_override("panel", style_box)
-	
-	vbox.add_child(title_label)
-	vbox.add_child(message_label)
-	margin.add_child(vbox)
-	panel.add_child(margin)
-	
-	notification_container.add_child(panel)
-	
-	var timer = get_tree().create_timer(5.0)
-	await timer.timeout
-	
-	if is_instance_valid(panel):
-		panel.queue_free()
+# Esta função é chamada quando uma notificação avisa que terminou.
+func _on_notification_finished():
+	# Liberta a vaga.
+	is_displaying = false
+	# Tenta imediatamente mostrar a próxima da fila.
+	_attempt_to_show_next()

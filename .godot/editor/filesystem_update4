@@ -1,6 +1,10 @@
 res://scenes/main.tscn
-res://scripts/main.gd
 res://scenes/GameMenu.tscn
 res://scenes/ChoiceDialog.tscn
 res://scenes/HeatUIComponent.tscn
-res://scripts/FixSceneStructure.gd
+res://scripts/NotificationSystem.gd
+res://scenes/NotificationPanel.tscn
+res://scripts/NotificationPanel.gd
+res://scripts/NarrativeSystem.gd
+res://scripts/main.gd
+res://scripts/PartyController.gd
